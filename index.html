@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, maximum-scale=1">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#221D17">
+<title>Plight — Oracle</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=UnifrakturCook:wght@700&family=EB+Garamond:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --parchment:#EAE0C7; --parchment-dim:#DCCFA8;
+    --ink:#221D17; --blood:#7A2E2E; --brass:#9C7A32; --slate:#55504A;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:radial-gradient(ellipse at top, #2b241d 0%, var(--ink) 60%);
+    color:var(--parchment); font-family:'EB Garamond', serif;
+    min-height:100vh; padding-bottom:40px; -webkit-font-smoothing:antialiased;
+  }
+  header{
+    position:sticky; top:0; z-index:6;
+    background:#221D17; padding:12px 18px 8px; text-align:center;
+    border-bottom:1px solid rgba(156,122,50,.35);
+  }
+  header h1{font-family:'UnifrakturCook', cursive; font-size:1.9rem; margin:0; letter-spacing:1px;}
+  header p{margin:2px 0 8px; font-size:.72rem; letter-spacing:.12em; text-transform:uppercase; color:var(--brass);}
+  nav.tabbar{
+    display:flex; gap:6px; overflow-x:auto; padding:0 4px 10px;
+    scrollbar-width:none;
+  }
+  nav.tabbar::-webkit-scrollbar{display:none;}
+  nav.tabbar button{
+    flex:none; background:transparent; border:1px solid rgba(156,122,50,.5);
+    color:var(--parchment-dim); padding:7px 14px; border-radius:20px;
+    font-family:'EB Garamond',serif; font-size:.88rem; font-weight:600;
+    white-space:nowrap; cursor:pointer;
+  }
+  nav.tabbar button.active{background:var(--blood); border-color:var(--blood); color:var(--parchment);}
+  main{max-width:480px; margin:0 auto; padding:14px 16px 4px;}
+  .tabpanel{display:none;}
+  .tabpanel.active{display:block;}
+  .card{
+    background:var(--parchment); color:var(--ink); border-radius:6px;
+    padding:16px 16px 18px; margin-bottom:16px; border:1px solid rgba(0,0,0,.15);
+    box-shadow:0 6px 18px rgba(0,0,0,.35); position:relative;
+  }
+  .card::before{content:""; position:absolute; inset:6px; border:1px solid rgba(122,46,46,.25); border-radius:3px; pointer-events:none;}
+  .card h2{font-size:1.02rem; margin:0 0 4px; display:flex; align-items:center; gap:8px; flex-wrap:wrap;}
+  .die-badge{
+    font-family:'JetBrains Mono', monospace; font-size:.7rem; background:var(--blood);
+    color:var(--parchment); padding:2px 7px; border-radius:20px; font-weight:700; letter-spacing:.03em;
+  }
+  .card p.desc{font-size:.83rem; color:var(--slate); margin:0 0 12px; font-style:italic;}
+  button.roll{
+    display:block; width:100%; background:var(--blood); color:var(--parchment); border:none;
+    padding:12px; font-family:'EB Garamond', serif; font-weight:600; font-size:1rem;
+    letter-spacing:.03em; border-radius:4px; cursor:pointer; transition:transform .08s ease;
+  }
+  button.roll:active{transform:scale(.97);}
+  button.roll:focus-visible{outline:2px solid var(--brass); outline-offset:2px;}
+  button.small{
+    background:none; border:1px solid var(--blood); color:var(--blood); padding:8px 12px;
+    font-family:'EB Garamond', serif; font-weight:600; border-radius:4px; cursor:pointer;
+    margin-top:10px; font-size:.9rem;
+  }
+  .pickrow{display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;}
+  .pickrow button{
+    flex:none; background:none; border:1px solid var(--slate); color:var(--slate);
+    padding:6px 10px; border-radius:16px; font-size:.8rem; font-family:'EB Garamond',serif; cursor:pointer;
+  }
+  .pickrow button.sel{background:var(--brass); border-color:var(--brass); color:var(--parchment); font-weight:600;}
+  .result{margin-top:12px; min-height:1.4em;}
+  .result .name{font-size:1.12rem; font-weight:600; line-height:1.35;}
+  .result .subroll{font-size:.72rem; color:var(--slate); margin-top:4px; font-family:'JetBrains Mono', monospace;}
+  .result .th-translation{font-size:.85rem; color:var(--slate); font-style:italic; margin-top:6px;}
+  .result .mark-flavor{font-style:italic; color:var(--slate); font-size:.88rem; margin-top:2px;}
+  .result .mark-note{font-size:.85rem; color:var(--blood); font-weight:600; margin-top:6px;}
+  .result .line{margin-bottom:4px;}
+  .tile-wrap{
+    display:flex; justify-content:center; margin:10px 0 4px;
+    opacity:0; transform:scale(.95); transition:opacity .35s ease, transform .35s ease;
+  }
+  .tile-wrap.show{opacity:1; transform:scale(1);}
+  .exits-line{text-align:center; font-size:.82rem; color:var(--slate); margin-top:2px;}
+  .door-result{font-size:1.1rem; font-weight:600;}
+  .door-result.trapped{color:var(--blood);}
+  .trap-desc{font-size:.88rem; margin-top:6px; color:var(--slate);}
+  footer{max-width:480px; margin:0 auto; padding:6px 22px 30px; font-size:.72rem; color:var(--slate); line-height:1.5; opacity:.85; text-align:center;}
+  @media (prefers-reduced-motion: reduce){ .tile-wrap{transition:none;} button.roll{transition:none;} }
+</style>
+</head>
+<body>
+
+<header>
+  <h1>Plight</h1>
+  <p>Oracle</p>
+  <nav class="tabbar" id="tabbar">
+    <button data-tab="question" class="active">คำถาม</button>
+    <button data-tab="narrative">เนื้อเรื่อง</button>
+    <button data-tab="npc">NPC</button>
+    <button data-tab="faction">กลุ่ม</button>
+    <button data-tab="civ">เมือง</button>
+    <button data-tab="dungeon">ดันเจี้ยน</button>
+    <button data-tab="reward">รางวัล</button>
+    <button data-tab="travel">เดินทาง</button>
+    <button data-tab="marks">Marks</button>
+  </nav>
+</header>
+
+<main>
+
+<!-- ========== QUESTION ========== -->
+<section class="tabpanel active" data-tab="question">
+  <div class="card">
+    <h2>คำถามปิด <span class="die-badge">2d6</span></h2>
+    <p class="desc">ใช้ถามคำถามใช่/ไม่ใช่ เพื่อกำหนดสถานการณ์ NPC หรือวัตถุ</p>
+    <button class="roll" onclick="rollClosedQ()">ทอย</button>
+    <div class="result" id="closedQResult"></div>
+  </div>
+  <div class="card">
+    <h2>คำถามเปิด <span class="die-badge">d20</span></h2>
+    <p class="desc">ได้คำตอบ 3 คำ (การกระทำ / ลักษณะ / ธีม) เพื่อตีความเข้ากับสถานการณ์</p>
+    <button class="roll" onclick="rollOpenQ()">ทอย</button>
+    <div class="result" id="openQResult"></div>
+  </div>
+</section>
+
+<!-- ========== NARRATIVE ========== -->
+<section class="tabpanel" data-tab="narrative">
+  <div class="card">
+    <h2>จุดเริ่มเควส <span class="die-badge">d20</span></h2>
+    <p class="desc">ไอเดียเปิดเรื่องแบบเร็ว</p>
+    <button class="roll" onclick="rollQuestSpark()">ทอย</button>
+    <div class="result" id="questResult"></div>
+  </div>
+  <div class="card">
+    <h2>จุดพลิกผัน <span class="die-badge">d10</span></h2>
+    <p class="desc">ใช้พลิกสถานการณ์ปัจจุบันของกลุ่มให้น่าสนใจขึ้น</p>
+    <button class="roll" onclick="rollPlotTwist()">ทอย</button>
+    <div class="result" id="twistResult"></div>
+  </div>
+</section>
+
+<!-- ========== NPC ========== -->
+<section class="tabpanel" data-tab="npc">
+  <div class="card">
+    <h2>ปฏิกิริยา/จำนวน/ขนาด <span class="die-badge">2d6</span></h2>
+    <p class="desc">ทอยครั้งเดียว ได้ทั้งสามค่าพร้อมกัน</p>
+    <button class="roll" onclick="rollRNS()">ทอย</button>
+    <div class="result" id="rnsResult"></div>
+  </div>
+  <div class="card">
+    <h2>ชื่อ NPC <span class="die-badge">d20</span></h2>
+    <p class="desc">เลือกเผ่าพันธุ์/เพศก่อน แล้วทอยหาชื่อ</p>
+    <div class="pickrow" id="namePick">
+      <button data-k="dwarfM" class="sel">คนแคระ ♂</button>
+      <button data-k="dwarfF">คนแคระ ♀</button>
+      <button data-k="elf">เอลฟ์</button>
+      <button data-k="humanM">มนุษย์ ♂</button>
+      <button data-k="humanF">มนุษย์ ♀</button>
+    </div>
+    <button class="roll" onclick="rollName()">ทอยชื่อ</button>
+    <div class="result" id="nameNpcResult"></div>
+  </div>
+  <div class="card">
+    <h2>เป้าหมาย <span class="die-badge">d20</span></h2>
+    <button class="roll" onclick="rollAmbition()">ทอย</button>
+    <div class="result" id="ambitionResult"></div>
+  </div>
+  <div class="card">
+    <h2>เผ่าพันธุ์ <span class="die-badge">d4</span></h2>
+    <button class="roll" onclick="rollNpcSpecies()">ทอย</button>
+    <div class="result" id="npcSpeciesResult"></div>
+  </div>
+  <div class="card">
+    <h2>บทบาท <span class="die-badge">d20</span></h2>
+    <button class="roll" onclick="rollRole()">ทอย</button>
+    <div class="result" id="roleResult"></div>
+  </div>
+</section>
+
+<!-- ========== FACTION ========== -->
+<section class="tabpanel" data-tab="faction">
+  <div class="card">
+    <h2>ชื่อกลุ่ม <span class="die-badge">d4 + d20</span></h2>
+    <button class="roll" onclick="rollFactionName()">ทอยชื่อ</button>
+    <div class="result" id="factionNameResult"></div>
+  </div>
+  <div class="card">
+    <h2>จุดสนใจ/สายอาชีพ <span class="die-badge">d20</span></h2>
+    <button class="roll" onclick="rollFocus()">ทอย</button>
+    <div class="result" id="focusResult"></div>
+  </div>
+  <div class="card">
+    <h2>รูปแบบผู้นำ <span class="die-badge">d6</span></h2>
+    <button class="roll" onclick="rollLeadership()">ทอย</button>
+    <div class="result" id="leadResult"></div>
+  </div>
+</section>
+
+<!-- ========== CIVILIZATION ========== -->
+<section class="tabpanel" data-tab="civ">
+  <div class="card">
+    <h2>ชื่อเมือง/หมู่บ้าน <span class="die-badge">d20 x2</span></h2>
+    <button class="roll" onclick="rollSettlementName()">ทอยชื่อ</button>
+    <div class="result" id="settlementResult"></div>
+  </div>
+  <div class="card">
+    <h2>ปัญหาประจำเมือง <span class="die-badge">d20</span></h2>
+    <button class="roll" onclick="rollTrouble()">ทอย</button>
+    <div class="result" id="troubleResult"></div>
+  </div>
+  <div class="card">
+    <h2>เผ่าพันธุ์/จำนวนประชากร <span class="die-badge">d4</span></h2>
+    <button class="roll" onclick="rollCivPop()">ทอย</button>
+    <div class="result" id="civPopResult"></div>
+  </div>
+  <div class="card">
+    <h2>อำนาจปกครอง <span class="die-badge">d6</span></h2>
+    <button class="roll" onclick="rollAuthority()">ทอย</button>
+    <div class="result" id="authorityResult"></div>
+  </div>
+</section>
+
+<!-- ========== DUNGEON ========== -->
+<section class="tabpanel" data-tab="dungeon">
+  <div class="card">
+    <h2>ชื่อดันเจี้ยน <span class="die-badge">d4 + d20</span></h2>
+    <button class="roll" onclick="rollDungeonName()">ทอยชื่อ</button>
+    <div class="result" id="nameResult"></div>
+  </div>
+  <div class="card">
+    <h2>ภูมิประเทศถ้ำ <span class="die-badge">d12</span></h2>
+    <p class="desc">ภาพสุ่มสร้างใหม่ทุกครั้ง ไม่ใช่ภาพจากหนังสือ</p>
+    <button class="roll" onclick="rollCaveTile()">ทอยแผนที่ถ้ำ</button>
+    <div class="tile-wrap" id="caveTileWrap"></div>
+    <div class="exits-line" id="caveExitsLine"></div>
+  </div>
+  <div class="card">
+    <h2>ภูมิประเทศสิ่งก่อสร้าง <span class="die-badge">d20</span></h2>
+    <button class="roll" onclick="rollStructureTile()">ทอยแผนผังห้อง</button>
+    <div class="tile-wrap" id="structTileWrap"></div>
+    <div class="exits-line" id="structExitsLine"></div>
+  </div>
+  <div class="card">
+    <h2>ประตู <span class="die-badge">2d4</span></h2>
+    <button class="roll" onclick="rollDoor()">ทอยประตู</button>
+    <div class="result" id="doorResult"></div>
+  </div>
+  <div class="card">
+    <h2>ความยากระหว่างบุกดันเจี้ยน <span class="die-badge">d6</span></h2>
+    <p class="desc">ทอยท้าย round (10 นาที) ระหว่างสำรวจในดันเจี้ยน</p>
+    <button class="roll" onclick="rollDelveDiff()">ทอย</button>
+    <div class="result" id="delveDiffResult"></div>
+  </div>
+</section>
+
+<!-- ========== REWARD ========== -->
+<section class="tabpanel" data-tab="reward">
+  <div class="card">
+    <h2>สมบัติ <span class="die-badge">d12</span></h2>
+    <p class="desc">บางผลจะทอยย่อยอัตโนมัติให้ (d6)</p>
+    <button class="roll" onclick="rollTreasure()">ทอย</button>
+    <div class="result" id="treasureResult"></div>
+  </div>
+</section>
+
+<!-- ========== MARKS ========== -->
+<section class="tabpanel" data-tab="marks">
+  <div class="card">
+    <h2>Marks — รอยแผลจากการถูกน็อค</h2>
+    <p class="desc">ใช้เมื่อการโจมตีทำให้ HP เหลือ 0 พอดี (ไม่ใช่ต่ำกว่า 0) — นี่คือการ "ค้นตาราง" ไม่ใช่การสุ่ม: เลือกจำนวนดาเมจที่โจมตีนั้นสร้างขึ้นจริง (หลัง AR แล้ว) แล้วระบบจะทอยลูกเต๋าย่อยของช่องนั้นให้ทันที</p>
+    <div class="pickrow" id="markPick">
+      <button data-n="1">1</button><button data-n="2">2</button><button data-n="3">3</button><button data-n="4">4</button>
+      <button data-n="5">5</button><button data-n="6">6</button><button data-n="7">7</button><button data-n="8">8</button>
+      <button data-n="9">9</button><button data-n="10">10</button><button data-n="11">11</button><button data-n="12">12+</button>
+    </div>
+    <div class="result" id="markResult"></div>
+  </div>
+</section>
+
+<!-- ========== TRAVEL (TERRAIN) ========== -->
+<section class="tabpanel" data-tab="travel">
+  <div class="card">
+    <h2>ภูมิประเทศ (แผนที่เฮกซ์) <span class="die-badge">2d6</span></h2>
+    <p class="desc">1 เฮกซ์ = 12 ไมล์ · ไอคอนสุ่มสร้างใหม่เอง ไม่ใช่ภาพจากหนังสือ</p>
+    <button class="roll" onclick="rollWorldTerrain()">ทอย</button>
+    <div class="tile-wrap" id="worldTerrainWrap"></div>
+    <div class="result" id="worldTerrainResult"></div>
+  </div>
+</section>
+
+</main>
+
+<footer>
+  ตารางเนื้อหาอ้างอิงจาก <em>Plight</em> โดย Timothy Fogarty (qstmkr.itch.io) —
+  เผยแพร่ข้อความภายใต้สัญญาอนุญาต CC BY-SA 4.0 ·
+  ภาพแผนที่ถ้ำ/ห้องเป็นภาพที่สุ่มสร้างขึ้นใหม่ทั้งหมดในแอปนี้ ไม่ได้ใช้ภาพประกอบต้นฉบับของ Daniel Comerci
+</footer>
+
+<script>
+/* ---------- utility ---------- */
+function rollDie(n){ return 1 + Math.floor(Math.random()*n); }
+function pick(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+function idx(arr,i){ return arr[i-1]; }
+
+/* ---------- TABS ---------- */
+document.getElementById('tabbar').addEventListener('click', e=>{
+  const btn = e.target.closest('button[data-tab]');
+  if(!btn) return;
+  document.querySelectorAll('nav.tabbar button').forEach(b=>b.classList.toggle('active', b===btn));
+  document.querySelectorAll('.tabpanel').forEach(p=>p.classList.toggle('active', p.dataset.tab===btn.dataset.tab));
+});
+
+/* ================= QUESTION ================= */
+function rollClosedQ(){
+  const a=rollDie(6), b=rollDie(6), sum=a+b;
+  const labels=["ใช่ แถมด้วย…","ใช่","ใช่ แต่…","ไม่ใช่","ไม่ใช่ แต่…"];
+  let i; if(sum<=4) i=0; else if(sum<=6) i=1; else if(sum===7) i=2; else if(sum<=9) i=3; else i=4;
+  document.getElementById('closedQResult').innerHTML =
+    `<div class="name">${labels[i]}</div><div class="subroll">2d6 = ${a}+${b} = ${sum}</div>`;
+}
+const QQ_ACTION=["Barter","Battle","Betray","Command","Confront","Create","Defend","Enchant","Entertain","Escape","Explore","Heal","Hunt","Investigate","Negotiate","Protect","Rescue","Sabotage","Sneak","Solve"];
+const QQ_ACTION_TH=["ต่อรอง","ต่อสู้","ทรยศ","บัญชาการ","เผชิญหน้า","สร้างขึ้น","ปกป้อง","ร่ายมนตร์ใส่","สร้างความบันเทิง","หลบหนี","สำรวจ","รักษา","ล่า","สืบสวน","เจรจา","คุ้มครอง","ช่วยเหลือ","ก่อวินาศกรรม","แอบซ่อน","คลี่คลาย"];
+const QQ_DESC=["Ancient","Arcane","Blighted","Corrupted","Cursed","Eerie","Enchanted","Forgotten","Haunted","Hidden","Looming","Lost","Moving","Mysterious","Perilous","Sacred","Savage","Treacherous","War-torn","Zealous"];
+const QQ_DESC_TH=["โบราณ","ลึกลับทางเวทมนตร์","เน่าเปื่อย","เสื่อมทราม","ต้องคำสาป","น่าขนลุก","ถูกร่ายมนตร์","ถูกลืม","มีผีสิง","ซ่อนเร้น","คุกคามใกล้เข้ามา","สาบสูญ","กำลังเคลื่อนที่","ลึกลับ","เต็มไปด้วยอันตราย","ศักดิ์สิทธิ์","ป่าเถื่อน","หักหลัง","บอบช้ำจากสงคราม","ศรัทธาแรงกล้า"];
+const QQ_THEME=["Blood","Captivity","Conflict","Creature","Death","Device","Group","Hate","Knowledge","Law","Leader","Love","Message","Person","Religion","Resource","Revenge","Secret","Vengeance","Weapon"];
+const QQ_THEME_TH=["สายเลือด","การถูกจองจำ","ความขัดแย้ง","สิ่งมีชีวิตประหลาด","ความตาย","กลไก","กลุ่มคน","ความเกลียดชัง","ความรู้","กฎหมาย","ผู้นำ","ความรัก","ข้อความ","บุคคล","ศาสนา","ทรัพยากร","การแก้แค้น","ความลับ","การชำระแค้น","อาวุธ"];
+function rollOpenQ(){
+  const ra=rollDie(20), rd=rollDie(20), rt=rollDie(20);
+  const th = `${idx(QQ_ACTION_TH,ra)} · ${idx(QQ_DESC_TH,rd)} · ${idx(QQ_THEME_TH,rt)}`;
+  document.getElementById('openQResult').innerHTML =
+    `<div class="name">${idx(QQ_ACTION,ra)} · ${idx(QQ_DESC,rd)} · ${idx(QQ_THEME,rt)}</div><div class="subroll">การกระทำ d20=${ra} · ลักษณะ d20=${rd} · ธีม d20=${rt}</div><div class="th-translation">แปลไทย: ${th}</div>`;
+}
+
+/* ================= NARRATIVE ================= */
+const QUEST_SPARKS=[
+"Mineral Shortage — เหมืองคนแคระขาดแคลนแร่ธาตุ ต้องหาเหมืองใหม่หรือเจรจาการค้า",
+"Vanishing Wildlife — ป่าเอลฟ์สัตว์ป่าลดลงเพราะมนุษย์รุกที่ ต้องไกล่เกลี่ยสองฝ่าย",
+"Crops in Peril — หมู่บ้านขาดแคลนอาหารเพราะแมลงยักษ์ระบาด",
+"The Lost Heirloom — ตามล่ามรดกตระกูลที่ถูกขโมยไปจากซ่องโจร",
+"Goblin Diplomacy — ก็อบลินขู่บุกเมือง เว้นแต่จะได้มงกุฎหัวหน้าคืน",
+"Whisper in the Woods — ป่าลึกลับทำให้คนหายตัว ต้องสืบและช่วยเหลือ",
+"Forgotten Forge — ตามหาโรงตีเหล็กในตำนานของคนแคระที่สาบสูญ",
+"Ancient Wisdom — ตามหาเอลฟ์อาวุโสผู้รู้วิธีรักษาป่าที่เน่าเสีย",
+"Rival Merchant — พ่อค้าเจ้าเล่ห์เบียดพ่อค้ารายย่อย ต้องหาหลักฐานโกง",
+"The Missing Relic — กู้คืนของวิเศษที่มังกรยึดไว้จากโจรที่ขโมยมันมา",
+"Guild Rivalry — สองกลุ่มอำนาจในเมืองขัดแย้งกัน ทั้งคู่มาขอความช่วยเหลือ",
+"The Vanishing Village — หมู่บ้านทั้งหมู่บ้านหายไปข้ามคืน",
+"Trial of the Ancients — วิญญาณโบราณทดสอบพลัง ความคล่องแคล่ว และสติปัญญา",
+"A Giant Problem — ยักษ์จะทำลายเมืองในไม่กี่วัน ต้องเจรจาหรืออพยพ",
+"Rise of the Cult — ลัทธิมืดวางแผนเรียกปีศาจ ต้องแทรกซึมหยุดพิธี",
+"Lost Expedition — นักสำรวจคนแคระหายไปในถ้ำที่ยังไม่สำรวจ",
+"Moonlit Garden — สวนเอลฟ์มีสมุนไพรรักษาโรคระบาด แต่ถูกออร์คคุกคาม",
+"Undead Nightmare — ซอมบี้ลุกจากหลุมฝังศพเพราะเวทมนตร์ผิดพลาด",
+"A Stinky Situation — นักล่าอัญมณีคนแคระอยากได้อัญมณีจากมูลโทรลล์",
+"Lizard vs. Wizard — ก็อบลินขอความช่วยเหลือกำจัดลิชที่คุกคามพวกมัน"
+];
+function rollQuestSpark(){
+  const r=rollDie(20);
+  document.getElementById('questResult').innerHTML = `<div class="name">${idx(QUEST_SPARKS,r)}</div><div class="subroll">d20=${r}</div>`;
+}
+const PLOT_TWISTS=[
+"NPC ที่ไว้ใจกลับกลายเป็นศัตรูลับ",
+"สมาคมลับปรากฏตัว ถือกุญแจสู่พลังที่ไม่คาดคิด",
+"เควสหลักเป็นแค่เรื่องบังหน้า ภัยที่ใหญ่กว่ากำลังจะมา",
+"แรงจูงใจของ NPC ไม่ใช่อย่างที่คิด มีเรื่องราวโศกเศร้าซ่อนอยู่",
+"ญาติที่หายไปนานปรากฏตัว เปลี่ยนมุมมองต่อสายเลือดตัวเอง",
+"ศัตรูร่วมเสนอพันธมิตรที่ดูอึดอัด เจตนาที่แท้จริงยังไม่ชัด",
+"ของต้องสาปที่คิดว่าถูกทำลายแล้วกลับมาสร้างความโกลาหล",
+"คำทำนายถูกตีความผิด ทำให้กลุ่มหลงทาง",
+"ตัวละครพบว่าความทรงจำถูกดัดแปลง เกิดความสงสัย",
+"อาจารย์ที่รักกลับซ่อนความลับมืดที่เป็นอันตรายต่อภารกิจ"
+];
+function rollPlotTwist(){
+  const r=rollDie(10);
+  document.getElementById('twistResult').innerHTML = `<div class="name">${idx(PLOT_TWISTS,r)}</div><div class="subroll">d10=${r}</div>`;
+}
+
+/* ================= NPC ================= */
+const REACTION=["ก้าวร้าว","ระแวง","สนใจใคร่รู้","เป็นมิตร","ให้ความช่วยเหลือ"];
+const NUMBER=["ไม่มี","หนึ่งตัว/คน","สองตัว/คน","หลายตัว/คน","จำนวนมาก"];
+const SCALE=["จิ๋ว","เล็ก","ปานกลาง","ใหญ่","มหึมา"];
+function rollRNS(){
+  function grp(sum){ if(sum===2) return 0; if(sum<=5) return 1; if(sum<=8) return 2; if(sum<=11) return 3; return 4; }
+  const a1=rollDie(6),b1=rollDie(6),s1=a1+b1;
+  const a2=rollDie(6),b2=rollDie(6),s2=a2+b2;
+  const a3=rollDie(6),b3=rollDie(6),s3=a3+b3;
+  document.getElementById('rnsResult').innerHTML =
+    `<div class="name">${REACTION[grp(s1)]} / ${NUMBER[grp(s2)]} / ${SCALE[grp(s3)]}</div><div class="subroll">ปฏิกิริยา 2d6=${s1} · จำนวน 2d6=${s2} · ขนาด 2d6=${s3}</div>`;
+}
+const NAMES = {
+  dwarfM:["Bäldrin","Björn","Brölin","Bröndor","Därgan","Dörnik","Dürgrihm","Fälkar","Gröndar","Grümlihn","Häldor","Härlok","Härgrim","Krägg","Örin","Rögär","Thörik","Thrähn","Törin","Ülfar"],
+  dwarfF:["Ästrid","Brünhild","Ëdda","Ëlda","Ëlin","Frïda","Gärta","Gilda","Güdrun","Hëlga","Hilda","Ïngrid","Örla","Rägna","Rüna","Sïgrid","Sölveig","Thöra","Thyria","Yngräd"],
+  elf:["Aerilyn","Aelarion","Althoria","Arionel","Arlindel","Calidora","Caeloria","Elinora","Elyndra","Elowyn","Faelin","Feloria","Isora","Lyrion","Nyxara","Selirion","Sylvanis","Thalysia","Thandril","Zephyria"],
+  humanM:["Aldric","Barlowe","Corin","Draven","Eamon","Finnian","Galeran","Hadrian","Ilyas","Jorvik","Kazimir","Lyre","Maddox","Naelon","Othalar","Percival","Quillon","Ronan","Stellan","Thorian"],
+  humanF:["Althaea","Brynna","Calista","Daelia","Elowyn","Farina","Gavrielle","Hespera","Ilyana","Jessamine","Kaelani","Lysandrya","Maeryn","Nalani","Ophelia","Persephone","Quinn","Rosalind","Sylvya","Thalassa"]
+};
+let nameKind = 'dwarfM';
+document.getElementById('namePick').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-k]'); if(!b) return;
+  nameKind=b.dataset.k;
+  document.querySelectorAll('#namePick button').forEach(x=>x.classList.toggle('sel', x===b));
+});
+function rollName(){
+  const r=rollDie(20);
+  document.getElementById('nameNpcResult').innerHTML = `<div class="name">${idx(NAMES[nameKind],r)}</div><div class="subroll">d20=${r}</div>`;
+}
+const AMBITION=["ไต่เต้าในกลุ่มอำนาจที่มีชื่อเสียง","ล้างแค้นให้คนรัก","สร้างธุรกิจให้เจริญรุ่งเรือง","สะสมของวิเศษในตำนาน","ชักชวนเพื่อนให้กลับบ้าน","ค้นหาสมบัติที่ซ่อนอยู่","ตั้งกองคาราวานค้าขาย","ตามหามรดกตระกูลที่สูญหาย","ล่าสัตว์ในตำนาน","รักษาชุมชนให้ปลอดภัย","ไขความจริงของคำทำนายลึกลับ","เชี่ยวชาญเวทมนตร์ต้องห้าม","โค่นล้มผู้ปกครองฉ้อฉล","กลับมาพบพี่น้องที่พลัดพราก","ไถ่บาปจากความผิดในอดีต","ไขคดีฆาตกรรม","เดินทางเรียนรู้ปัญญาโบราณ","บุกเบิกดินแดนที่ไม่เคยสำรวจ","ชนะการแข่งขันอันทรงเกียรติ","สร้างสันติภาพระหว่างฝ่ายที่ทำสงคราม"];
+function rollAmbition(){
+  const r=rollDie(20);
+  document.getElementById('ambitionResult').innerHTML = `<div class="name">${idx(AMBITION,r)}</div><div class="subroll">d20=${r}</div>`;
+}
+const NPC_SPECIES=["คนแคระ","เอลฟ์","มนุษย์","อื่นๆ"];
+function rollNpcSpecies(){
+  const r=rollDie(4);
+  document.getElementById('npcSpeciesResult').innerHTML = `<div class="name">${idx(NPC_SPECIES,r)}</div><div class="subroll">d4=${r}</div>`;
+}
+const ROLE=["ช่างฝีมือ","นักฆ่า","นักดนตรีเร่ร่อน","ผู้ส่งสาร","อาชญากร","นักการทูต","นักสำรวจ","ชาวนา","ผู้หลบหนี","ยาม","หมอรักษา","นักล่า","ผู้นำ","พ่อค้า","คนนอกคอก","นักเก็บของเก่า","นักวิชาการ","สายลาดตระเวน","ทหาร","โจร"];
+function rollRole(){
+  const r=rollDie(20);
+  document.getElementById('roleResult').innerHTML = `<div class="name">${idx(ROLE,r)}</div><div class="subroll">d20=${r}</div>`;
+}
+
+/* ================= FACTION ================= */
+const F_LEGACY=["Ancient","Awakened","Blessed","Bloody","Broken","Crimson","Cursed","Enduring","Exalted","Fallen","Golden","Hidden","Sacred","Shattered","Silent","Supreme","Undying","United","Veiled","Wandering"];
+const F_AFFIL=["Alliance","Circle","Coalition","Collective","Confederation","Council","Court","Covenant","Dominion","Federation","Guild","League","Legion","Order","Pact","Regiment","Republic","Sphere","Syndicate","Union"];
+const F_IDENT=["Blades","Defenders","Disciples","Embers","Flames","Guardians","Harbingers","Heralds","Hounds","Keepers","Knights","Ravens","Relics","Seekers","Sentinels","Shadows","Skulls","Vanguards","Wardens","Watchers"];
+function rollFactionName(){
+  const t=rollDie(4), legacy=pick(F_LEGACY), affil=pick(F_AFFIL), ident=pick(F_IDENT);
+  let name;
+  if(t===1) name=`${legacy} ${affil}`;
+  else if(t===2) name=`${ident} of the ${legacy} ${affil}`;
+  else if(t===3) name=`${legacy} ${ident}`;
+  else name=`${affil} of the ${legacy} ${ident}`;
+  document.getElementById('factionNameResult').innerHTML = `<div class="name">${name}</div><div class="subroll">template d4=${t}</div>`;
+}
+const FOCUS=["เภสัชกร","นักฆ่า","โจร","นักล่าค่าหัว","ลัทธิ","ผู้ถูกเนรเทศ","อันธพาล","นักบวช","อัศวิน","ทหารรับจ้าง","นักล่าสัตว์ประหลาด","ขุนนาง","พรรคการเมือง","ผู้บุกโจมตี","กบฏ","นักวิชาการ","สมาคมลับ","นักลักลอบขนของ","โจรขโมย","เผ่า"];
+function rollFocus(){
+  const r=rollDie(20);
+  document.getElementById('focusResult').innerHTML = `<div class="name">${idx(FOCUS,r)}</div><div class="subroll">d20=${r}</div>`;
+}
+const LEADERSHIP=["อนาธิปไตย","เผด็จการ","ราชวงศ์สืบสาย","สภาผู้อาวุโส","เลือกตั้ง","ตามคำทำนาย"];
+function rollLeadership(){
+  const r=rollDie(6);
+  document.getElementById('leadResult').innerHTML = `<div class="name">${idx(LEADERSHIP,r)}</div><div class="subroll">d6=${r}</div>`;
+}
+
+/* ================= CIVILIZATION ================= */
+const CIV_PREFIX=["Black","Dragon","Elden","Ember","Frost","Golden","Iron","Mist","Moon","Oak","Raven","Red","Shadow","Silver","Stone","Thorne","Thunder","Willow","Wind","Wood"];
+const CIV_SUFFIX=["barrow","bridge","brook","cairn","crag","fall","field","ford","hall","haven","hope","mount","ridge","river","rock","stone","stead","vale","watch","wick"];
+function rollSettlementName(){
+  const p=rollDie(20), s=rollDie(20);
+  document.getElementById('settlementResult').innerHTML =
+    `<div class="name">${idx(CIV_PREFIX,p)}${idx(CIV_SUFFIX,s)}</div><div class="subroll">prefix d20=${p} · suffix d20=${s}</div>`;
+}
+const TROUBLE=["ปีศาจโบราณตื่นขึ้นใต้ดิน","ผู้ปกครองฉ้อฉล","ถูกสาปโดยเสาหินประหลาด","สัตว์ประหลาดอันตรายบุกรุก","เวทมนตร์มืดรบกวนชีวิตผู้คน","โรคร้ายกำลังระบาด","เศรษฐกิจล่มสลาย ความยากจนพุ่งสูง","กองทัพศัตรูโจมตี","ค่ำคืนนิรันดร์ปกคลุมเมือง","ความเชื่อสุดโต่งก่อความขัดแย้ง","กลุ่มอำนาจต่างๆ แย่งชิงอำนาจ","กำแพงเวทมนตร์กักขังชาวเมือง","ภัยธรรมชาติทำลายล้าง","อดอาหารเพราะพืชผลล้มเหลว","ผู้คนหายตัวไปอย่างไร้ร่องรอย","คำสาปแห่งความเงียบปกคลุมเมือง","พลังเหนือธรรมชาติสร้างความหวาดกลัว","คนนอกคอกที่ผูกแค้นกลับมา","ทรัพยากรสำคัญกำลังหมดลง","แหล่งน้ำกำลังแห้งเหือด"];
+function rollTrouble(){
+  const r=rollDie(20);
+  document.getElementById('troubleResult').innerHTML = `<div class="name">${idx(TROUBLE,r)}</div><div class="subroll">d20=${r}</div>`;
+}
+const CIV_SPECIES=["คนแคระ","เอลฟ์","มนุษย์","ผสมปนเป"];
+const CIV_POP=["หลักสิบ","หลักร้อย","หลักพัน","หลักหมื่น"];
+function rollCivPop(){
+  const r1=rollDie(4), r2=rollDie(4);
+  document.getElementById('civPopResult').innerHTML = `<div class="name">${idx(CIV_SPECIES,r1)} / ประชากร${idx(CIV_POP,r2)}</div><div class="subroll">เผ่าพันธุ์ d4=${r1} · ประชากร d4=${r2}</div>`;
+}
+const AUTHORITY=["ไม่มีกฎหมาย","กฎหมายไร้ประสิทธิภาพ","ผ่อนปรน","ยุติธรรม","ฉ้อฉล","กดขี่"];
+function rollAuthority(){
+  const r=rollDie(6);
+  document.getElementById('authorityResult').innerHTML = `<div class="name">${idx(AUTHORITY,r)}</div><div class="subroll">d6=${r}</div>`;
+}
+
+/* ================= DUNGEON ================= */
+const DUNGEON_PLACE=["Burrow","Camp","Castle","Cave","Cavern","Den","Fort","Hollow","Keep","Lair","Nest","Pit","Post","Reach","Ruin","Shrine","Spire","Stronghold","Temple","Tower"];
+const DUNGEON_PLACE_TH=["โพรงดิน","ค่ายพัก","ปราสาท","ถ้ำ","ถ้ำลึก","ซ่องโจร","ป้อม","แอ่งกลวง","หอคอยหลัก","รังสัตว์ร้าย","รัง","หลุม","ด่านหน้า","เขตแดนไกลโพ้น","ซากปรักหักพัง","ศาลเจ้า","ยอดแหลม","ป้อมปราการ","วิหาร","หอคอย"];
+const DUNGEON_DESC=["Ancient","Black","Blighted","Bloody","Cursed","Dark","Dead","Doomed","Endless","Forbidden","Forgotten","Forsaken","Grim","Hidden","High","Jagged","Lost","Sacred","Wicked","Withered"];
+const DUNGEON_DESC_TH=["โบราณ","ดำมืด","เน่าเปื่อย","เปื้อนเลือด","ต้องคำสาป","มืดมิด","แห่งความตาย","ถึงคราวล่มสลาย","ไม่สิ้นสุด","ต้องห้าม","ถูกลืม","ถูกทอดทิ้ง","มืดหม่น","ซ่อนเร้น","สูงเสียดฟ้า","ขรุขระแหลมคม","สาบสูญ","ศักดิ์สิทธิ์","ชั่วร้าย","เหี่ยวเฉา"];
+const DUNGEON_NOUN=["Blood","Bone","Claws","Cult","Dagger","Dead","Dim","Eye","Exiled","Fear","Finger","Guard","Hand","Knave","Prophet","Refuge","Skull","Sorrow","Sword","Wolf"];
+const DUNGEON_NOUN_TH=["เลือด","กระดูก","กรงเล็บ","ลัทธิ","มีดสั้น","คนตาย","ความมืดมัว","ดวงตา","ผู้ถูกเนรเทศ","ความหวาดกลัว","นิ้วมือ","ผู้พิทักษ์","มือ","คนโกง","ศาสดา","ที่พักพิง","กะโหลก","ความโศกเศร้า","ดาบ","หมาป่า"];
+function rollDungeonName(){
+  const t=rollDie(4);
+  let name, nameTh, breakdown;
+  if(t===1){
+    const pR=rollDie(20), nR=rollDie(20);
+    name=`The ${idx(DUNGEON_PLACE,pR)} of the ${idx(DUNGEON_NOUN,nR)}`;
+    nameTh=`${idx(DUNGEON_PLACE_TH,pR)}แห่ง${idx(DUNGEON_NOUN_TH,nR)}`;
+    breakdown=`Place d20=${pR} · Noun d20=${nR}`;
+  } else if(t===2){
+    const pR=rollDie(20), dR=rollDie(20), nR=rollDie(20);
+    name=`The ${idx(DUNGEON_PLACE,pR)} of the ${idx(DUNGEON_DESC,dR)} ${idx(DUNGEON_NOUN,nR)}`;
+    nameTh=`${idx(DUNGEON_PLACE_TH,pR)}แห่ง${idx(DUNGEON_NOUN_TH,nR)}${idx(DUNGEON_DESC_TH,dR)}`;
+    breakdown=`Place d20=${pR} · Descriptor d20=${dR} · Noun d20=${nR}`;
+  } else {
+    const pR=rollDie(20), dR=rollDie(20);
+    name=`The ${idx(DUNGEON_DESC,dR)} ${idx(DUNGEON_PLACE,pR)}`;
+    nameTh=`${idx(DUNGEON_PLACE_TH,pR)}${idx(DUNGEON_DESC_TH,dR)}`;
+    breakdown = t===3
+      ? `Descriptor d20=${dR} · Place d20=${pR}`
+      : `Descriptor d20=${dR} · Place d20=${pR} (ถ้ามีชื่อผู้นำ เติมนำหน้าว่า "[ชื่อผู้นำ]'s")`;
+  }
+  document.getElementById('nameResult').innerHTML =
+    `<div class="name">${name}</div><div class="subroll">d4=${t} · ${breakdown}</div><div class="th-translation">แปลไทย: ${nameTh}</div>`;
+}
+function rollCaveTile(){
+  const roll=rollDie(12);
+  const cx=130, cy=130, baseR=92;
+  const N=16+Math.floor(Math.random()*6);
+  let pts=[];
+  for(let i=0;i<N;i++){ const a=(i/N)*Math.PI*2; const r=baseR*(0.55+Math.random()*0.42); pts.push([cx+Math.cos(a)*r, cy+Math.sin(a)*r]); }
+  const floorPath="M"+pts.map(p=>p[0].toFixed(1)+","+p[1].toFixed(1)).join(" L")+" Z";
+  const dirs=[["N",0,-1],["NE",0.707,-0.707],["E",1,0],["SE",0.707,0.707],["S",0,1],["SW",-0.707,0.707],["W",-1,0],["NW",-0.707,-0.707]];
+  const shuffled=dirs.slice().sort(()=>Math.random()-0.5);
+  const numExits=1+Math.floor(Math.random()*3);
+  const exits=shuffled.slice(0,numExits);
+  let tunnels="", labels="";
+  exits.forEach(([label,dx,dy])=>{
+    const x1=cx+dx*baseR*0.35, y1=cy+dy*baseR*0.35, x2=cx+dx*124, y2=cy+dy*124;
+    tunnels+=`<line x1="${x1.toFixed(1)}" y1="${y1.toFixed(1)}" x2="${x2.toFixed(1)}" y2="${y2.toFixed(1)}" stroke="#DCCFA8" stroke-width="30" stroke-linecap="round"/>`;
+    const lx=cx+dx*140, ly=cy+dy*140;
+    labels+=`<text x="${lx.toFixed(1)}" y="${ly.toFixed(1)}" font-family="JetBrains Mono, monospace" font-size="13" font-weight="700" fill="#9C7A32" text-anchor="middle" dominant-baseline="middle">${label}</text>`;
+  });
+  const svg=`<svg width="230" height="230" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+    <rect x="4" y="4" width="252" height="252" rx="10" fill="#3a332a"/>
+    ${tunnels}<path d="${floorPath}" fill="#DCCFA8"/>
+    <rect x="4" y="4" width="252" height="252" rx="10" fill="none" stroke="#9C7A32" stroke-width="2"/>${labels}</svg>`;
+  const wrap=document.getElementById('caveTileWrap');
+  wrap.classList.remove('show'); wrap.innerHTML=svg;
+  requestAnimationFrame(()=>wrap.classList.add('show'));
+  document.getElementById('caveExitsLine').textContent=`d12 = ${roll} · ทางออก: ${exits.map(e=>e[0]).join(", ")}`;
+}
+const ROOM=[[1,1],[1,2],[1,3],[2,1],[2,2],[2,3],[3,1],[3,2],[3,3]];
+const TEMPLATES=[
+  [[2,0],[2,1],[2,2],[2,3],[2,4]],
+  [[0,2],[1,2],[2,2],[2,3],[2,4]],
+  [[0,2],[1,2],[2,2],[3,2],[4,2],[2,3],[2,4]],
+  [[0,2],[1,2],[2,2],[3,2],[4,2],[2,0],[2,1],[2,3],[2,4]],
+  [[2,0],[2,1],[2,2]],
+  [...ROOM,[4,2]],
+  [...ROOM,[0,2],[4,2]],
+  [...ROOM,[0,2],[2,4]],
+  [...ROOM,[0,2],[2,4],[4,2]],
+  [...ROOM,[0,2],[2,4],[4,2],[2,0]],
+  [[1,0],[1,1],[1,2],[1,3],[1,4],[2,0],[2,1],[2,2],[2,3],[2,4],[3,0],[3,1],[3,2],[3,3],[3,4],[0,2],[4,2]],
+  [[1,0],[1,1],[1,2],[2,2],[3,2],[3,3],[3,4]]
+];
+function rotateCell([r,c], rot, N=5){ let rr=r, cc=c; for(let i=0;i<rot;i++){ const nr=cc, nc=(N-1)-rr; rr=nr; cc=nc; } return [rr,cc]; }
+function rollStructureTile(){
+  const roll=rollDie(20);
+  const base=TEMPLATES[(roll-1)%TEMPLATES.length];
+  const rot=Math.floor(Math.random()*4);
+  const N=5;
+  const openSet=new Set(base.map(cell=>rotateCell(cell,rot,N).join(",")));
+  const margin=20, cs=44;
+  let floors="", walls="", ticks="", labels="";
+  const compassOf=(dr,dc)=> dr===-1?"N":dr===1?"S":dc===-1?"W":"E";
+  openSet.forEach(key=>{
+    const [r,c]=key.split(",").map(Number);
+    const x=margin+c*cs, y=margin+r*cs;
+    floors+=`<rect x="${x}" y="${y}" width="${cs}" height="${cs}" fill="#DCCFA8"/>`;
+    [[-1,0],[1,0],[0,-1],[0,1]].forEach(([dr,dc])=>{
+      const nr=r+dr, nc=c+dc;
+      const outOfGrid=nr<0||nr>=N||nc<0||nc>=N;
+      if(outOfGrid){
+        const midx=x+cs/2, midy=y+cs/2, dir=compassOf(dr,dc);
+        const tx=midx+dc*cs/2, ty=midy+dr*cs/2;
+        ticks+=`<line x1="${tx}" y1="${ty}" x2="${tx+dc*10}" y2="${ty+dr*10}" stroke="#9C7A32" stroke-width="6"/>`;
+        labels+=`<text x="${tx+dc*22}" y="${ty+dr*22}" font-family="JetBrains Mono, monospace" font-size="12" font-weight="700" fill="#9C7A32" text-anchor="middle" dominant-baseline="middle">${dir}</text>`;
+      } else if(!openSet.has(nr+","+nc)){
+        if(dr===-1) walls+=`<line x1="${x}" y1="${y}" x2="${x+cs}" y2="${y}" stroke="#221D17" stroke-width="4"/>`;
+        if(dr===1)  walls+=`<line x1="${x}" y1="${y+cs}" x2="${x+cs}" y2="${y+cs}" stroke="#221D17" stroke-width="4"/>`;
+        if(dc===-1) walls+=`<line x1="${x}" y1="${y}" x2="${x}" y2="${y+cs}" stroke="#221D17" stroke-width="4"/>`;
+        if(dc===1)  walls+=`<line x1="${x+cs}" y1="${y}" x2="${x+cs}" y2="${y+cs}" stroke="#221D17" stroke-width="4"/>`;
+      }
+    });
+  });
+  const total=margin*2+cs*N;
+  const svg=`<svg width="230" height="230" viewBox="0 0 ${total} ${total}" xmlns="http://www.w3.org/2000/svg">
+    <rect x="2" y="2" width="${total-4}" height="${total-4}" rx="8" fill="#3a332a"/>
+    ${floors}${walls}${ticks}${labels}
+    <rect x="2" y="2" width="${total-4}" height="${total-4}" rx="8" fill="none" stroke="#9C7A32" stroke-width="2"/></svg>`;
+  const exitDirs=[];
+  openSet.forEach(key=>{ const [r,c]=key.split(",").map(Number);
+    if(r===0) exitDirs.push("N"); if(r===N-1) exitDirs.push("S"); if(c===0) exitDirs.push("W"); if(c===N-1) exitDirs.push("E"); });
+  const wrap=document.getElementById('structTileWrap');
+  wrap.classList.remove('show'); wrap.innerHTML=svg;
+  requestAnimationFrame(()=>wrap.classList.add('show'));
+  document.getElementById('structExitsLine').textContent=`d20 = ${roll} · ทางออก: ${[...new Set(exitDirs)].join(", ")||"ไม่มี (จุดอับ)"}`;
+}
+const TRAPS=[["กับดักพ่นกรด","พ่นกรดกัดกร่อนใส่ทิศทางที่กำหนด"],["เครื่องยิงธนู","ยิงธนูชุดใหญ่ใส่พื้นที่ที่กำหนด"],["เพดานถล่ม","หินและเศษซากร่วงลงมาจากด้านบน"],["กำแพงบีบ","กำแพงสองฝั่งเลื่อนเข้าหากันช้าๆ"],["วงเวทเรียกธาตุ","อัญเชิญเอเลเมนทัลเมื่อถูกกระตุ้น"],["เปลวไฟพวยพุ่ง","พ่นไฟเป็นระลอกเมื่อถูกกระตุ้น"],["หีบสมบัติปลอม","ระเบิดหรือดักจับเมื่อถูกเปิด"],["ใบมีดกิโยติน","ใบมีดหนักหล่นลงมาจากด้านบน"],["สะพานลวงตา","ทางเดินปลอมที่พังเมื่อเหยียบ"],["มิมิค","วัตถุที่แปลงร่างเป็นสัตว์ประหลาด"],["เขาวงกตกระจก","ภาพลวงตาที่ทำให้หลงทาง"],["หลุมพราง","หลุมซ่อนที่เปิดออกใต้เท้า"],["ลูกดอกพิษ","ยิงลูกดอกอาบยาพิษเมื่อถูกกด"],["กลุ่มแก๊สพิษ","ปล่อยแก๊สพิษเมื่อถูกกระตุ้น"],["ประตูเหล็กหนัก","ประตูเหล็กหล่นลงมาปิดทาง"],["ปริศนากลไก","คันโยกชุดที่ให้รางวัลหรือดักจับ"],["ก้อนหินกลิ้ง","หินก้อนใหญ่กลิ้งลงมาตามทางเดิน"],["พื้นหนามแหลม","หนามพุ่งขึ้นจากพื้นกะทันหัน"],["วงเวทเทเลพอร์ต","ส่งตัวไปยังที่อื่นทันที"],["บ่วงดักสะดุด","ทำให้ติดค้างอยู่ในตาข่าย"]];
+function trapHTML(){
+  const roll=rollDie(20); const [nm,desc]=TRAPS[roll-1];
+  return `<div class="trap-desc">d20=${roll} → <b>${nm}</b> — ${desc}</div>`;
+}
+function rollTrap(){ document.getElementById('doorResult').innerHTML += trapHTML(); }
+function rollTrapInto(targetId){ document.getElementById(targetId).innerHTML += trapHTML(); }
+function rollDoor(){
+  const a=rollDie(4), b=rollDie(4), sum=a+b;
+  let label, trapped=false;
+  if(sum<=3) label="กีดขวางจากอีกฝั่ง";
+  else if(sum<=5) label="เปิดอยู่";
+  else if(sum<=7) label="ล็อกอยู่";
+  else { label="มีกับดัก!"; trapped=true; }
+  let html=`<div class="door-result${trapped?' trapped':''}">${label}</div><div class="subroll">2d4 = ${a}+${b} = ${sum}</div>`;
+  if(trapped) html += `<button class="small" onclick="rollTrap()">ทอยชนิดกับดัก (d20)</button>`;
+  document.getElementById('doorResult').innerHTML = html;
+}
+
+/* ================= REWARD ================= */
+function describeTreasure(r){
+  switch(r){
+    case 1: return "อาวุธวิเศษ — ใช้ oracle อื่นสร้างพลังของอาวุธ";
+    case 2: { const s=rollDie(6); const opt=s<=2?"ภาพวาดเล็ก มูลค่า 50c":s<=4?"ประติมากรรมแกะสลัก (เทอะทะ) มูลค่า 100c":s===5?"ผ้าทอลายละเอียด มูลค่า 200c":"ผลงานชิ้นเอก (เทอะทะ) มูลค่า 500c"; return `งานศิลปะ (d6=${s}) — ${opt}`; }
+    case 3: return "โพชั่นรักษา — ฟื้นฟูค่าพลังทั้งหมดกลับเต็ม";
+    case 4: return "ของวิเศษ (Relic) — ใช้ oracle อื่นสร้างพลังที่ชาร์จใหม่ได้";
+    case 5: { const s=rollDie(6); const opt=s<=2?"ถุงเล็ก 25c":s<=4?"ถุงกลาง 50c":s===5?"ถุงหรู 100c":"ถุงประดับ 250c"; return `ถุงเงิน (d6=${s}) — ${opt}`; }
+    case 6: return "ม้วนคาถา (Scroll) — คาถาสุ่ม ใช้ครั้งเดียว";
+    case 7: { const g=(rollDie(6)+rollDie(6))*10; return `เหรียญทอง — ${g}c`; }
+    case 8: { const s=rollDie(6); const opt=s<=2?"อัญมณีทั่วไป 50c":s<=4?"อัญมณีหายาก 100c":s===5?"อัญมณีล้ำค่า 500c":"อัญมณีไร้ตำหนิ 1,000c"; return `อัญมณี (d6=${s}) — ${opt}`; }
+    case 9: return "สมุดคาถา (Spellbook) — คาถาสุ่ม 1 เล่ม";
+    case 10: return "เกราะวิเศษ — ใช้ oracle อื่นสร้างพลังของเกราะ";
+    case 11: { const s=rollDie(6); const opt=s<=2?"เครื่องเงินเรียบง่าย 20c":s<=4?"เครื่องทองประดับ 50c":s===5?"ชิ้นประณีตฝังอัญมณี 200c":"ชิ้นวิจิตรฝังอัญมณีหลายเม็ด 500c"; return `เครื่องประดับ (d6=${s}) — ${opt}`; }
+    default: return "";
+  }
+}
+function rollTreasure(){
+  const r1=rollDie(12);
+  let lines=[];
+  if(r1===12){
+    lines.push(`d12=12 → <b>รางวัลคู่!</b> ทอยซ้ำ 2 ครั้ง`);
+    for(let i=0;i<2;i++){ let rr=rollDie(12); while(rr===12) rr=rollDie(12); lines.push(`• d12=${rr} — ${describeTreasure(rr)}`); }
+  } else {
+    lines.push(`d12=${r1} — ${describeTreasure(r1)}`);
+  }
+  document.getElementById('treasureResult').innerHTML = lines.map(l=>`<div class="line">${l}</div>`).join('');
+}
+
+/* ================= MARKS (table 21) ================= */
+const MARK_NAMES=["แผลเป็น (Scar)","มึนงง (Concussed)","หายใจไม่ทัน (Breathless)","กระดูกหัก (Fracture)","ติดเชื้อ (Diseased)","บาดเจ็บที่ศีรษะ (Head Wound)","ขาเป๋ (Hamstrung)","หูอื้อ (Deafened)","บาดแผลทางใจ (Trauma)","อวัยวะพิการ (Sundered)","บาดเจ็บสาหัส (Mortal Wound)","รอดตายหวุดหวิด (Doomed)"];
+const MARK_FLAVOR=[
+  "บาดแผลเฉียดทำให้เลือดออก",
+  "แรงปะทะทำให้มึนงง",
+  "ถูกเหวี่ยงลอยและกระแทกพื้นจนหายใจไม่ทัน",
+  "แรงกระแทกมาพร้อมเสียงกระดูกหัก",
+  "บาดแผลกลายเป็นแผลติดเชื้อไม่สบายตัว",
+  "แรงกระแทกทำให้สลบไป",
+  "การโจมตีทำให้ขาเป๋ เคลื่อนไหวลำบาก",
+  "แรงกระแทกทำให้หูอื้อ ไม่ได้ยินอะไรเลยจนกว่าจะได้รับการรักษาพิเศษ",
+  "บางส่วนในจิตใจถูกสั่นคลอน",
+  "การโจมตีตัดหรือทำให้อวัยวะพิการ ร่างกายต้องทดแทนพลังไปยังแขนขาที่เหลือ",
+  "การโจมตีทำให้บาดเจ็บสาหัสจนหมดสติ เลือดไหลไม่หยุด",
+  "ความตายเฉียดใกล้ แต่กลับรอดมาได้อย่างหวุดหวิด"
+];
+const MARK_NOTE={
+  3:"ตกอยู่ในสถานะ Deprived จนกว่าจะได้พักยาว (Long Rest)",
+  5:"ตกอยู่ในสถานะ Deprived จนกว่าจะได้พักยาว (Long Rest)",
+  7:"ตกอยู่ในสถานะ Deprived จนกว่าจะได้พักยาว (Long Rest)",
+  10:"ต้องพักเต็มที่ (Full Rest)",
+  11:"ต้องพักเต็มที่ (Full Rest) — เสียชีวิตภายใน 1 ชั่วโมงถ้าไม่ได้รับการรักษา",
+  12:"ต้องพักเต็มที่ (Full Rest) — ถ้าเซฟ Critical Damage ครั้งถัดไปล้มเหลว จะเสียชีวิตทันทีอย่างน่าสยดสยอง"
+};
+function cmpLine(roll,dieLabel,statLabel){
+  return `${dieLabel}=${roll} → ถ้ามากกว่า ${statLabel} ปัจจุบัน ให้ใช้ ${roll} เป็น${statLabel}ใหม่แทน`;
+}
+function rollMark(n){
+  let lines=[];
+  switch(n){
+    case 1:{
+      const locRoll=rollDie(6);
+      const LOC=["คอ","มือ","ตา","อก","ขา","หู"];
+      lines.push(`d6=${locRoll} → ตำแหน่งแผลเป็นถาวร: <b>${idx(LOC,locRoll)}</b>`);
+      lines.push(cmpLine(rollDie(6),"d6","Max HP"));
+      break;
+    }
+    case 2:{ lines.push(cmpLine(rollDie(6),"d6","Max HP")); break; }
+    case 3:{ lines.push(cmpLine(rollDie(6),"d6","Max HP")); break; }
+    case 4:{
+      const fr=rollDie(6);
+      const FRAC=["ซี่โครง","ขา","ขา","แขน","แขน","กะโหลก"];
+      lines.push(`d6=${fr} → ตำแหน่งที่หัก: <b>${idx(FRAC,fr)}</b>`);
+      lines.push(cmpLine(rollDie(6)+rollDie(6),"2d6","Max HP"));
+      break;
+    }
+    case 5:{ lines.push(cmpLine(rollDie(6)+rollDie(6),"2d6","Max HP")); break; }
+    case 6:{
+      const which=rollDie(3);
+      const ATTR=["STR","DEX","INT"];
+      const sum=rollDie(6)+rollDie(6)+rollDie(6);
+      lines.push(`d3=${which} → ค่าที่ได้รับผล: <b>${idx(ATTR,which)}</b>`);
+      lines.push(`3d6=${sum} → ถ้ามากกว่าค่า ${idx(ATTR,which)} "ปัจจุบัน" (ไม่ใช่ max) ให้ใช้ ${sum} แทน`);
+      break;
+    }
+    case 7:{ lines.push(cmpLine(rollDie(6)+rollDie(6)+rollDie(6),"3d6","Max DEX")); break; }
+    case 8:{
+      const bonus=rollDie(4);
+      lines.push(`ทำ INT check (ทอย d20 ให้ได้ค่า ≤ INT ปัจจุบันของคุณ)`);
+      lines.push(`ถ้าผ่าน check: d4=${bonus} → เพิ่ม Max INT ขึ้น ${bonus}`);
+      break;
+    }
+    case 9:{ lines.push(cmpLine(rollDie(6)+rollDie(6)+rollDie(6),"3d6","Max INT")); break; }
+    case 10:{
+      const which=rollDie(2);
+      const PART=["แขน","ขา"];
+      lines.push(`d2=${which} → อวัยวะที่ใช้การไม่ได้: <b>${idx(PART,which)}</b>`);
+      lines.push(cmpLine(rollDie(6)+rollDie(6)+rollDie(6),"3d6","Max STR"));
+      break;
+    }
+    case 11:{ lines.push(cmpLine(rollDie(6)+rollDie(6)+rollDie(6),"3d6","Max HP")); break; }
+    case 12:{
+      lines.push(`ถ้าเซฟ Critical Damage ครั้งถัดไป "ผ่าน" ให้ทอย 3d6 เทียบกับ Max HP ปัจจุบัน (ถ้ามากกว่า ใช้เป็น Max HP ใหม่)`);
+      break;
+    }
+  }
+  let html = `<div class="name">${idx(MARK_NAMES,n)}</div><div class="mark-flavor">${idx(MARK_FLAVOR,n)}</div>`;
+  if(MARK_NOTE[n]) html += `<div class="mark-note">${MARK_NOTE[n]}</div>`;
+  html += lines.map(l=>`<div class="subroll" style="margin-top:6px;">${l}</div>`).join('');
+  document.getElementById('markResult').innerHTML = html;
+}
+document.getElementById('markPick').addEventListener('click', e=>{
+  const b=e.target.closest('button[data-n]'); if(!b) return;
+  document.querySelectorAll('#markPick button').forEach(x=>x.classList.toggle('sel', x===b));
+  rollMark(Number(b.dataset.n));
+});
+
+/* ================= DELVING (moved here from old Travel tab) ================= */
+function rollDelveDiff(){
+  const r=rollDie(6);
+  let body;
+  if(r===1) body=`เจอเหตุการณ์สุ่ม (Encounter) ระหว่างบุกดันเจี้ยน`;
+  else if(r===2) body=`พบเบาะแส (Clue) นำไปสู่จุดสนใจ`;
+  else if(r===3) body=`อ่อนล้า (Fatigue) — ได้รับ Fatigue 1 หน่วย เว้นแต่จะใช้ round ถัดไปพักสั้น (Short Rest)`;
+  else if(r===4) body=`มืด (Darkness) — คบไฟที่จุดอยู่ดับหมด ตะเกียงน้ำมันแห้งเกลี้ยง`;
+  else if(r===5) body=`พื้นที่มีกับดัก<br><button class="small" onclick="rollTrapInto('delveDiffResult')">ทอยชนิดกับดัก (d20)</button>`;
+  else body=`ไม่มีอะไรเกิดขึ้น`;
+  document.getElementById('delveDiffResult').innerHTML = `<div class="name">d6=${r}</div><div class="subroll">${body}</div>`;
+}
+
+/* ================= TERRAIN (pg.36) — original hex-tile icons, hand-copyable ================= */
+function hexPoints(cx,cy,r){
+  const pts=[];
+  for(let i=0;i<6;i++){
+    const a = Math.PI/180 * (60*i);
+    pts.push([cx + r*Math.cos(a), cy + r*Math.sin(a)]);
+  }
+  return pts;
+}
+function hexPathD(cx,cy,r){
+  const p = hexPoints(cx,cy,r);
+  return "M"+p.map(pt=>pt[0].toFixed(1)+","+pt[1].toFixed(1)).join(" L")+" Z";
+}
+const INK = "#221D17", FLOOR = "#DCCFA8";
+
+function cityIcon(){
+  const baseY=195;
+  const bld=[[78,150],[122,118],[168,145],[198,162]];
+  let s='';
+  bld.forEach(([cx,topY])=>{
+    const w=26;
+    s+=`<rect x="${cx-w/2}" y="${topY}" width="${w}" height="${baseY-topY}" fill="${INK}"/>`;
+    for(let i=0;i<3;i++){
+      s+=`<rect x="${cx-w/2+4+i*8}" y="${topY-8}" width="5" height="8" fill="${INK}"/>`;
+    }
+  });
+  s+=`<line x1="55" y1="${baseY}" x2="205" y2="${baseY}" stroke="${INK}" stroke-width="4"/>`;
+  return s;
+}
+function hillsIcon(){
+  const baseY=188; let s='';
+  [[82,42],[130,54],[178,40]].forEach(([cx,r])=>{
+    s+=`<path d="M${cx-r},${baseY} A${r},${r} 0 0 1 ${cx+r},${baseY}" fill="none" stroke="${INK}" stroke-width="6" stroke-linecap="round"/>`;
+  });
+  return s;
+}
+function mountainsIcon(tall){
+  const baseY=178;
+  const peaks = tall ? [[92,62,52],[130,42,64],[170,60,50]] : [[100,92,34],[135,76,44],[172,94,32]];
+  let s='';
+  peaks.forEach(([cx,peakY,hw])=>{
+    s+=`<polygon points="${cx-hw},${baseY} ${cx},${peakY} ${cx+hw},${baseY}" fill="${INK}"/>`;
+    if(tall){
+      const capH=(baseY-peakY)*0.3, capHW=hw*0.4;
+      s+=`<polygon points="${cx-capHW},${peakY+capH} ${cx},${peakY} ${cx+capHW},${peakY+capH}" fill="${FLOOR}"/>`;
+    }
+  });
+  return s;
+}
+function plainsIcon(){
+  let s='';
+  [95,120,145,170].forEach(y=>{
+    let d=`M45,${y}`;
+    for(let x=45;x<=215;x+=22){ d+=` Q${x+11},${y-9} ${x+22},${y}`; }
+    s+=`<path d="${d}" fill="none" stroke="${INK}" stroke-width="4" stroke-linecap="round"/>`;
+  });
+  return s;
+}
+function pineTree(cx,baseY,size){
+  return `
+    <polygon points="${cx-size*0.48},${baseY} ${cx},${baseY-size} ${cx+size*0.48},${baseY}" fill="${INK}"/>
+    <polygon points="${cx-size*0.36},${baseY-size*0.4} ${cx},${baseY-size*1.35} ${cx+size*0.36},${baseY-size*0.4}" fill="${INK}"/>
+  `;
+}
+function forestIcon(){
+  const baseY=182;
+  let s='';
+  [[85,58],[130,66],[175,58]].forEach(([x,size],i)=>{ s+=pineTree(x, baseY-(i%2===0?0:6), size); });
+  return s;
+}
+function rainforestIcon(){
+  return `
+    <ellipse cx="92" cy="138" rx="42" ry="30" fill="${INK}"/>
+    <ellipse cx="138" cy="116" rx="50" ry="36" fill="${INK}"/>
+    <ellipse cx="180" cy="142" rx="38" ry="28" fill="${INK}"/>
+    <line x1="68" y1="182" x2="60" y2="204" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="128" y1="188" x2="120" y2="210" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+    <line x1="186" y1="182" x2="180" y2="204" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>
+  `;
+}
+function swampIcon(){
+  let s=`<path d="M45,170 Q65,160 85,170 T125,170 T165,170 T215,170" fill="none" stroke="${INK}" stroke-width="4"/>`;
+  [78,108,148,178].forEach((x,i)=>{
+    const h=28+(i%2)*12;
+    s+=`<path d="M${x},170 Q${x-7},${170-h*0.6} ${x+3},${170-h}" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round"/>`;
+  });
+  return s;
+}
+function lakeIcon(){
+  let s='';
+  for(let y=92;y<=178;y+=17){
+    let d=`M48,${y}`;
+    for(let x=48;x<=212;x+=17){ d+=` Q${x+8.5},${y-5} ${x+17},${y}`; }
+    s+=`<path d="${d}" fill="none" stroke="${INK}" stroke-width="3" stroke-linecap="round" opacity="0.85"/>`;
+  }
+  return s;
+}
+
+const TERRAIN_DATA=[
+  {name:"เมือง", move:"ปกติ", icon:cityIcon},
+  {name:"เนินเขา", move:"ปกติ", icon:hillsIcon},
+  {name:"ภูเขาสูง", move:"ผ่านไม่ได้", icon:()=>mountainsIcon(true)},
+  {name:"ภูเขา", move:"ยากลำบาก", icon:()=>mountainsIcon(false)},
+  {name:"ที่ราบ", move:"ปกติ", icon:plainsIcon},
+  {name:"ป่าไม้", move:"ปกติ", icon:forestIcon},
+  {name:"ป่าฝน", move:"ยากลำบาก", icon:rainforestIcon},
+  {name:"หนองบึง", move:"ยากลำบาก", icon:swampIcon},
+  {name:"ทะเลสาบ", move:"ผ่านไม่ได้", icon:lakeIcon}
+];
+function grpTerrain(sum){ if(sum<=3) return 0; if(sum===4) return 1; if(sum===5) return 2; if(sum===6) return 3; if(sum===7) return 4; if(sum===8) return 5; if(sum===9) return 6; if(sum===10) return 7; return 8; }
+
+function rollWorldTerrain(){
+  const a=rollDie(6), b=rollDie(6), sum=a+b, g=grpTerrain(sum);
+  const t=TERRAIN_DATA[g];
+  const hexD=hexPathD(130,130,108);
+  const svg=`<svg width="230" height="230" viewBox="0 0 260 260" xmlns="http://www.w3.org/2000/svg">
+    <defs><clipPath id="hexClip"><path d="${hexD}"/></clipPath></defs>
+    <path d="${hexD}" fill="${FLOOR}" stroke="#9C7A32" stroke-width="4"/>
+    <g clip-path="url(#hexClip)">${t.icon()}</g>
+    <path d="${hexD}" fill="none" stroke="#9C7A32" stroke-width="4"/>
+  </svg>`;
+  const wrap=document.getElementById('worldTerrainWrap');
+  wrap.classList.remove('show'); wrap.innerHTML=svg;
+  requestAnimationFrame(()=>wrap.classList.add('show'));
+  let html = `<div class="name">${t.name}</div><div class="subroll">2d6=${a}+${b}=${sum} · การเคลื่อนที่: ${t.move}</div>`;
+  if(g===8){ const river=rollDie(10); html += `<div class="subroll">อาจมีแม่น้ำ: d10=${river} → ลากแม่น้ำยาว ${river} ช่องเฮกซ์ตามแนวเฮกซ์ที่ยังไม่สำรวจ (ถ้าไม่มีเฮกซ์เหลือ ก็เป็นแค่ทะเลสาบเฉยๆ)</div>`; }
+  document.getElementById('worldTerrainResult').innerHTML = html;
+}
+</script>
+</body>
+</html>
