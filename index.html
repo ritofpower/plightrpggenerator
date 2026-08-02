@@ -5514,7 +5514,8 @@ function rollWorldTerrain(){
   text-align:left; -webkit-text-size-adjust:100%;
 }
 #jr-root *,#jr-bar *{box-sizing:border-box}
-:root{--jr-navpad:78px; --jr-barh:112px; --jr-kb:0px}
+:root{--jr-navtop:74px; --jr-dockh:0px; --jr-navpad:78px;
+       --jr-barh:112px; --jr-kb:0px}
 
 #jr-root{                                    /* ชั้นล่างสุด — บันทึก */
   top:0; bottom:calc(var(--jr-barh) + var(--jr-kb)); z-index:100;
@@ -5546,18 +5547,26 @@ function rollWorldTerrain(){
 /* แถบทอยเต๋าลอยของแอปเดิม (.dice-dock, bottom:15px) นั่งทับแถบเขียนพอดี
    ยกขึ้นไปลอยเหนือแถบเขียนแทน — override ด้วยลำดับ ไม่ต้องใช้ !important
    และมีผลเฉพาะตอนอยู่ในหน้าเล่นเกม จึงไม่กระทบหน้าเลือกตัวละคร          */
+/* แถบทอยเต๋าลอย (.dice-dock) เดิมอยู่ bottom:15px → บังทั้งช่องพิมพ์และ
+   บันทึกแถวล่าง ย้ายขึ้นไปพักใต้แถบแท็บด้านบน (นาน ๆ ใช้ที)
+   override ด้วยลำดับของ stylesheet ไม่ต้องใช้ !important                */
 body.jr-live .dice-dock{
-  bottom:calc(var(--jr-barh) + var(--jr-kb) + 12px);
-  transition:bottom .2s ease;
+  top:var(--jr-navtop); bottom:auto;
 }
-/* ลิ้นชักเปิด → มีคานปิดเพิ่มมา 38px ดันแถบเต๋าขึ้นอีกชั้น ไม่ให้บังปุ่มปิด */
-body.jr-live.jr-drawer .dice-dock{
-  bottom:calc(var(--jr-barh) + var(--jr-kb) + 50px);
+/* toast เดิมโผล่มุมขวาบน → ย้ายมาอยู่ใต้แถบเต๋าพอดี */
+body.jr-live #toastContainer{
+  top:calc(var(--jr-navtop) + var(--jr-dockh) + 8px);
+  left:50%; right:auto; transform:translateX(-50%);
+  width:calc(100% - 24px); max-width:420px; align-items:center;
 }
 
 /* ลิ้นชัก : ตัวเนื้อเลื่อนเอง + คานปิดที่ขอบล่าง */
 #jr-panel .jr-pbody{
-  flex:1 1 auto; min-height:0; overflow-y:auto; -webkit-overflow-scrolling:touch;
+  /* ⚠️ แอปหลักไม่มี `*{box-sizing:border-box}` ถ้าไม่ระบุตรงนี้
+     width:100% + padding 15px จะดันเนื้อหาล้นขอบขวา 30px            */
+  box-sizing:border-box;
+  flex:1 1 auto; min-height:0; overflow-y:auto; overflow-x:hidden;
+  -webkit-overflow-scrolling:touch;
   width:100%; max-width:680px; margin:0 auto;
   padding:var(--jr-navpad) 15px 18px;
 }
@@ -5700,6 +5709,9 @@ const CFG = {
   gameScreenId: 'gameScreen',
   oracleRootId: 'oracleTab',
   navSel      : '.tab-nav',
+  dockSel     : '.dice-dock',
+  toastMs     : 5000,
+  toastDedupe : 400,
   maxSysLen   : 240,
   maxPending  : 3,
   armDelay    : 800
@@ -5981,7 +5993,39 @@ function acceptPending(i) {
 }
 function dropPending(i) { pending.splice(i, 1); renderTray(); }
 
-let unpatchLog = null, observer = null;
+let unpatchLog = null, unpatchToast = null, observer = null;
+
+/* ── แทน showToast จากภายนอก (ไม่แก้ของเดิม · unhook() คืนสภาพได้) ──
+   เหตุผล 2 ข้อ
+   1. rollCustomDice() เรียก showToast() แล้วเรียก log() ซึ่งข้างในเรียก
+      showToast() อีกรอบ → popup เด้งซ้อน 2 อัน แก้ด้วยการกันข้อความซ้ำ
+      ภายในช่วงสั้น ๆ (เทียบหลังถอด HTML tag ออก จึงจับได้ทั้งที่ markup ต่างกัน)
+   2. ของเดิมตั้งไว้ 3 วิ — ยืดเป็น 5 วิตามที่ต้องการ                        */
+function hookToast() {
+  if (unpatchToast) return;
+  const orig = window.showToast;
+  let lastKey = '', lastAt = 0;
+  window.showToast = function (msg) {
+    const key = String(msg || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+    const now = Date.now();
+    if (key && key === lastKey && now - lastAt < CFG.toastDedupe) return;
+    lastKey = key; lastAt = now;
+
+    const c = document.getElementById('toastContainer');
+    if (!c) { if (typeof orig === 'function') return orig.apply(this, arguments); return; }
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.innerHTML = msg;
+    c.appendChild(t);
+    setTimeout(() => {
+      t.style.transition = 'all .3s';
+      t.style.opacity = '0';
+      t.style.transform = 'translateY(-12px)';
+      setTimeout(() => t.remove(), 320);
+    }, CFG.toastMs);
+  };
+  unpatchToast = () => { window.showToast = orig; unpatchToast = null; };
+}
 
 function hookLog() {
   if (unpatchLog || typeof window.log !== 'function') return;
@@ -6080,7 +6124,6 @@ function openPanel(id) {
   ui.tab = id; ui.panelOpen = true;
   showTab(id);
   $panel.classList.add('jr-open');
-  document.body.classList.add('jr-drawer');
   const pb = $panel.querySelector('.jr-pbody');
   if (pb) pb.scrollTop = 0;
 }
@@ -6088,7 +6131,6 @@ function openPanel(id) {
 function closePanel() {
   ui.panelOpen = false;
   $panel.classList.remove('jr-open');
-  document.body.classList.remove('jr-drawer');
   document.querySelectorAll('.tab-btn').forEach(b => {
     b.classList.toggle('active',
       (b.getAttribute('onclick') || '').indexOf(CFG.tabId) >= 0);
@@ -6119,13 +6161,18 @@ function syncScreen() {
 /* ══════ [11] วัดขนาด + คีย์บอร์ด ════════════════════════════════ */
 const setVar = (k, v) => document.documentElement.style.setProperty(k, v);
 
+/** วัดแถบแท็บลอย + แถบเต๋า แล้วเว้นที่ให้เนื้อหาเริ่มใต้ทั้งสองอัน */
 function fitNav() {
-  let pad = 78;
+  let top = 74, dock = 0;
   try {
     const nav = document.querySelector(CFG.navSel);
-    if (nav) { const r = nav.getBoundingClientRect(); if (r.height) pad = Math.round(r.bottom + 10); }
+    if (nav) { const r = nav.getBoundingClientRect(); if (r.height) top = Math.round(r.bottom + 8); }
+    const dk = document.querySelector(CFG.dockSel);
+    if (dk) dock = Math.round(dk.getBoundingClientRect().height) || 0;
   } catch (e) {}
-  setVar('--jr-navpad', pad + 'px');
+  setVar('--jr-navtop', top + 'px');
+  setVar('--jr-dockh',  dock + 'px');
+  setVar('--jr-navpad', (top + dock + 10) + 'px');
 }
 
 function measureBar() {
@@ -6220,7 +6267,7 @@ function init() {
   $speaker = $bar.querySelector('.jr-speaker');
   bindUI();
   fitNav(); measureBar(); render(true);
-  hookLog(); hookOracle(); hookTabs();
+  hookLog(); hookToast(); hookOracle(); hookTabs();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -6248,6 +6295,7 @@ const API = {
   wipeAll() { Store.keys().filter(k => k.indexOf(CFG.storePrefix)===0).forEach(Store.drop); },
   unhook()  {
     if (unpatchLog) unpatchLog();
+    if (unpatchToast) unpatchToast();
     if (unpatchTab) unpatchTab();
     if (observer) { observer.disconnect(); observer = null; }
   }
