@@ -5448,14 +5448,20 @@ function rollWorldTerrain(){
 
 <!--
 ╔══════════════════════════════════════════════════════════════════════════╗
-║   JOURNAL MODULE v1.2  —  START                                          ║
+║   JOURNAL MODULE v1.3  —  START                                          ║
 ║   ────────────────────────────────────────────────────────────────────   ║
 ║   MANIFEST                                                               ║
 ║   ‣ บันทึกเป็นชั้นล่างสุดตลอดเวลา · แท็บเดิมกลายเป็นลิ้นชักเลื่อนลงมาทับ  ║
 ║   ‣ แถบเขียน (ถาดรอ + ช่องพิมพ์) ลอยอยู่บนสุด ไม่ถูกลิ้นชักปิด            ║
 ║   ‣ เป็นเจ้าของแต่เพียงผู้เดียว :                                         ║
 ║        window.JRNL · CSS `.jr-` `#jr-root` `#jr-panel` `#jr-bar`         ║
-║        <style id="jr-styles"> · localStorage 'plight_journal_v1::<id>'   ║
+║        <style id="jr-styles"> · #jr-worldScreen · #jr-worldBar          ║
+║        localStorage 'plight_journal_v1::<charId>' · 'plight_world_v1'    ║
+║                                                                          ║
+║   ชั้นโลก [14] : 🌍 โลก (entities ใช้ร่วม) → 🧍 ตัวละคร (journal) → เกม  ║
+║     ⚠️ ห้ามแตะ characterList / CHAR_LIST_STORAGE_KEY เด็ดขาด            ║
+║        saveAllCharactersToStorage() เขียนทับทั้งก้อน — ถ้ากรอง array     ║
+║        ตัวละครโลกอื่นจะหายถาวร จึงเก็บ mapping ข้างนอกแล้วซ่อนที่ DOM     ║
 ║                                                                          ║
 ║   TOUCH LIST — จุดที่แตะโค้ดเดิม (2 จุด · ไม่แก้ฟังก์ชันเดิมสักบรรทัด)    ║
 ║     1. ปุ่มแท็บ 📓 ใน .tab-nav                            — 1 บรรทัด      ║
@@ -5597,6 +5603,25 @@ body.jr-live #toastContainer{
 #jr-panel .jr-pclose:hover{filter:none}
 #jr-panel .jr-pclose:active{transform:none;background:var(--jr-bg)}
 
+
+/* ══ [8] ชั้นโลก — ยืม .card/.char-card ของแอปเดิมเพื่อให้หน้าตากลมกลืน ══ */
+#jr-worldBar{
+  display:flex; align-items:center; gap:10px; flex-wrap:wrap;
+  margin-bottom:14px; padding:9px 12px;
+  background:var(--bg-color,#12131C); border:1px solid var(--border-color,#2F3346);
+  border-radius:10px; font-size:.85rem; color:var(--text-muted,#8E94A5);
+}
+#jr-worldBar b{color:var(--accent-gold,#E5A93C);font-size:.95rem}
+#jr-worldBar .jr-wbtn{
+  width:auto; margin-left:auto; padding:5px 12px; font-size:.75rem;
+  background:transparent; border:1px solid var(--border-color,#2F3346);
+  border-radius:20px; color:var(--text-muted,#8E94A5); font-weight:400;
+}
+#jr-worldBar .jr-wbtn:active{background:var(--card-bg,#1E202D);transform:none}
+#jr-worldList .jr-wmeta{font-size:.78rem;color:var(--text-muted,#8E94A5);margin-top:3px}
+#jr-worldList .char-card-actions button{font-size:.8rem}
+#jr-worldEmpty{text-align:center;padding:20px;color:var(--text-muted,#8E94A5);font-size:.85rem}
+
 /* ══ [2] หัวบันทึก ════════════════════════════════════════════════ */
 .jr-scope .jr-top{
   flex:0 0 auto; display:flex; align-items:center; gap:10px;
@@ -5732,7 +5757,8 @@ const CFG = {
   toastDedupe : 400,
   maxSysLen   : 240,
   maxPending  : 3,
-  armDelay    : 800
+  armDelay    : 800,
+  alwaysAskWorld: false   // true = ให้เลือกโลกใหม่ทุกครั้งที่เปิดแอป
 };
 
 /* ══════ [2] BRIDGE ◄── จุดเดียวที่คุยกับแอปเดิม ═════════════════ */
@@ -6286,6 +6312,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
+  bootWorld();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -6296,11 +6323,317 @@ function init() {
   syncScreen();
 }
 
+
+/* ══════ [14] WORLD LAYER ═══════════════════════════════════════
+   โครง 3 ชั้น :  🌍 โลก (entities ใช้ร่วม) → 🧍 ตัวละคร (journal) → เกม
+
+   ⚠️ กฎเหล็ก : ห้ามแตะ characterList หรือ CHAR_LIST_STORAGE_KEY เด็ดขาด
+   เพราะ saveAllCharactersToStorage() เขียนทับทั้งก้อน ถ้าเรากรอง array
+   ให้เหลือเฉพาะโลกปัจจุบัน ตัวละครโลกอื่นจะหายถาวรตอนแอปเซฟครั้งถัดไป
+   → จึงเก็บ mapping charId→worldId ไว้ข้างนอก แล้ว "ซ่อนการ์ดที่ DOM" แทน
+   ═══════════════════════════════════════════════════════════════ */
+const WKEY  = 'plight_world_v1';
+const WSCRN = 'jr-worldScreen';
+
+let world = { v: 1, worlds: [], charWorld: {}, current: null };
+let unpatchWorld = null;
+
+const wUid = () => 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+function loadWorld() {
+  try {
+    const raw = Store.read(WKEY);
+    if (raw) {
+      const p = JSON.parse(raw);
+      if (p && Array.isArray(p.worlds)) world = Object.assign(world, p);
+    }
+  } catch (e) { console.warn('[JRNL] โหลดข้อมูลโลกไม่สำเร็จ', e); }
+
+  /* ── migrate: ต้องมีอย่างน้อย 1 โลกเสมอ ── */
+  if (!world.worlds.length)
+    world.worlds.push({ id: wUid(), name: 'โลกแรก', born: Date.now() });
+
+  /* ── ตัวละครเก่าที่ยังไม่มีสังกัด → ยัดเข้าโลกแรก (ไม่มีอะไรหาย) ── */
+  migrateUnmapped();
+
+  /* โลกที่เลือกไว้ล่าสุดไม่มีอยู่แล้ว → บังคับเลือกใหม่
+     ถ้าอยากให้ถามทุกครั้งที่เปิดแอป ตั้ง CFG.alwaysAskWorld = true */
+  if (!world.current || !world.worlds.some(w => w.id === world.current) || CFG.alwaysAskWorld)
+    world.current = null;
+  saveWorld();
+}
+
+function saveWorld() { Store.write(WKEY, JSON.stringify(world)); }
+
+/** อ่านรายชื่อตัวละครแบบอ่านอย่างเดียว — ไม่แก้ ไม่เขียนกลับ
+    ⚠️ แอปเรียก loadAllCharactersFromStorage() ตอน window.onload ซึ่งมาทีหลัง
+       DOMContentLoaded ที่โมดูลนี้ init → ตอน migrate อาจเห็น array ว่าง
+       จึงอ่านจาก storage ตรง ๆ เป็นตัวสำรอง (อ่านอย่างเดียว ไม่เขียนทับ)      */
+function allChars() {
+  try { if (Array.isArray(characterList) && characterList.length) return characterList; } catch (e) {}
+  try {
+    const raw = localStorage.getItem('plight_characters_list_v3');
+    const p = raw ? JSON.parse(raw) : [];
+    return Array.isArray(p) ? p : [];
+  } catch (e) { return []; }
+}
+
+/** ตาข่ายกันตก : ตัวละครที่ยังไม่มีสังกัด → โลกแรกเสมอ
+    กันไม่ให้มีตัวละครที่มองไม่เห็นในโลกไหนเลย                              */
+function migrateUnmapped() {
+  if (!world.worlds.length) return;
+  const first = world.worlds[0].id;
+  let changed = false;
+  allChars().forEach(c => {
+    if (!world.charWorld[c.id]) { world.charWorld[c.id] = first; changed = true; }
+  });
+  if (changed) saveWorld();
+}
+const worldOf   = id => world.charWorld[id] || null;
+const worldName = id => (world.worlds.find(w => w.id === id) || {}).name || '—';
+const countIn   = id => allChars().filter(c => worldOf(c.id) === id).length;
+
+/* ── จอเลือกโลก : สร้างตอน runtime ไม่แตะ HTML เดิม ─────────────── */
+function buildWorldScreen() {
+  if (document.getElementById(WSCRN)) return;
+  const host = document.querySelector('.container') || document.body;
+  const el = document.createElement('div');
+  el.id = WSCRN;
+  el.className = 'app-screen';
+  el.innerHTML =
+    '<h2>🌍 เลือกโลก</h2>' +
+    '<div class="card">' +
+      '<h3>🗺️ โลกของคุณ</h3>' +
+      '<p style="font-size:.85rem;color:var(--text-muted);text-align:center;margin-bottom:15px;">' +
+        'แต่ละโลกมี NPC สถานที่ และกลุ่มอำนาจเป็นของตัวเอง<br>' +
+        'ตัวละครในโลกเดียวกันใช้ข้อมูลชุดเดียวกัน</p>' +
+      '<button class="btn-green" style="margin-bottom:15px" data-w="new">➕ สร้างโลกใหม่</button>' +
+      '<div id="jr-worldList" class="char-card-list"></div>' +
+    '</div>';
+  host.appendChild(el);
+  el.addEventListener('click', onWorldClick);
+}
+
+function renderWorlds() {
+  const box = document.getElementById('jr-worldList');
+  if (!box) return;
+  box.innerHTML = world.worlds.map(w => {
+    const n = countIn(w.id);
+    return '<div class="char-card">' + worldCard(w, n) + '</div>';
+  }).join('') || '<div id="jr-worldEmpty">ยังไม่มีโลก กดปุ่มด้านบนเพื่อสร้าง</div>';
+}
+
+function worldCard(w, n) {
+  return '<div class="char-card-info">' +
+           '<h4>' + esc(w.name) + '</h4>' +
+           '<div class="jr-wmeta">' + (n ? n + ' ตัวละคร' : 'ยังไม่มีตัวละคร') + '</div>' +
+         '</div>' +
+         '<div class="char-card-actions">' +
+           '<button class="btn-green" data-w="enter" data-id="' + w.id + '">เข้าโลก</button>' +
+           '<button data-w="rename" data-id="' + w.id + '">✏️</button>' +
+           '<button class="btn-red" data-w="del" data-id="' + w.id + '">🗑️</button>' +
+         '</div>';
+}
+
+function onWorldClick(ev) {
+  const b = ev.target.closest('[data-w]'); if (!b) return;
+  const id = b.dataset.id;
+  switch (b.dataset.w) {
+    case 'new': {
+      const n = prompt('ตั้งชื่อโลกใหม่', 'โลกที่ ' + (world.worlds.length + 1));
+      if (n === null) return;
+      world.worlds.push({ id: wUid(), name: (n || 'ไม่มีชื่อ').trim(), born: Date.now() });
+      saveWorld(); renderWorlds();
+      break;
+    }
+    case 'enter':  enterWorld(id); break;
+    case 'rename': {
+      const w = world.worlds.find(x => x.id === id); if (!w) return;
+      const n = prompt('เปลี่ยนชื่อโลก', w.name);
+      if (n === null) return;
+      w.name = (n || w.name).trim(); saveWorld(); renderWorlds();
+      break;
+    }
+    case 'del': deleteWorld(id); break;
+  }
+}
+
+function deleteWorld(id) {
+  if (world.worlds.length <= 1) { alert('ต้องเหลือโลกไว้อย่างน้อย 1 โลก'); return; }
+  const n = countIn(id);
+  const fallback = world.worlds.find(w => w.id !== id).id;
+  const msg = n
+    ? 'ลบโลก "' + worldName(id) + '"?\n\nตัวละคร ' + n + ' ตัวจะย้ายไปโลก "' +
+      worldName(fallback) + '" (ไม่มีตัวละครถูกลบ)'
+    : 'ลบโลก "' + worldName(id) + '"?';
+  if (!confirm(msg)) return;
+
+  /* ย้ายสังกัด ไม่ลบตัวละคร */
+  Object.keys(world.charWorld).forEach(cid => {
+    if (world.charWorld[cid] === id) world.charWorld[cid] = fallback;
+  });
+  world.worlds = world.worlds.filter(w => w.id !== id);
+  if (world.current === id) world.current = null;
+  saveWorld(); renderWorlds();
+}
+
+function showWorldScreen() {
+  buildWorldScreen();
+  document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(WSCRN);
+  if (el) el.classList.add('active');
+  renderWorlds();
+  syncScreen();
+}
+
+function enterWorld(id) {
+  if (!world.worlds.some(w => w.id === id)) return;
+  world.current = id; saveWorld();
+  try { goToSelectScreen(); } catch (e) {
+    document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
+    const sc = document.getElementById('selectScreen');
+    if (sc) sc.classList.add('active');
+    filterCharCards();
+  }
+}
+
+/* ── แถบบอกโลกบนจอรายชื่อตัวละคร ───────────────────────────────── */
+function ensureWorldBar() {
+  const sc = document.getElementById('selectScreen');
+  if (!sc) return null;
+  let bar = document.getElementById('jr-worldBar');
+  if (!bar) {
+    bar = document.createElement('div');
+    bar.id = 'jr-worldBar';
+    bar.innerHTML = '<span>🌍</span><b class="nm"></b>' +
+                    '<button class="jr-wbtn" type="button">⬅️ เปลี่ยนโลก</button>';
+    bar.querySelector('.jr-wbtn').onclick = () => { world.current = null; saveWorld(); showWorldScreen(); };
+    const list = sc.querySelector('#charCardList');
+    (list ? list.parentNode : sc).insertBefore(bar, list || null);
+  }
+  bar.querySelector('.nm').textContent = worldName(world.current);
+  return bar;
+}
+
+/** ซ่อนการ์ดตัวละครที่ไม่ได้อยู่ในโลกปัจจุบัน — ไม่แตะข้อมูลใด ๆ */
+function filterCharCards() {
+  const box = document.getElementById('charCardList');
+  if (!box || !world.current) return;
+  migrateUnmapped();          // เผื่อแอปเพิ่งโหลดตัวละครเสร็จหลังเรา
+  ensureWorldBar();
+
+  let shown = 0;
+  box.querySelectorAll('.char-card').forEach(card => {
+    const btn = card.querySelector('[onclick*="goToGameScreen"]');
+    const mt  = btn && (btn.getAttribute('onclick') || '').match(/goToGameScreen\('([^']+)'\)/);
+    const cid = mt ? mt[1] : null;
+    const ok  = cid ? worldOf(cid) === world.current : true;
+    card.style.display = ok ? '' : 'none';
+    if (ok) shown++;
+  });
+
+  let empty = box.querySelector('#jr-worldEmpty');
+  if (!shown) {
+    if (!empty) {
+      empty = document.createElement('div');
+      empty.id = 'jr-worldEmpty';
+      box.appendChild(empty);
+    }
+    empty.textContent = 'โลกนี้ยังไม่มีตัวละคร กดปุ่มด้านบนเพื่อสร้าง';
+    empty.style.display = '';
+  } else if (empty) empty.style.display = 'none';
+}
+
+/* ── ห่อฟังก์ชันเดิม 4 ตัว (ไม่แก้ต้นฉบับ · unhook คืนสภาพได้) ──── */
+function hookWorld() {
+  if (unpatchWorld) return;
+  const o = {
+    render : window.renderCharacterListCard,
+    create : window.confirmCreateCharacter,
+    select : window.goToSelectScreen,
+    del    : window.deleteCharacter,
+    game   : window.goToGameScreen
+  };
+
+  if (typeof o.render === 'function')
+    window.renderCharacterListCard = function () {
+      const r = o.render.apply(this, arguments);
+      try { filterCharCards(); } catch (e) {}
+      return r;
+    };
+
+  if (typeof o.create === 'function')
+    window.confirmCreateCharacter = function () {
+      const before = allChars().map(c => c.id);
+      const r = o.create.apply(this, arguments);
+      try {
+        const fresh = allChars().filter(c => before.indexOf(c.id) < 0);
+        const w = world.current || world.worlds[0].id;
+        fresh.forEach(c => { world.charWorld[c.id] = w; });
+        if (fresh.length) saveWorld();
+      } catch (e) {}
+      return r;
+    };
+
+  if (typeof o.select === 'function')
+    window.goToSelectScreen = function () {
+      if (!world.current) { showWorldScreen(); return; }
+      const r = o.select.apply(this, arguments);
+      try { filterCharCards(); } catch (e) {}
+      return r;
+    };
+
+  if (typeof o.del === 'function')
+    window.deleteCharacter = function (id) {
+      const r = o.del.apply(this, arguments);
+      try {
+        if (id && !allChars().some(c => c.id === id)) { delete world.charWorld[id]; saveWorld(); }
+      } catch (e) {}
+      return r;
+    };
+
+  /* กันหลุด: เข้าเกมด้วยตัวละครต่างโลก → สลับโลกตาม */
+  if (typeof o.game === 'function')
+    window.goToGameScreen = function (id) {
+      try {
+        const w = worldOf(id);
+        if (w && w !== world.current) { world.current = w; saveWorld(); }
+      } catch (e) {}
+      return o.game.apply(this, arguments);
+    };
+
+  unpatchWorld = () => {
+    window.renderCharacterListCard = o.render;
+    window.confirmCreateCharacter  = o.create;
+    window.goToSelectScreen        = o.select;
+    window.deleteCharacter         = o.del;
+    window.goToGameScreen          = o.game;
+    unpatchWorld = null;
+  };
+}
+
+/** เรียกตอน init : ยังไม่เลือกโลก + อยู่จอรายชื่อ → เด้งไปจอโลกก่อน */
+function bootWorld() {
+  loadWorld();
+  buildWorldScreen();
+  hookWorld();
+  const sc = document.getElementById('selectScreen');
+  const onSelect = sc && sc.classList.contains('active');
+  if (!world.current && onSelect) showWorldScreen();
+  else if (world.current && onSelect) {
+    try { window.renderCharacterListCard(); } catch (e) { filterCharCards(); }
+  }
+}
+
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
 const API = {
   init, render, activate, addEntry, addSystemEntry, route, bridge, CFG,
   openPanel, closePanel,
   rules: { AUTO, PROMPT },
+  /* ── ชั้นโลก ── */
+  get world()   { return world; },
+  showWorldScreen, enterWorld,
+  worldOf, worldName,
   get data()    { return data; },
   get pending() { return pending; },
   get panelOpen() { return ui.panelOpen; },
@@ -6315,6 +6648,7 @@ const API = {
     if (unpatchLog) unpatchLog();
     if (unpatchToast) unpatchToast();
     if (unpatchTab) unpatchTab();
+    if (unpatchWorld) unpatchWorld();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
@@ -6329,7 +6663,7 @@ return API;
 
 <!--
 ╔══════════════════════════════════════════════════════════════════════════╗
-║   JOURNAL MODULE v1.2  —  END                                            ║
+║   JOURNAL MODULE v1.3  —  END                                            ║
 ╚══════════════════════════════════════════════════════════════════════════╝
 -->
 
