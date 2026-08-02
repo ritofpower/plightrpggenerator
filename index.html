@@ -5544,6 +5544,24 @@ function rollWorldTerrain(){
 }
 .jr-hide{display:none !important}
 
+/* ══ กันจอซูมเองบน iOS — 2 สาเหตุคนละแบบ ═════════════════════════
+   A) double-tap zoom : กดปุ่ม +/- รัว ๆ Safari ตีความเป็นแตะสองครั้ง
+      `touch-action:manipulation` ปิดเฉพาะ double-tap zoom
+      แต่ยังแตะ/เลื่อน/หนีบซูมสองนิ้วได้ตามปกติ (ไม่เสีย accessibility)
+   B) focus zoom : iOS ซูมเข้าเองทุกครั้งที่โฟกัส input ที่ font-size < 16px
+      .stepper-input ตั้ง font-size:0.85rem ไว้เป็น inline style
+      จึงต้องใช้ !important เพื่อชนะ (16px bold 3 หลัก ≈ 27px ยังพอดีช่อง 48px)
+   ทั้งสองข้ออยู่ในโมดูล ลบออกแล้วกลับเป็นเหมือนเดิมทันที              */
+button, a, label, summary, select,
+[onclick], [role="button"],
+.tab-btn, .dice-btn, .stat-btn, .cur-stepper *{
+  touch-action:manipulation;
+}
+.cur-stepper .stepper-input{ font-size:16px !important; }
+/* ช่องกรอกที่เหลือในลิ้นชักก็ยกเป็น 16px ด้วยเหตุผลเดียวกัน
+   (ค่า default ของ input คือ 13.3px → iOS ซูมทุกครั้งที่แตะพิมพ์)      */
+#jr-panel input, #jr-panel select, #jr-panel textarea{ font-size:16px; }
+
 /* แถบทอยเต๋าลอยของแอปเดิม (.dice-dock, bottom:15px) นั่งทับแถบเขียนพอดี
    ยกขึ้นไปลอยเหนือแถบเขียนแทน — override ด้วยลำดับ ไม่ต้องใช้ !important
    และมีผลเฉพาะตอนอยู่ในหน้าเล่นเกม จึงไม่กระทบหน้าเลือกตัวละคร          */
