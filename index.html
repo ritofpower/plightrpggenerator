@@ -5622,6 +5622,204 @@ body.jr-live #toastContainer{
 #jr-worldList .char-card-actions button{font-size:.8rem}
 #jr-worldEmpty{text-align:center;padding:20px;color:var(--text-muted,#8E94A5);font-size:.85rem}
 
+
+/* ══ [9] ENTITY — ชิปในบันทึก + แผ่นเลือก + แผ่นข้อมูล ══════════ */
+.jr-scope .jr-ent{
+  color:var(--jr-light); border-bottom:1px dotted currentColor;
+  padding:0 1px; cursor:pointer;
+}
+.jr-scope .jr-ent::before{font-size:.8em;opacity:.75;margin-right:2px}
+.jr-scope .jr-ent[data-t="npc"]::before    {content:"👤"}
+.jr-scope .jr-ent[data-t="place"]  {color:#6FBF8B}
+.jr-scope .jr-ent[data-t="place"]::before  {content:"📍"}
+.jr-scope .jr-ent[data-t="faction"]{color:#B58BD9}
+.jr-scope .jr-ent[data-t="faction"]::before{content:"⚑"}
+.jr-scope .jr-ent.gone{color:var(--jr-faint);border-bottom-style:none;font-style:italic}
+.jr-scope .jr-chip.jr-link{
+  border-style:dashed; border-color:color-mix(in srgb,var(--jr-light) 45%,transparent);
+  color:var(--jr-light);
+}
+
+/* แถวแนะนำลิงก์ + ปุ่มเก็บ entity ในถาดรอ */
+.jr-scope .jr-sug{
+  display:flex; align-items:center; gap:8px; margin:-3px 0 11px 15px;
+  padding:6px 10px; border-radius:9px; font-size:.73rem;
+  background:color-mix(in srgb,var(--jr-light) 8%,transparent);
+  border:1px dashed color-mix(in srgb,var(--jr-light) 35%,transparent);
+  color:var(--jr-dim);
+}
+.jr-scope .jr-sug .tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr-scope .jr-sug .ok{color:var(--jr-light);font-weight:700;font-size:.73rem;padding:2px 4px}
+.jr-scope .jr-sug .no{color:var(--jr-faint);font-size:.78rem;padding:2px 5px}
+.jr-scope .jr-pend .ent{
+  flex:0 0 auto; color:var(--jr-light); font-size:.74rem; font-weight:700;
+  border:1px solid color-mix(in srgb,var(--jr-light) 45%,transparent);
+  border-radius:14px; padding:1px 8px;
+}
+
+/* แผ่นเลือก entity — ยกให้พ้นคีย์บอร์ดด้วย --jr-kb */
+.jr-sheet .jr-sheet-in{margin-bottom:var(--jr-kb,0px)}
+.jr-pick .jr-sheet-in, .jr-entsheet .jr-sheet-in{max-height:82vh;overflow-y:auto}
+.jr-pick .jr-pq{
+  width:100%; padding:11px 13px; margin-bottom:9px; font-size:16px;
+  background:var(--bg-color,#12131C); border:1px solid var(--border-color,#2F3346);
+  border-radius:10px; color:var(--text-main,#E0E2EC);
+}
+.jr-pick .jr-pq:focus{outline:none;border-color:var(--accent-gold,#E5A93C)}
+.jr-pick .jr-ptabs{display:flex;gap:6px;margin-bottom:9px;overflow-x:auto;scrollbar-width:none}
+.jr-pick .jr-ptabs::-webkit-scrollbar{display:none}
+.jr-pick .jr-ptabs button{
+  width:auto; flex:0 0 auto; padding:5px 12px; font-size:.76rem; font-weight:400;
+  background:transparent; border:1px solid var(--border-color,#2F3346);
+  border-radius:20px; color:var(--text-muted,#8E94A5);
+}
+.jr-pick .jr-ptabs button.on{
+  background:var(--accent-gold,#E5A93C); border-color:var(--accent-gold,#E5A93C);
+  color:#12131C; font-weight:700;
+}
+.jr-pick .jr-plist{max-height:44vh;overflow-y:auto}
+.jr-pick .jr-prow{
+  display:flex; align-items:center; gap:10px; width:100%; text-align:left;
+  padding:11px 12px; border-radius:10px; font-size:.9rem; font-weight:400;
+  background:none; border:none; color:var(--text-main,#E0E2EC);
+}
+.jr-pick .jr-prow:active{background:var(--bg-color,#12131C);transform:none}
+.jr-pick .jr-prow .nm{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr-pick .jr-prow .ty{font-size:.7rem;color:var(--text-muted,#8E94A5)}
+.jr-pick .jr-prow{padding-right:4px}
+.jr-pick .jr-prow .info{
+  flex:0 0 auto;width:46px;align-self:stretch;min-height:44px;
+  display:flex;align-items:center;justify-content:center;
+  border-radius:10px;font-size:1rem;
+  background:var(--card-bg,#1E202D);border:1px solid var(--border-color,#2F3346);
+}
+.jr-pick .jr-prow .info:active{
+  background:var(--accent-gold,#E5A93C);border-color:var(--accent-gold,#E5A93C);
+}
+.jr-pick .jr-phint{
+  flex:0 0 auto;align-self:center;font-size:.62rem;color:#4C5666;padding-left:4px;
+}
+.jr-pick .jr-pgrp{
+  display:flex;align-items:center;gap:7px;font-size:.68rem;letter-spacing:.05em;
+  color:var(--text-muted,#8E94A5);padding:11px 12px 4px;margin-top:3px;
+  border-top:1px solid var(--border-color,#2F3346);
+}
+.jr-pick .jr-pgrp:first-child{border-top:none;margin-top:0;padding-top:3px}
+.jr-pick .jr-pgrp .c{
+  font-size:.62rem;padding:0 6px;border-radius:9px;
+  background:var(--border-color,#2F3346);color:var(--text-muted,#8E94A5);
+}
+.jr-pick .jr-prow .fresh{
+  flex:0 0 auto;font-size:.62rem;letter-spacing:.05em;padding:1px 7px;border-radius:10px;
+  background:color-mix(in srgb,var(--accent-gold,#E5A93C) 20%,transparent);
+  color:var(--accent-gold,#E5A93C);
+}
+.jr-pick .jr-ptitle{font-size:.8rem;color:var(--accent-gold,#E5A93C);
+  font-weight:700;padding:2px 4px 9px}
+.jr-pick .jr-prow.new{color:var(--accent-gold,#E5A93C)}
+.jr-pick .jr-pnew{
+  font-size:.72rem;color:var(--text-muted,#8E94A5);
+  padding:9px 12px 3px;border-top:1px solid var(--border-color,#2F3346);margin-top:5px;
+}
+.jr-pick .jr-pcancel{margin-top:5px;color:var(--text-muted,#8E94A5)}
+.jr-pempty{text-align:center;padding:24px 14px;color:#5A6073;font-size:.83rem}
+
+/* แผ่นข้อมูล entity */
+.jr-entsheet .jr-ehead{display:flex;align-items:center;gap:11px;padding:4px 12px 12px}
+.jr-entsheet .jr-ehead .ic{font-size:1.5rem}
+.jr-entsheet .jr-ehead b{display:block;font-size:1.05rem;color:var(--accent-gold,#E5A93C)}
+.jr-entsheet .jr-ehead .ty{font-size:.72rem;color:var(--text-muted,#8E94A5)}
+.jr-entsheet .jr-enotes{
+  width:100%; min-height:62px; padding:10px 12px; font-size:16px; line-height:1.5;
+  background:var(--bg-color,#12131C); border:1px solid var(--border-color,#2F3346);
+  border-radius:10px; color:var(--text-main,#E0E2EC); resize:vertical;
+  font-family:inherit; box-sizing:border-box;
+}
+.jr-entsheet .jr-fields{
+  border:1px solid var(--border-color,#2F3346); border-radius:12px;
+  overflow:hidden; margin:2px 0 4px;
+}
+.jr-entsheet .jr-frow{
+  display:flex; align-items:flex-start; gap:9px; padding:8px 11px;
+  border-bottom:1px solid var(--border-color,#2F3346);
+}
+.jr-entsheet .jr-frow:last-child{border-bottom:none}
+.jr-entsheet .jr-frow .lb{
+  flex:0 0 84px; padding-top:7px; font-size:.72rem; line-height:1.3;
+  color:var(--text-muted,#8E94A5);
+}
+.jr-entsheet .jr-frow .fv{
+  flex:1; min-width:0; width:auto; padding:5px 8px; font-size:15px; line-height:1.45;
+  background:var(--bg-color,#12131C); border:1px solid transparent; border-radius:8px;
+  color:var(--text-main,#E0E2EC); resize:none; overflow:hidden; font-family:inherit;
+  box-sizing:border-box;
+}
+.jr-entsheet .jr-frow .fv:focus{outline:none;border-color:var(--accent-gold,#E5A93C)}
+.jr-entsheet .jr-frow .fv::placeholder{color:#4C5666}
+.jr-entsheet .jr-frow .dice{
+  flex:0 0 auto; width:32px; height:32px; margin-top:1px; border-radius:8px;
+  background:var(--border-color,#2F3346); color:var(--text-main,#E0E2EC);
+  font-size:.9rem; text-align:center; padding:0; font-weight:400;
+}
+.jr-entsheet .jr-frow .dice:active{
+  background:var(--accent-gold,#E5A93C); color:#12131C; transform:none;
+}
+.jr-entsheet .jr-rels{margin-top:8px}
+.jr-entsheet .jr-frow .rel{
+  flex:1; min-width:0; width:auto; text-align:left; padding:7px 9px;
+  font-size:.9rem; font-weight:400; border-radius:8px;
+  background:var(--bg-color,#12131C); border:1px solid transparent;
+  color:var(--text-main,#E0E2EC);
+}
+.jr-entsheet .jr-frow .rel.none{color:#4C5666}
+.jr-entsheet .jr-frow .rel:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-entsheet .jr-memlist{display:flex;flex-wrap:wrap;gap:6px;padding:2px 2px 4px}
+.jr-entsheet .jr-mem{
+  width:auto;flex:0 0 auto;display:flex;align-items:center;gap:6px;
+  padding:6px 11px;font-size:.8rem;font-weight:400;border-radius:20px;
+  background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
+  color:var(--text-main,#E0E2EC);
+}
+.jr-entsheet .jr-mem .r{font-size:.68rem;color:var(--text-muted,#8E94A5)}
+.jr-entsheet .jr-mem:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-affpick .jr-arow{
+  display:flex;align-items:center;width:100%;text-align:left;
+  padding:14px;font-size:.95rem;font-weight:400;border-radius:10px;
+  background:none;border:none;color:var(--text-main,#E0E2EC);
+}
+.jr-affpick .jr-arow .ar{margin-left:auto;color:var(--text-muted,#8E94A5)}
+.jr-affpick .jr-arow:active{background:var(--bg-color,#12131C);transform:none}
+.jr-affpick hr{border:none;border-top:1px solid var(--border-color,#2F3346);margin:5px 0}
+.jr-entsheet .jr-nhead{
+  font-size:.72rem; color:var(--text-muted,#8E94A5); letter-spacing:.06em;
+  padding:13px 2px 5px;
+}
+.jr-entsheet .jr-enotes{min-height:70px}
+.jr-entsheet .jr-blhead{
+  font-size:.72rem;color:var(--text-muted,#8E94A5);letter-spacing:.06em;
+  padding:14px 12px 6px;
+}
+.jr-entsheet .jr-bllist{max-height:38vh;overflow-y:auto}
+.jr-entsheet .jr-blowner{
+  font-size:.7rem;color:#5A6073;padding:9px 12px 3px;
+  border-top:1px solid var(--border-color,#2F3346);margin-top:6px;
+}
+.jr-entsheet .jr-bl{
+  display:block;width:100%;text-align:left;padding:8px 12px;font-weight:400;
+  border:none;border-left:2px solid var(--border-color,#2F3346);border-radius:0 8px 8px 0;
+  margin:0 0 7px 12px;background:none;color:var(--text-main,#E0E2EC);
+}
+.jr-entsheet .jr-bl.go:active{background:var(--bg-color,#12131C);transform:none}
+.jr-entsheet .jr-bl.go{border-left-color:color-mix(in srgb,var(--accent-gold,#E5A93C) 55%,transparent)}
+.jr-entsheet .jr-bl .d{
+  font-size:.68rem;color:#5A6073;display:flex;align-items:center;gap:6px;margin-bottom:2px;
+}
+.jr-entsheet .jr-bl .ar{margin-left:auto;color:var(--accent-gold,#E5A93C)}
+.jr-entsheet .jr-bl .tx{font-size:.85rem;line-height:1.55;white-space:pre-wrap;word-break:break-word}
+.jr-entsheet .jr-bl .jr-ent{color:var(--accent-gold,#E5A93C)}
+.jr-entsheet .jr-erow{display:flex;gap:8px}
+.jr-entsheet .jr-erow button{flex:1;text-align:center;font-size:.85rem}
+
 /* ══ [2] หัวบันทึก ════════════════════════════════════════════════ */
 .jr-scope .jr-top{
   flex:0 0 auto; display:flex; align-items:center; gap:10px;
@@ -5656,31 +5854,71 @@ body.jr-live #toastContainer{
 .jr-scope .jr-watch{display:flex;align-items:center;gap:7px;margin:16px 0 7px;
   font-size:.72rem;color:var(--jr-dim)}
 
-/* ══ [4] ENTRY — สันซ้ายคือริบบิ้นสว่าง/มืด ═══════════════════════ */
-.jr-scope .jr-e{position:relative;padding:3px 20px 3px 15px;margin:0 0 9px;
-  border-left:2px solid var(--jr-line);white-space:pre-wrap;word-break:break-word;
-  animation:jr-in .18s ease-out}
+/* ══ [4] ENTRY — บับเบิลแบบแอปแชท ═════════════════════════════ */
+.jr-scope .jr-e{display:flex;margin:0 0 8px;animation:jr-in .18s ease-out}
 @keyframes jr-in{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
 @media (prefers-reduced-motion:reduce){.jr-scope .jr-e{animation:none}}
+.jr-scope .jr-e.side-l{justify-content:flex-start}
+.jr-scope .jr-e.side-r{justify-content:flex-end}
+.jr-scope .jr-e.side-c{justify-content:center}
 
-.jr-scope .jr-e.w-light{border-left-color:color-mix(in srgb,var(--jr-light) 45%,transparent)}
-.jr-scope .jr-e.w-dark {border-left-color:color-mix(in srgb,var(--jr-dark)  50%,transparent)}
-.jr-scope .jr-e.pinned{background:linear-gradient(90deg,rgba(229,169,60,.08),transparent 62%)}
-.jr-scope .jr-e.pinned::after{content:"📌";position:absolute;right:2px;top:2px;font-size:.6rem;opacity:.75}
+.jr-scope .jr-e .bub{
+  position:relative; max-width:84%; padding:8px 13px; border-radius:16px;
+  white-space:pre-wrap; word-break:break-word; line-height:1.55;
+}
+.jr-scope .jr-e.side-l .bub{border-bottom-left-radius:5px}
+.jr-scope .jr-e.side-r .bub{border-bottom-right-radius:5px}
 
-.jr-scope .jr-e.t-speech{font-style:italic;color:#CFD6E4}
-.jr-scope .jr-e.t-speech .who{display:block;font-style:normal;font-size:.68rem;
-  letter-spacing:.07em;color:var(--jr-dim);margin-bottom:2px}
+/* เรื่องราวของผู้เล่น — ชิดขวา */
+.jr-scope .jr-e.t-note .bub{
+  background:color-mix(in srgb,var(--jr-light) 13%,var(--jr-panel));
+  color:var(--jr-text);
+}
+/* บทพูด — ซ้าย=NPC ขวา=ผู้เล่น */
+.jr-scope .jr-e.t-speech .bub{background:var(--jr-panel);color:#CFD6E4;font-style:italic}
+.jr-scope .jr-e.t-speech.mine .bub{
+  background:color-mix(in srgb,var(--jr-light) 20%,var(--jr-panel));
+}
+.jr-scope .jr-e.t-speech .who{
+  display:block;font-style:normal;font-size:.68rem;letter-spacing:.05em;
+  color:var(--jr-dim);margin-bottom:2px;
+}
+.jr-scope .jr-e.t-speech .qt::before{content:"“"}
+.jr-scope .jr-e.t-speech .qt::after{content:"”"}
 
-.jr-scope .jr-e.t-ooc{font-size:.85rem;color:var(--jr-ooc);
-  border-left-color:color-mix(in srgb,var(--jr-ooc) 55%,transparent)}
-.jr-scope .jr-e.t-ooc::before{content:"📝 ";opacity:.75}
+/* ระบบ / ผู้บรรยาย — ชิดซ้าย พื้นจาง */
+.jr-scope .jr-e.t-sys .bub{
+  background:color-mix(in srgb,var(--jr-dim) 11%,transparent);
+  color:var(--jr-dim);font-size:.8rem;border-radius:12px;
+}
+.jr-scope .jr-e.t-sys .bub::before{content:"⚙ ";opacity:.55}
 
-.jr-scope .jr-e.t-sys{font-size:.8rem;color:var(--jr-dim);border-left-style:dotted}
-.jr-scope .jr-e.t-sys::before{content:"⚙ ";opacity:.55}
-.jr-scope .jr-e .jr-expand{display:inline-block;margin-top:5px;font-size:.68rem;
-  color:var(--jr-faint);border:1px solid var(--jr-line);border-radius:20px;padding:2px 10px}
-.jr-scope .jr-e .jr-expand:active{color:var(--jr-text);border-color:var(--jr-dim)}
+/* นอกเรื่อง — กึ่งกลาง คนละสี */
+.jr-scope .jr-e.t-ooc .bub{
+  background:color-mix(in srgb,var(--jr-ooc) 15%,transparent);
+  border:1px dashed color-mix(in srgb,var(--jr-ooc) 40%,transparent);
+  color:var(--jr-ooc);font-size:.82rem;max-width:90%;text-align:center;border-radius:12px;
+}
+.jr-scope .jr-e.t-ooc .bub::before{content:"📝 ";opacity:.75}
+
+/* เวลาสว่าง/มืด — ขอบบางด้านนอกของบับเบิล */
+.jr-scope .jr-e.side-l .bub{border-left:2px solid transparent}
+.jr-scope .jr-e.side-r .bub{border-right:2px solid transparent}
+.jr-scope .jr-e.w-light.side-l .bub{border-left-color:color-mix(in srgb,var(--jr-light) 45%,transparent)}
+.jr-scope .jr-e.w-dark.side-l  .bub{border-left-color:color-mix(in srgb,var(--jr-dark) 55%,transparent)}
+.jr-scope .jr-e.w-light.side-r .bub{border-right-color:color-mix(in srgb,var(--jr-light) 45%,transparent)}
+.jr-scope .jr-e.w-dark.side-r  .bub{border-right-color:color-mix(in srgb,var(--jr-dark) 55%,transparent)}
+
+.jr-scope .jr-e.pinned .bub{box-shadow:0 0 0 1px color-mix(in srgb,var(--jr-light) 55%,transparent)}
+.jr-scope .jr-e.pinned .bub::after{
+  content:"📌";position:absolute;top:-6px;right:-4px;font-size:.62rem;
+}
+/* ไฮไลต์ตอนกระโดดมาจาก backlink */
+.jr-scope .jr-e.flash .bub{animation:jr-flash 1.6s ease-out}
+@keyframes jr-flash{
+  0%,55%{background:color-mix(in srgb,var(--jr-light) 42%,var(--jr-panel))}
+  100%{}
+}
 
 .jr-scope .jr-empty{text-align:center;padding:52px 26px;color:var(--jr-faint);
   font-size:.85rem;line-height:1.9}
@@ -5707,16 +5945,29 @@ body.jr-live #toastContainer{
   padding:5px 13px;font-size:.78rem;white-space:nowrap;transition:.13s}
 .jr-scope .jr-chip[aria-pressed="true"]{background:var(--jr-light);
   border-color:var(--jr-light);color:#12131C;font-weight:700}
-.jr-scope .jr-speaker{display:none;width:100%;margin-bottom:7px;padding:8px 12px;
+.jr-scope .jr-speakrow{display:none;gap:7px;margin-bottom:7px}
+.jr-scope .jr-speakrow.on{display:flex}
+.jr-scope .jr-speaker{flex:1;width:auto;padding:8px 12px;
   background:var(--jr-bg);border:1px solid var(--jr-line);border-radius:10px;
   color:var(--jr-text);font-size:16px}
-.jr-scope .jr-speaker.on{display:block}
+.jr-scope .jr-spick{flex:0 0 auto;width:40px;height:38px;border-radius:10px;
+  background:var(--jr-line);color:var(--jr-text);font-size:1rem;text-align:center}
+.jr-scope .jr-spick:active{background:var(--jr-light);color:#12131C}
+.jr-scope .jr-e.t-speech .who .jr-ent{font-size:.95em}
 .jr-scope .jr-row{display:flex;gap:8px;align-items:flex-end}
 .jr-scope .jr-input{flex:1;width:auto;min-height:42px;max-height:26vh;overflow-y:auto;
   padding:10px 13px;background:var(--jr-bg);border:1px solid var(--jr-line);
   border-radius:12px;color:var(--jr-text);font-size:16px;line-height:1.55}
 .jr-scope .jr-input::placeholder,.jr-scope .jr-speaker::placeholder{color:var(--jr-faint)}
 .jr-scope .jr-input:focus,.jr-scope .jr-speaker:focus{outline:none;border-color:var(--jr-dim)}
+.jr-scope .jr-pcsp{
+  flex:0 0 auto;width:38px;height:42px;border-radius:12px;font-size:1rem;
+  background:transparent;border:1px solid var(--jr-line);color:var(--jr-faint);
+  text-align:center;transition:.13s;
+}
+.jr-scope .jr-pcsp.on{
+  background:var(--jr-light);border-color:var(--jr-light);color:#12131C;
+}
 .jr-scope .jr-send{flex:0 0 auto;width:42px;height:42px;border-radius:12px;
   background:var(--jr-line);color:var(--jr-dim);font-size:1.1rem;
   text-align:center;transition:.13s}
@@ -5774,6 +6025,12 @@ const bridge = {
   },
   getCharId() {
     try { return currentActiveCharId || '_none'; } catch (e) { return '_none'; }
+  },
+  getCharName() {
+    try {
+      const c = characterList.find(x => x.id === currentActiveCharId);
+      return (c && c.name) || 'ฉัน';
+    } catch (e) { return 'ฉัน'; }
   }
 };
 
@@ -5795,7 +6052,7 @@ let armed   = false;
 let pending = [];
 let wired   = false;
 let devClock = { day: 1, watch: 0, season: 0 };
-const ui = { mode: 'note', panelOpen: false, tab: null };
+const ui = { mode: 'note', panelOpen: false, tab: null, suggest: null, speakerEnt: null, pcSpeech: false };
 
 const Store = (function () {
   let ok = true, mem = {};
@@ -5855,9 +6112,13 @@ function addEntry(type, text, speaker) {
   const c = clock();
   const e = { id: uid(), type, text,
               day: c.day, watch: c.watch, season: c.season,
-              pinned: false, refs: [], epId: null };   // refs/epId สงวนให้เฟส 2-3
+              pinned: false, refs: extractRefs(text + ' ' + (speaker || '')), epId: null };
   if (type === 'speech' && speaker) e.speaker = speaker.trim();
   data.entries.push(e);
+  if (type !== 'sys') {                      // [2e] เฉพาะข้อความที่ผู้เล่นเขียนเอง
+    const s = suggestLinks(text);
+    ui.suggest = s.length ? { id: e.id, list: s } : null;
+  }
   save(); render(true);
   return e;
 }
@@ -5887,7 +6148,7 @@ function togglePin(id) {
 }
 
 /* ══════ [7] RENDER ══════════════════════════════════════════════ */
-let $root, $panel, $bar, $stream, $input, $send, $now, $speaker, $dev, $tray;
+let $root, $panel, $bar, $stream, $input, $send, $now, $speaker, $speakRow, $pcsp, $dev, $tray;
 const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
 function render(toBottom) {
@@ -5913,6 +6174,7 @@ function render(toBottom) {
         pWatch = e.watch;
       }
       html += entryHTML(e);
+      if (ui.suggest && ui.suggest.id === e.id) html += suggestHTML();
     }
     $stream.innerHTML = html;
   }
@@ -5920,24 +6182,63 @@ function render(toBottom) {
   if (stick) $stream.scrollTop = $stream.scrollHeight;
 }
 
+/* ผังแบบแอปแชท — มองปราดเดียวรู้ว่าใครพูด
+     ระบบ (DM)      ชิดซ้าย  พื้นหลังจาง
+     บทพูด NPC      ชิดซ้าย  เหมือนแชทจากคนอื่น
+     เรื่องราว/บทพูดผู้เล่น  ชิดขวา
+     นอกเรื่อง       กึ่งกลาง คนละสี                                */
+function entrySide(e) {
+  if (e.type === 'ooc') return 'c';
+  if (e.type === 'sys') return 'l';
+  if (e.type === 'speech') return e.mine ? 'r' : 'l';
+  return 'r';                                    // note = ของผู้เล่น
+}
+
 function entryHTML(e) {
-  const cls = `jr-e t-${e.type} ${isLight(e.season,e.watch)?'w-light':'w-dark'}` +
+  const cls = `jr-e t-${e.type}${e.mine ? ' mine' : ''} side-${entrySide(e)} ` +
+              (isLight(e.season, e.watch) ? 'w-light' : 'w-dark') +
               (e.pinned ? ' pinned' : '');
-  let inner;
-  if (e.type === 'speech' && e.speaker)
-    inner = `<span class="who">${esc(e.speaker)}</span>“${esc(e.text)}”`;
-  else if (e.type === 'sys')
-    inner = esc(e.text) + `<button class="jr-expand" data-act="expand">✍️ ขยายความ</button>`;
-  else inner = esc(e.text);
-  return `<div class="${cls}" data-id="${e.id}">${inner}</div>`;
+  const tx = linkify(esc(e.text));        // ⚠️ esc ก่อน แล้วค่อย linkify เสมอ
+  let inner = '';
+  if (e.type === 'speech') {
+    if (e.speaker) inner += `<span class="who">${linkify(esc(e.speaker))}</span>`;
+    inner += `<span class="qt">${tx}</span>`;
+  } else inner = tx;
+  return `<div class="${cls}" data-id="${e.id}"><div class="bub">${inner}</div></div>`;
+}
+
+function suggestHTML() {
+  const names = ui.suggest.list
+    .map(e => ETYPE[e.type].icon + ' ' + esc(e.name)).join(' · ');
+  return '<div class="jr-sug">' +
+           '<span class="tx">🔗 พบ ' + names + '</span>' +
+           '<button class="ok" data-sug="ok">ลิงก์</button>' +
+           '<button class="no" data-sug="no">✕</button>' +
+         '</div>';
+}
+
+/** เลื่อนไปหาบันทึกที่ระบุแล้วไฮไลต์ให้เห็นว่าอยู่ตรงไหน */
+function jumpTo(entryId) {
+  if (ui.panelOpen) closePanel();
+  render();
+  requestAnimationFrame(() => {
+    const el = $stream && $stream.querySelector(`.jr-e[data-id="${entryId}"]`);
+    if (!el) { safeToast('⚠️ ไม่พบบันทึกนี้แล้ว'); return; }
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+    el.classList.add('flash');
+    setTimeout(() => el.classList.remove('flash'), 1700);
+  });
 }
 
 function renderTray() {
   if (!$tray) return;
-  $tray.innerHTML = pending.map((p, i) =>
-    `<button class="jr-pend" data-i="${i}">` +
-      `<span class="tx">${esc(p)}</span><span class="add">+ เก็บ</span>` +
-      `<span class="x" data-x="${i}">✕</span></button>`).join('');
+  $tray.innerHTML = pending.map((p, i) => {
+    const ent = (p.kind && p.name)
+      ? `<span class="ent" data-e="${i}">+ ${ETYPE[p.kind].icon}</span>` : '';
+    return `<button class="jr-pend" data-i="${i}">` +
+      `<span class="tx">${esc(p.t)}</span>${ent}` +
+      `<span class="add">+ เก็บ</span><span class="x" data-x="${i}">✕</span></button>`;
+  }).join('');
   measureBar();
 }
 
@@ -5950,18 +6251,41 @@ function updateNow() {
 }
 
 /* ══════ [8] COMPOSER ════════════════════════════════════════════ */
+/** ปุ่ม 💬 ซ้ายช่องพิมพ์ — ติ๊กแล้วข้อความนี้เป็นบทพูดของตัวเรา (ชิดขวา)
+    ใช้ครั้งเดียวแล้วปลดเอง กันลืมค้างไว้                                */
+function setPcSpeech(on) {
+  ui.pcSpeech = !!on;
+  if ($pcsp) $pcsp.classList.toggle('on', ui.pcSpeech);
+  if ($input) $input.placeholder = ui.pcSpeech ? 'ฉันพูดว่า…' : TYPE[ui.mode].ph;
+}
+
 function setMode(m) {
   ui.mode = m;
+  setPcSpeech(false);                      // เปลี่ยนโหมด = ปลดติ๊กเสมอ
   $bar.querySelectorAll('.jr-chip[data-mode]')
       .forEach(b => b.setAttribute('aria-pressed', b.dataset.mode === m));
-  $speaker.classList.toggle('on', m === 'speech');
+  if ($speakRow) $speakRow.classList.toggle('on', m === 'speech');
+  if ($pcsp) $pcsp.style.display = (m === 'note') ? '' : 'none';
   $input.placeholder = TYPE[m].ph;
   measureBar();
 }
 
+function speakerValue() {
+  const raw = $speaker.value.trim();
+  if (!raw) return '';
+  const e = ui.speakerEnt;
+  return (e && raw === e.name) ? `[[${e.type}:${e.id}]]` : raw;   // ตรงกัน = เก็บเป็นลิงก์
+}
+
 function submit() {
   if (!$input.value.trim()) return;
-  addEntry(ui.mode, $input.value, ui.mode === 'speech' ? $speaker.value : '');
+  if (ui.mode === 'note' && ui.pcSpeech) {
+    const e = addEntry('speech', $input.value, bridge.getCharName());
+    if (e) { e.mine = true; save(); render(true); }
+    setPcSpeech(false);                    // ปลดติ๊กทันทีหลังส่ง
+  } else {
+    addEntry(ui.mode, $input.value, ui.mode === 'speech' ? speakerValue() : '');
+  }
   $input.value = ''; autoGrow(); refreshSend();
 }
 function autoGrow() {
@@ -6014,30 +6338,53 @@ function clean(msg) {
   return t;
 }
 
-function route(msg) {
+/** meta = { kind, name } มาจากกล่องผล Oracle ที่สร้าง "ชื่อ" (ดู BOX_KIND) */
+function route(msg, meta) {
   if (!armed) return;
   const t = clean(msg);
   if (!t) return;
   if (AUTO.some(r => r.test(t)))   { addSystemEntry(t); return; }
-  if (PROMPT.some(r => r.test(t))) { pushPending(t);    return; }
+  if (PROMPT.some(r => r.test(t))) { pushPending(t, meta); return; }
 }
 
-function pushPending(t) {
-  if (pending[pending.length - 1] === t) return;
-  pending.push(t);
+function pushPending(t, meta) {
+  const last = pending[pending.length - 1];
+  if (last && last.t === t) return;
+  pending.push({ t, kind: meta && meta.kind, name: meta && meta.name });
   if (pending.length > CFG.maxPending) pending.shift();
   renderTray();
 }
+/** "+ เก็บ" = ลงไดอารี่ + ถ้าเป็นชื่อที่ทอยได้ ให้สร้าง entity แล้วฝังลิงก์เลย
+    (ไม่งั้นผู้เล่นต้องมาก๊อปชื่อไปลิงก์เองทีหลัง ซึ่งย้อนแย้ง)          */
 function acceptPending(i) {
-  const t = pending[i]; if (t === undefined) return;
+  const p = pending[i]; if (!p) return;
   pending.splice(i, 1); renderTray();
-  addSystemEntry(t);
+  let txt = p.t;
+  if (p.kind && p.name) {
+    const e = entCreate(p.kind, p.name);
+    if (e) txt = replaceOutsideTokens(txt, p.name, `[[${e.type}:${e.id}]]`);
+  }
+  addSystemEntry(txt);
   setMode('note');
   if ($input) $input.focus();
 }
 function dropPending(i) { pending.splice(i, 1); renderTray(); }
 
+/** [2d] เก็บชื่อที่ทอยได้เป็น entity แล้วแทรก token ให้เขียนต่อทันที */
+function entFromPending(i) {
+  const p = pending[i];
+  if (!p || !p.kind || !p.name) return;
+  const e = entCreate(p.kind, p.name);
+  pending.splice(i, 1); renderTray();
+  if (e) {
+    insertToken(e);
+    setMode('note');
+    try { showToast('✅ เพิ่ม ' + ETYPE[e.type].icon + ' ' + e.name + ' แล้ว'); } catch (err) {}
+  }
+}
+
 let unpatchLog = null, unpatchToast = null, observer = null;
+let quietToast = false, quietTimer = null;
 
 /* ── แทน showToast จากภายนอก (ไม่แก้ของเดิม · unhook() คืนสภาพได้) ──
    เหตุผล 2 ข้อ
@@ -6050,6 +6397,7 @@ function hookToast() {
   const orig = window.showToast;
   let lastKey = '', lastAt = 0;
   window.showToast = function (msg) {
+    if (quietToast) return;                    // ระหว่างสุ่มจากแผ่น entity
     const key = String(msg || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
     const now = Date.now();
     if (key && key === lastKey && now - lastAt < CFG.toastDedupe) return;
@@ -6099,7 +6447,11 @@ function hookOracle() {
       const t = m.target;
       if (t.nodeType === 1 && t.classList && t.classList.contains('result')) {
         const s = summarize(t);
-        if (s) route('🔮 ' + s);
+        if (!s) continue;
+        const kind = BOX_KIND[t.id];                 // กล่องไหน = entity ชนิดอะไร
+        const nEl  = kind ? t.querySelector('.name') : null;
+        const nm   = nEl ? nEl.textContent.trim() : '';
+        route('🔮 ' + s, (kind && nm) ? { kind, name: nm } : null);
       }
     }
   });
@@ -6250,9 +6602,14 @@ function buildUI() {
         '<button class="jr-chip" data-mode="note" aria-pressed="true">✒ เรื่องราว</button>' +
         '<button class="jr-chip" data-mode="speech" aria-pressed="false">💬 บทพูด</button>' +
         '<button class="jr-chip" data-mode="ooc" aria-pressed="false">📝 นอกเรื่อง</button>' +
+        '<button class="jr-chip jr-link" data-act="link">🔗 ลิงก์</button>' +
       '</div>' +
-      '<input class="jr-speaker" placeholder="ใครพูด?">' +
+      '<div class="jr-speakrow">' +
+        '<input class="jr-speaker" placeholder="ใครพูด?">' +
+        '<button class="jr-spick" type="button" title="เลือกจากรายชื่อ">👤</button>' +
+      '</div>' +
       '<div class="jr-row">' +
+        '<button class="jr-pcsp" type="button" title="บทพูดของตัวเรา">💬</button>' +
         '<textarea class="jr-input" rows="1" placeholder="วันนี้ฉัน…"></textarea>' +
         '<button class="jr-send">↑</button></div>' +
     '</div>';
@@ -6265,11 +6622,25 @@ function buildUI() {
 
 function bindUI() {
   $bar.querySelectorAll('.jr-chip[data-mode]').forEach(b => b.onclick = () => setMode(b.dataset.mode));
+  const lk = $bar.querySelector('.jr-link');
+  if (lk) lk.onclick = () => openPicker();
+  if ($pcsp) $pcsp.onclick = () => setPcSpeech(!ui.pcSpeech);
+  const sp = $bar.querySelector('.jr-spick');
+  if (sp) sp.onclick = () => openPicker({
+    type: 'npc', title: 'ใครพูด?',
+    onPick: e => { if (!e) return; ui.speakerEnt = e; $speaker.value = e.name; $input.focus(); }
+  });
+  $speaker.addEventListener('input', () => {
+    if (ui.speakerEnt && $speaker.value.trim() !== ui.speakerEnt.name) ui.speakerEnt = null;
+  });
   $send.onclick = submit;
   $input.addEventListener('input', () => { autoGrow(); refreshSend(); });
 
   $stream.addEventListener('click', ev => {
-    if (ev.target.closest('[data-act="expand"]')) { setMode('note'); $input.focus(); return; }
+    const sg = ev.target.closest('[data-sug]');
+    if (sg) { ev.stopPropagation(); sg.dataset.sug === 'ok' ? applySuggest() : dropSuggest(); return; }
+    const en = ev.target.closest('[data-ent]');
+    if (en) { ev.stopPropagation(); openEntSheet(en.dataset.ent); return; }
     const e = ev.target.closest('.jr-e');
     if (e) openSheet(e.dataset.id);
   });
@@ -6277,6 +6648,8 @@ function bindUI() {
   $tray.addEventListener('click', ev => {
     const x = ev.target.closest('[data-x]');
     if (x) { ev.stopPropagation(); dropPending(+x.dataset.x); return; }
+    const en = ev.target.closest('[data-e]');
+    if (en) { ev.stopPropagation(); entFromPending(+en.dataset.e); return; }
     const p = ev.target.closest('[data-i]');
     if (p) acceptPending(+p.dataset.i);
   });
@@ -6298,7 +6671,7 @@ function bindUI() {
   }
 }
 
-function activate() { syncBook(); fitNav(); measureBar(); render(true); renderTray(); }
+function activate() { syncBook(); entSync(); fitNav(); measureBar(); render(true); renderTray(); }
 
 function init() {
   $root = document.getElementById(CFG.rootId);
@@ -6309,10 +6682,12 @@ function init() {
   $input   = $bar.querySelector('.jr-input');
   $send    = $bar.querySelector('.jr-send');
   $speaker = $bar.querySelector('.jr-speaker');
+  $speakRow = $bar.querySelector('.jr-speakrow');
+  $pcsp     = $bar.querySelector('.jr-pcsp');
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -6488,7 +6863,7 @@ function showWorldScreen() {
 
 function enterWorld(id) {
   if (!world.worlds.some(w => w.id === id)) return;
-  world.current = id; saveWorld();
+  world.current = id; saveWorld(); entLoad(id);
   try { goToSelectScreen(); } catch (e) {
     document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
     const sc = document.getElementById('selectScreen');
@@ -6592,14 +6967,17 @@ function hookWorld() {
       return r;
     };
 
-  /* กันหลุด: เข้าเกมด้วยตัวละครต่างโลก → สลับโลกตาม */
+  /* กันหลุด: เข้าเกมด้วยตัวละครต่างโลก → สลับโลกตาม
+     และต้อง activate() เสมอ เพราะ stream บันทึกจะค้างเล่มของตัวละครก่อนหน้า */
   if (typeof o.game === 'function')
     window.goToGameScreen = function (id) {
       try {
         const w = worldOf(id);
-        if (w && w !== world.current) { world.current = w; saveWorld(); }
+        if (w && w !== world.current) { world.current = w; saveWorld(); entLoad(w); }
       } catch (e) {}
-      return o.game.apply(this, arguments);
+      const r = o.game.apply(this, arguments);
+      try { activate(); } catch (e) {}
+      return r;
     };
 
   unpatchWorld = () => {
@@ -6625,6 +7003,724 @@ function bootWorld() {
   }
 }
 
+/* ══════ [15] แก้บั๊ก "ค่า 0 เด้งกลับเป็น default" ═══════════════
+   ต้นเหตุอยู่ใน autoSaveCurrentCharacter() ของแอปเดิม :
+       hpCur:  parseInt(...) || 5
+       strCur: parseInt(...) || 10   ... ฯลฯ
+   parseInt('0') === 0 ซึ่งเป็น falsy → `||` เด้งไป default ทันที
+   ผลคือตัวละครที่ HP/STR/DEX/INT เหลือ 0 จะ "ฟื้น" เองตอนเซฟ
+
+   วิธีแก้ที่นี่ : ห่อฟังก์ชันเดิม แล้วเขียนค่า 0 กลับลงไปหลังเซฟเสร็จ
+   แตะเฉพาะตัวละครที่กำลังเล่น และเฉพาะฟิลด์ที่ DOM บอกว่าเป็น 0 จริง ๆ
+
+   ถ้าอยากแก้ที่ต้นทางแทน ให้เปลี่ยนทุกบรรทัดในฟังก์ชันนั้นเป็นแบบนี้ :
+       hpCur: (v => Number.isFinite(v) ? v : 5)(parseInt(el.value))
+   แล้วโค้ดส่วนนี้จะกลายเป็น no-op เอง ไม่ต้องลบ
+   ═══════════════════════════════════════════════════════════════ */
+const ZERO_FIELDS = ['strCur','strMax','dexCur','dexMax','intCur','intMax','hpCur','hpMax'];
+let unpatchZero = null;
+
+function fixZeroStats() {
+  let id, list;
+  try { id = currentActiveCharId; list = characterList; } catch (e) { return; }
+  if (!id || !Array.isArray(list)) return;
+  const i = list.findIndex(c => c && c.id === id);
+  if (i < 0) return;
+
+  let changed = false;
+  for (const k of ZERO_FIELDS) {
+    const el = document.getElementById(k);
+    if (!el) continue;
+    const raw = String(el.value == null ? '' : el.value).trim();
+    if (raw === '') continue;                 // ช่องว่างจริง ๆ → ปล่อย default เดิมทำงาน
+    if (parseInt(raw, 10) === 0 && list[i][k] !== 0) { list[i][k] = 0; changed = true; }
+  }
+  if (changed) { try { saveAllCharactersToStorage(); } catch (e) {} }
+}
+
+function hookZeroBug() {
+  if (unpatchZero || typeof window.autoSaveCurrentCharacter !== 'function') return;
+  const orig = window.autoSaveCurrentCharacter;
+  window.autoSaveCurrentCharacter = function () {
+    const r = orig.apply(this, arguments);
+    try { fixZeroStats(); } catch (e) {}
+    return r;
+  };
+  unpatchZero = () => { window.autoSaveCurrentCharacter = orig; unpatchZero = null; };
+}
+
+
+/* ══════ [16] ENTITIES — NPC / สถานที่ / กลุ่มอำนาจ ═════════════
+   ‣ เก็บ "ต่อโลก" ไม่ใช่ต่อตัวละคร → localStorage 'plight_ent_v1::<worldId>'
+     (บันทึกยังเป็นของตัวละครใครตัวละครมัน แต่ NPC/สถานที่ใช้ร่วมทั้งโลก)
+   ‣ รูปแบบใน text : [[npc:n045]]  หรือ  [[npc:n045|ข้อความที่อยากให้แสดง]]
+     ไม่มี alias = แสดงชื่อปัจจุบันเสมอ → เปลี่ยนชื่อแล้วบันทึกเก่าอัปเดตเอง
+   ⚠️ ตอน render ต้อง esc() ก่อน แล้วค่อยแทน token เป็น <span>
+      ถ้าสลับลำดับจะเปิดช่อง XSS จากชื่อ entity ที่ผู้เล่นพิมพ์เอง
+   ═══════════════════════════════════════════════════════════════ */
+const EKEY  = 'plight_ent_v1::';
+const ETYPE = {
+  npc    : { icon: '👤', label: 'NPC' },
+  place  : { icon: '📍', label: 'สถานที่' },
+  faction: { icon: '⚑',  label: 'กลุ่มอำนาจ' }
+};
+const TOKEN_RE = /\[\[(npc|place|faction):([A-Za-z0-9_]+)(?:\|([^\]]*))?\]\]/g;
+
+/* กล่องผลลัพธ์ Oracle → ชนิด entity (ใช้ตอนกด "+ NPC" ในถาดรอ) */
+const BOX_KIND = {
+  nameNpcResult    : 'npc',
+  settlementResult : 'place',
+  nameResult       : 'place',      // ชื่อดันเจียน
+  factionNameResult: 'faction'
+};
+
+let ents = { v: 1, list: [] };
+let entWorld = null;
+
+const eUid = () => 'n' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
+
+function entLoad(wid) {
+  entWorld = wid || world.current;
+  ents = { v: 1, list: [] };
+  if (!entWorld) return;
+  try {
+    const raw = Store.read(EKEY + entWorld);
+    if (raw) { const p = JSON.parse(raw); if (p && Array.isArray(p.list)) ents = p; }
+  } catch (e) { console.warn('[JRNL] โหลด entity ไม่สำเร็จ', e); }
+}
+function entSave() { if (entWorld) Store.write(EKEY + entWorld, JSON.stringify(ents)); }
+function entSync() { if (world.current !== entWorld) entLoad(world.current); }
+
+const entGet = id => ents.list.find(e => e.id === id) || null;
+
+function entCreate(type, name) {
+  name = (name || '').trim();
+  if (!name || !ETYPE[type]) return null;
+  entSync();
+  const dup = ents.list.find(e => e.type === type && e.name === name);
+  if (dup) return dup;
+  const e = { id: eUid(), type, name, aliases: [], notes: '', born: clock().day };
+  ents.list.push(e); entSave();
+  return e;
+}
+function entRename(id, name) {
+  const e = entGet(id); if (!e || !(name || '').trim()) return;
+  e.name = name.trim(); entSave(); render();
+}
+function entDelete(id) {
+  ents.list = ents.list.filter(e => e.id !== id); entSave(); render();
+}
+/** id ของ entity เรียงตามที่ถูกเอ่ยถึงล่าสุดในบันทึกเล่มนี้ (ใหม่→เก่า) */
+function recentIds() {
+  const seen = [];
+  for (let i = data.entries.length - 1; i >= 0; i--) {
+    const r = data.entries[i].refs;
+    if (!r) continue;
+    for (const id of r) if (seen.indexOf(id) < 0) seen.push(id);
+    if (seen.length > 40) break;
+  }
+  return seen;
+}
+
+/** ค้นหาแล้วดันตัวที่เพิ่งเอ่ยถึงขึ้นบน — ที่เหลือเรียงตามตัวอักษร */
+function entRank(q, type) {
+  const order = recentIds();
+  const rk = e => { const i = order.indexOf(e.id); return i < 0 ? 9999 : i; };
+  return entSearch(q, type).sort((a, b) => {
+    const d = rk(a) - rk(b);
+    return d !== 0 ? d : a.name.localeCompare(b.name, 'th');
+  });
+}
+
+/** type รับได้ทั้ง string เดียว หรือ array (เลือกหลายหมวด) */
+function entSearch(q, type) {
+  entSync();
+  q = (q || '').trim().toLowerCase();
+  const set = Array.isArray(type) ? type : (type ? [type] : []);
+  return ents.list
+    .filter(e => (!set.length || set.indexOf(e.type) >= 0) &&
+                 (!q || e.name.toLowerCase().indexOf(q) >= 0))
+    .sort((a, b) => a.name.localeCompare(b.name, 'th'));
+}
+
+/** ดึง id ของ entity ที่ถูกอ้างถึงในข้อความ (ใช้เติม entry.refs) */
+function extractRefs(text) {
+  const out = []; let m;
+  TOKEN_RE.lastIndex = 0;
+  while ((m = TOKEN_RE.exec(String(text || '')))) if (out.indexOf(m[2]) < 0) out.push(m[2]);
+  return out;
+}
+
+/** แทน token เป็นชิป — ต้องเรียก "หลัง" esc() เท่านั้น */
+function linkify(escaped) {
+  TOKEN_RE.lastIndex = 0;
+  return String(escaped).replace(TOKEN_RE, (_, type, id, alias) => {
+    const e = entGet(id);
+    const show = alias || (e ? e.name : '(ถูกลบแล้ว)');
+    const cls  = e ? 'jr-ent' : 'jr-ent gone';
+    return `<span class="${cls}" data-t="${type}" data-ent="${id}">${esc(show)}</span>`;
+  });
+}
+
+
+/* ── [2e] แนะนำลิงก์ ─────────────────────────────────────────────
+   ภาษาไทยไม่มีช่องว่างระหว่างคำ → \b ใช้ไม่ได้ ถ้าแปลงอัตโนมัติ
+   NPC ชื่อ "มาร" จะไปจับคำว่า "มาร" ใน "มารดา" ทันที
+   จึงใช้วิธี "เสนอแล้วให้กดยืนยัน" — false positive ไม่ทำอะไรเสียหาย  */
+function suggestLinks(text) {
+  entSync();
+  const masked = String(text).replace(TOKEN_RE, m => '\u0000'.repeat(m.length));
+  const out = [];
+  ents.list.slice()
+    .sort((a, b) => b.name.length - a.name.length)     // ชื่อยาวก่อน กันซ้อนทับ
+    .forEach(e => {
+      if (!e.name || e.name.length < 2) return;
+      if (masked.indexOf(e.name) < 0) return;
+      if (out.some(f => f.name.indexOf(e.name) >= 0)) return;
+      out.push(e);
+    });
+  return out;
+}
+
+/** แทนเฉพาะนอก token และแทนแค่ครั้งแรก เพื่อไม่ให้ประโยคเต็มไปด้วยชิป */
+function replaceOutsideTokens(text, needle, repl) {
+  const parts = []; let last = 0, m;
+  TOKEN_RE.lastIndex = 0;
+  while ((m = TOKEN_RE.exec(text))) {
+    parts.push([text.slice(last, m.index), false]);
+    parts.push([m[0], true]);
+    last = m.index + m[0].length;
+  }
+  parts.push([text.slice(last), false]);
+  let done = false;
+  return parts.map(([s, isTok]) => {
+    if (isTok || done) return s;
+    const i = s.indexOf(needle);
+    if (i < 0) return s;
+    done = true;
+    return s.slice(0, i) + repl + s.slice(i + needle.length);
+  }).join('');
+}
+
+function applySuggest() {
+  const s = ui.suggest; if (!s) return;
+  const e = findEntry(s.id); if (!e) { ui.suggest = null; render(); return; }
+  let txt = e.text;
+  s.list.forEach(en => { txt = replaceOutsideTokens(txt, en.name, `[[${en.type}:${en.id}]]`); });
+  e.text = txt; e.refs = extractRefs(txt);
+  ui.suggest = null; save(); render(true);
+}
+function dropSuggest() { ui.suggest = null; render(); }
+
+/* ── แผ่นเลือก/สร้าง entity ─────────────────────────────────────── */
+/** opts = { type, onPick, title } — ไม่ส่งอะไรมา = โหมดแทรก token ปกติ */
+function openPicker(opts) {
+  opts = (opts && typeof opts === 'object' && !opts.type_) ? opts : {};
+  entSync();
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-pick';
+  el.innerHTML =
+    '<div class="jr-sheet-in">' +
+      (opts.title ? `<div class="jr-ptitle">${esc(opts.title)}</div>` : '') +
+      '<input class="jr-pq" placeholder="ค้นหา หรือพิมพ์ชื่อใหม่">' +
+      '<div class="jr-ptabs">' +
+        `<button data-f="" class="${opts.type ? '' : 'on'}">ทั้งหมด</button>` +
+        Object.keys(ETYPE).map(k =>
+          `<button data-f="${k}" class="${opts.type === k ? 'on' : ''}">` +
+          `${ETYPE[k].icon} ${ETYPE[k].label}</button>`).join('') +
+        '<span class="jr-phint">แตะเลือกได้หลายหมวด</span>' +
+      '</div>' +
+      '<div class="jr-plist"></div>' +
+      '<button class="jr-pcancel">ยกเลิก</button>' +
+    '</div>';
+  document.body.appendChild(el);
+
+  const q    = el.querySelector('.jr-pq');
+  const list = el.querySelector('.jr-plist');
+  const take = opts.onPick || insertToken;
+  let picked = opts.type ? [opts.type] : [];        // เลือกได้หลายหมวดพร้อมกัน
+  const fresh = recentIds().slice(0, 5);
+
+  const rowHTML = e =>
+    `<button class="jr-prow" data-pick="${e.id}">` +
+      `<span class="ic">${ETYPE[e.type].icon}</span>` +
+      `<span class="nm">${esc(e.name)}</span>` +
+      (fresh.indexOf(e.id) >= 0 ? '<span class="fresh">ล่าสุด</span>' : '') +
+      `<span class="info" data-info="${e.id}">ℹ️</span></button>`;   // ปุ่มนี้ 46px กันกดพลาดบนมือถือ
+
+  /* จัดกลุ่มให้อ่านง่าย : ดูทั้งหมด = แยกตามชนิด · ดูเฉพาะ NPC = แยกตามสังกัด */
+  const grouped = found => {
+    const buckets = new Map();
+    found.forEach(e => {
+      const key = (picked.length === 1 && picked[0] === 'npc')
+        ? affLabel(e) : ETYPE[e.type].icon + ' ' + ETYPE[e.type].label;
+      if (!buckets.has(key)) buckets.set(key, []);
+      buckets.get(key).push(e);
+    });
+    /* กลุ่ม "ยังไม่ระบุ" ไปท้ายสุดเสมอ */
+    const keys = [...buckets.keys()].sort((a, b) => {
+      const w = s => (s.indexOf('ยังไม่ระบุ') >= 0 || s.indexOf('ถูกลบ') >= 0) ? 1 : 0;
+      return w(a) - w(b);
+    });
+    return { n: keys.length, html: keys.map(k =>
+      `<div class="jr-pgrp">${esc(k)} <span class="c">${buckets.get(k).length}</span></div>` +
+      buckets.get(k).map(rowHTML).join('')).join('') };
+  };
+
+  const draw = () => {
+    const term = q.value.trim();
+    const found = entRank(term, picked);            // เพิ่งเอ่ยถึง = อยู่บนสุด
+    /* จัดกลุ่มเมื่อมีมากกว่า 1 กลุ่มจริง ๆ — กำลังค้นหาอยู่ก็ไม่ต้องจัด */
+    const g = term ? null : grouped(found);
+    let html = (g && g.n > 1) ? g.html : found.map(rowHTML).join('');
+    if (term && !found.some(e => e.name === term)) {
+      const types = picked.length ? picked : Object.keys(ETYPE);
+      html += '<div class="jr-pnew">สร้างใหม่: <b>' + esc(term) + '</b></div>' +
+        types.map(k =>
+          `<button class="jr-prow new" data-new="${k}">` +
+            `<span class="ic">${ETYPE[k].icon}</span>` +
+            `<span class="nm">เพิ่มเป็น ${ETYPE[k].label}</span></button>`).join('');
+    }
+    list.innerHTML = html ||
+      '<div class="jr-pempty">ยังไม่มีข้อมูล — พิมพ์ชื่อเพื่อสร้างใหม่</div>';
+  };
+
+  q.addEventListener('input', draw);
+  el.addEventListener('click', ev => {
+    if (ev.target === el || ev.target.closest('.jr-pcancel')) { el.remove(); return; }
+    const f = ev.target.closest('[data-f]');
+    if (f) {
+      const k = f.dataset.f;
+      if (!k) picked = [];                          // "ทั้งหมด" = ล้างตัวกรอง
+      else {
+        const i = picked.indexOf(k);
+        i >= 0 ? picked.splice(i, 1) : picked.push(k);
+      }
+      el.querySelectorAll('[data-f]').forEach(b =>
+        b.classList.toggle('on', b.dataset.f ? picked.indexOf(b.dataset.f) >= 0 : !picked.length));
+      draw(); return;
+    }
+    const inf = ev.target.closest('[data-info]');
+    if (inf) { ev.stopPropagation(); el.remove(); openEntSheet(inf.dataset.info); return; }
+    const p = ev.target.closest('[data-pick]');
+    if (p) { take(entGet(p.dataset.pick)); el.remove(); return; }
+    const n = ev.target.closest('[data-new]');
+    if (n) { take(entCreate(n.dataset.new, q.value)); el.remove(); return; }
+  });
+
+  draw();
+  setTimeout(() => q.focus(), 60);
+}
+
+/** แทรก token ตรงตำแหน่งเคอร์เซอร์ */
+function insertToken(e) {
+  if (!e || !$input) return;
+  const tok = `[[${e.type}:${e.id}]]`;
+  const v = $input.value;
+  const a = $input.selectionStart != null ? $input.selectionStart : v.length;
+  const b = $input.selectionEnd   != null ? $input.selectionEnd   : v.length;
+  const pad = (a > 0 && !/\s$/.test(v.slice(0, a))) ? ' ' : '';
+  $input.value = v.slice(0, a) + pad + tok + ' ' + v.slice(b);
+  const pos = a + pad.length + tok.length + 1;
+  $input.focus();
+  try { $input.setSelectionRange(pos, pos); } catch (err) {}
+  autoGrow(); refreshSend();
+}
+
+
+/* ── [17] ปุ่มสุ่ม Oracle ในแผ่นแก้ไข entity ─────────────────────
+   เรียกฟังก์ชันทอยของแอปเดิม (global) แล้วอ่านผลจากกล่องของมันเอง
+   → ไม่ต้องคัดลอกตารางมาทำซ้ำ ไม่ต้องแก้โค้ดหลักแม้แต่บรรทัดเดียว
+
+   ต้องกันผลข้างเคียง 2 อย่างระหว่างทอย :
+     1. observer ของเราจะจับผลนี้เข้าถาดรอ → ตัดการเชื่อมชั่วคราว
+        (disconnect() ล้างคิวด้วย ผลที่เกิดตอนตัดจึงไม่ถูกส่งย้อนหลัง)
+     2. logOracle() ของแอปเดิมจะเด้ง toast → ปิดเสียงชั่วคราว
+   ═══════════════════════════════════════════════════════════════ */
+/* คำในตารางของแอปเดิมที่อยากแก้ — `const FOCUS = [...]` แก้เนื้อในได้
+   (const ล็อกแค่ตัวแปร ไม่ได้ล็อกสมาชิกใน array) จึงไม่ต้องแตะโค้ดหลัก
+   ค้นด้วยคำ ไม่ใช้ index เผื่อวันหลังตารางขยับ                        */
+const WORD_FIX = [['FOCUS', 'โจรขโมย', 'หัวขโมย']];
+
+function fixWords() {
+  WORD_FIX.forEach(([tbl, from, to]) => {
+    try {
+      const a = window[tbl] || (typeof eval('typeof ' + tbl) !== 'undefined' ? eval(tbl) : null);
+      if (!Array.isArray(a)) return;
+      const i = a.indexOf(from);
+      if (i >= 0) a[i] = to;
+    } catch (e) {}
+  });
+}
+
+/* ── ความสัมพันธ์ระหว่าง entity ────────────────────────────────
+   npc     → สังกัด (เมือง / กลุ่ม / อิสระ / ไม่รู้)
+   place   → ผู้นำ (เป็น NPC)
+   faction → หัวหน้า (เป็น NPC)
+   เก็บที่ ent.rel = { aff:{k,id}, leader:{k:'npc',id} }              */
+const AFF_KIND = {
+  place  : { icon: '📍', label: 'เมือง/สถานที่' },
+  faction: { icon: '⚑',  label: 'กลุ่มอำนาจ' },
+  free   : { icon: '🕊',  label: 'อิสระ' },
+  unknown: { icon: '❓', label: 'ไม่รู้' }
+};
+const ENT_RELS = {
+  npc    : [['aff',    'สังกัด',        'aff']],
+  place  : [['parent', 'อยู่ภายใน',     'place'],
+            ['leader', 'ผู้นำ',         'npc']],
+  faction: [['base',   'ฐานอยู่ที่',    'place'],
+            ['leader', 'หัวหน้า',       'npc']]
+};
+
+const entRels = type => (ENT_RELS[type] || []).map(r => r.slice());
+
+function relGet(ent, key) { return (ent && ent.rel && ent.rel[key]) || null; }
+
+function relText(ent, key) {
+  const r = relGet(ent, key);
+  if (!r || !r.k) return '';
+  if (AFF_KIND[r.k] && !r.id) return AFF_KIND[r.k].icon + ' ' + AFF_KIND[r.k].label;
+  const tgt = entGet(r.id);
+  return tgt ? ETYPE[tgt.type].icon + ' ' + tgt.name : '(ถูกลบแล้ว)';
+}
+
+function relSet(id, key, k, targetId) {
+  const e = entGet(id); if (!e) return;
+  /* กันผูกวน : ตัวเอง หรือ สถานที่แม่ที่ตัวเองเป็นแม่มันอยู่ */
+  if (targetId === id) { safeToast('⚠️ ผูกกับตัวเองไม่ได้'); return; }
+  if (key === 'parent' && targetId && placePath(targetId).indexOf(id) >= 0) {
+    safeToast('⚠️ ผูกวนกันไม่ได้'); return;
+  }
+  if (!e.rel) e.rel = {};
+  if (!k) delete e.rel[key];
+  else e.rel[key] = { k, id: targetId || null };
+  entSave();
+}
+
+function safeToast(msg) { setTimeout(() => { try { showToast(msg); } catch (e) {} }, 80); }
+
+/** entity ที่ชี้กลับมาหา id นี้ผ่านความสัมพันธ์ key */
+function childrenOf(id, key, type) {
+  return ents.list.filter(x => {
+    const r = relGet(x, key);
+    return (!type || x.type === type) && r && r.id === id;
+  }).sort((a, b) => a.name.localeCompare(b.name, 'th'));
+}
+const membersOf = id => childrenOf(id, 'aff', 'npc');
+
+/** สายโซ่สถานที่แม่ เช่น ท่าเรือเก่า ‹ เมืองแบล็กมัวร์ ‹ แคว้นเหนือ */
+function placePath(id, depth) {
+  const out = []; let cur = entGet(id), n = 0;
+  while (cur && n++ < (depth || 4)) {
+    const r = relGet(cur, 'parent');
+    if (!r || !r.id) break;
+    cur = entGet(r.id);
+    if (!cur || out.indexOf(cur.id) >= 0) break;   // กันวนลูป
+    out.push(cur.id);
+  }
+  return out;
+}
+
+/** ป้ายสังกัดของ NPC ใช้จัดกลุ่มในรายการ */
+function affLabel(e) {
+  const r = relGet(e, 'aff');
+  if (!r || !r.k) return 'ยังไม่ระบุสังกัด';
+  if (!r.id) return AFF_KIND[r.k].icon + ' ' + AFF_KIND[r.k].label;
+  const t = entGet(r.id);
+  return t ? ETYPE[t.type].icon + ' ' + t.name : 'สังกัดที่ถูกลบแล้ว';
+}
+
+/* ป้ายชื่อทุกอันคัดมาจากหัวข้อการ์ดในแท็บ Oracle ตรง ๆ
+   เพื่อให้คำเดียวกันแปลว่าอย่างเดียวกันทั้งแอป
+     FOCUS      → "จุดสนใจ/สายอาชีพ"  อยู่หมวด Faction (ไม่ใช่ NPC)
+     ROLE       → "บทบาท"             อยู่หมวด NPC  ← นี่คืออาชีพ
+     AMBITION   → "เป้าหมาย"           อยู่หมวด NPC
+     LEADERSHIP → "รูปแบบผู้นำ"        อยู่หมวด Faction
+     AUTHORITY  → "อำนาจปกครอง"        อยู่หมวด Civilization
+   [key, ป้ายชื่อ, ฟังก์ชันทอย, กล่องผล]                                */
+const ENT_FIELDS = {
+  npc: [
+    ['species',  'เผ่าพันธุ์',       'rollNpcSpecies',   'npcSpeciesResult'],
+    ['role',     'บทบาท',           'rollRole',         'roleResult'],
+    ['ambition', 'เป้าหมาย',         'rollAmbition',     'ambitionResult']
+  ],
+  place: [
+    ['terrain',  'ภูมิประเทศ',       'rollWorldTerrain', 'worldTerrainResult'],
+    ['pop',      'ประชากร',          'rollCivPop',       'civPopResult'],
+    ['authority','อำนาจปกครอง',      'rollAuthority',    'authorityResult'],
+    ['trouble',  'ปัญหา',            'rollTrouble',      'troubleResult']
+  ],
+  faction: [
+    ['focus',    'จุดสนใจ/สายอาชีพ', 'rollFocus',        'focusResult'],
+    ['lead',     'รูปแบบผู้นำ',      'rollLeadership',   'leadResult']
+  ]
+};
+
+/** ช่องที่ทอยได้จริงเท่านั้น — แอปเดิมเปลี่ยนชื่อฟังก์ชันเมื่อไหร่ ปุ่มหายเอง */
+function entFields(type) {
+  return (ENT_FIELDS[type] || []).map(f => f.slice());
+}
+function canRoll(fn, box) {
+  return typeof window[fn] === 'function' && !!document.getElementById(box);
+}
+
+function rollInto(fn, boxId) {
+  const f = window[fn], box = document.getElementById(boxId);
+  if (typeof f !== 'function' || !box) return null;
+
+  const wasOn = !!observer;
+  if (wasOn) { observer.disconnect(); observer = null; }   // กันเข้าถาดรอ
+  quietToast = true;                                       // กัน toast เด้ง
+  let out = null;
+  try { f(); out = summarize(box); }
+  catch (e) { console.warn('[JRNL] ทอยไม่สำเร็จ:', fn, e); }
+  if (wasOn) hookOracle();
+
+  /* observer ของแอปเดิม (logOracle) เป็น microtask ที่ทำงานหลังเราจบ
+     ปิดเสียงแบบ synchronous จะสายเกินไป ต้องคาไว้ข้าม task ปัจจุบัน */
+  clearTimeout(quietTimer);
+  quietTimer = setTimeout(() => { quietToast = false; }, 60);
+  return out && out.trim() ? out.trim() : null;
+}
+
+function entField(e, k) { return (e.fields && e.fields[k]) || ''; }
+
+function setEntField(id, k, v) {
+  const e = entGet(id); if (!e) return;
+  if (!e.fields) e.fields = {};
+  e.fields[k] = v;
+  entSave();
+}
+
+function rollField(id, k, label, fn, box, input) {
+  const txt = rollInto(fn, box);
+  if (!txt) { setTimeout(() => { try { showToast('⚠️ สุ่ม' + label + 'ไม่สำเร็จ'); } catch (e) {} }, 90); return; }
+  input.value = txt;
+  fitField(input);
+  setEntField(id, k, txt);
+}
+
+/** textarea ช่องค่า ให้สูงตามเนื้อหา — ค่าอย่าง "เป้าหมาย" ยาวได้หลายบรรทัด */
+function fitField(el) {
+  el.style.height = 'auto';
+  el.style.height = Math.min(el.scrollHeight, 120) + 'px';
+}
+
+
+/* ── ตัวเลือกความสัมพันธ์ ────────────────────────────────────────
+   mode 'aff' : เลือกประเภทก่อน (เมือง / กลุ่ม / อิสระ / ไม่รู้)
+   mode 'npc' : เลือก NPC ตรง ๆ (ใช้กับช่องผู้นำ/หัวหน้า)          */
+function chooseRel(id, key, done) {
+  const self = entGet(id);
+  const mode = (entRels(self.type).find(r => r[0] === key) || [])[2];
+
+  if (mode === 'npc') {
+    openPicker({
+      type: 'npc', title: 'เลือกผู้นำ',
+      onPick: e => {
+        if (!e) return;
+        relSet(id, key, 'npc', e.id);
+        /* ช่วยกรอกอีกฝั่งให้ด้วย : ถ้า NPC คนนี้ยังไม่มีสังกัด ให้ผูกมาที่นี่ */
+        if (!relGet(e, 'aff')) {
+          relSet(e.id, 'aff', self.type, id);
+          setTimeout(() => { try {
+            showToast('🔗 ตั้ง ' + e.name + ' ให้สังกัด ' + self.name + ' ด้วยแล้ว');
+          } catch (err) {} }, 80);
+        }
+        done && done();
+      }
+    });
+    return;
+  }
+
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-affpick';
+  el.innerHTML = '<div class="jr-sheet-in">' +
+    `<div class="jr-ptitle">สังกัดของ ${esc(self.name)}</div>` +
+    ['place', 'faction'].map(k =>
+      `<button class="jr-arow" data-k="${k}">${AFF_KIND[k].icon} ${AFF_KIND[k].label}` +
+      '<span class="ar">›</span></button>').join('') +
+    '<hr>' +
+    ['free', 'unknown'].map(k =>
+      `<button class="jr-arow" data-k="${k}">${AFF_KIND[k].icon} ${AFF_KIND[k].label}</button>`).join('') +
+    '<button class="jr-pcancel" data-k="">ยกเลิก</button>' +
+  '</div>';
+
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-k]');
+    if (!b) { if (ev.target === el) el.remove(); return; }
+    const k = b.dataset.k;
+    el.remove();
+    if (!k) { done && done(); return; }
+    if (k === 'free' || k === 'unknown') { relSet(id, key, k, null); done && done(); return; }
+    openPicker({
+      type: k, title: 'เลือก' + AFF_KIND[k].label,
+      onPick: e => { if (e) relSet(id, key, k, e.id); done && done(); }
+    });
+  });
+  document.body.appendChild(el);
+}
+
+/* ── แผ่นข้อมูล entity + backlinks ทั้งโลก ─────────────────────── */
+function backlinks(id) {
+  const out = [];
+  const cur = charId;
+  const ids = allChars().filter(c => worldOf(c.id) === world.current).map(c => c.id);
+  if (ids.indexOf(cur) < 0 && cur) ids.push(cur);
+
+  ids.forEach(cid => {
+    let book = null;
+    if (cid === cur) book = data;
+    else {
+      try { const raw = Store.read(CFG.storePrefix + cid); book = raw ? JSON.parse(raw) : null; }
+      catch (e) { book = null; }
+    }
+    if (!book || !Array.isArray(book.entries)) return;
+    const hits = book.entries.filter(e => e.refs && e.refs.indexOf(id) >= 0);
+    if (!hits.length) return;
+    const owner = (allChars().find(c => c.id === cid) || {}).name || '—';
+    out.push({ cid, owner, own: cid === cur, hits });
+  });
+  out.sort((a, b) => (b.own ? 1 : 0) - (a.own ? 1 : 0));
+  return out;
+}
+
+function openEntSheet(id) {
+  entSync();
+  const e = entGet(id);
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-entsheet';
+
+  if (!e) {
+    el.innerHTML = '<div class="jr-sheet-in"><div class="jr-pempty">' +
+      'ข้อมูลนี้ถูกลบไปแล้ว</div><button data-s="close">ปิด</button></div>';
+  } else {
+    const groups = backlinks(id);
+    const total  = groups.reduce((n, g) => n + g.hits.length, 0);
+    const body = groups.map(g =>
+      (g.own ? '' : `<div class="jr-blowner">📓 บันทึกของ ${esc(g.owner)}</div>`) +
+      g.hits.map(h =>
+        `<button class="jr-bl${g.own ? ' go' : ''}"` +
+        (g.own ? ` data-jump="${h.id}"` : '') + '>' +
+        `<span class="d">วันที่ ${h.day} · ${WATCH_TH[h.watch]}` +
+        (g.own ? '<span class="ar">ไปที่บันทึก ›</span>' : '') + '</span>' +
+        `<div class="tx">${linkify(esc(h.text)).slice(0, 400)}</div></button>`).join('')
+    ).join('') || '<div class="jr-pempty">ยังไม่ถูกเอ่ยถึงในบันทึกไหนเลย</div>';
+
+    const fields = entFields(e.type);
+    const fieldHTML = fields.map(([k, lb, fn, bx]) =>
+      '<div class="jr-frow">' +
+        `<span class="lb">${lb}</span>` +
+        `<textarea class="fv" rows="1" data-k="${k}" placeholder="—">${esc(entField(e, k))}</textarea>` +
+        (canRoll(fn, bx) ? `<button class="dice" data-f="${k}" title="สุ่ม${lb}">🎲</button>` : '') +
+      '</div>').join('');
+
+    el.innerHTML = '<div class="jr-sheet-in">' +
+      '<div class="jr-ehead">' +
+        `<span class="ic">${ETYPE[e.type].icon}</span>` +
+        `<div><b>${esc(e.name)}</b><span class="ty">${ETYPE[e.type].label}` +
+        (e.born ? ` · พบวันที่ ${e.born}` : '') +
+        (() => { const pp = placePath(id);
+          return pp.length ? ' · ' + pp.map(x => esc((entGet(x) || {}).name || '')).join(' ‹ ') : ''; })() +
+        `</span></div>` +
+      '</div>' +
+      (fields.length ? `<div class="jr-fields">${fieldHTML}</div>` : '') +
+      (entRels(e.type).length
+        ? '<div class="jr-fields jr-rels">' + entRels(e.type).map(([k, lb]) => {
+            const v = relText(e, k);
+            return '<div class="jr-frow">' +
+              `<span class="lb">${lb}</span>` +
+              `<button class="rel${v ? '' : ' none'}" data-rel="${k}">` +
+                `${v || 'แตะเพื่อเลือก'}</button>` +
+              (v ? `<button class="dice" data-relx="${k}" title="ล้างค่า">✕</button>` : '') +
+            '</div>';
+          }).join('') + '</div>'
+        : '') +
+      '<div class="jr-nhead">โน้ตของฉัน</div>' +
+      '<textarea class="jr-enotes" placeholder="อยากจดอะไรเพิ่มก็เขียนตรงนี้…">' +
+        esc(e.notes || '') + '</textarea>' +
+      (e.type !== 'npc' ? (() => {
+        const chip = (x, extra) =>
+          `<button class="jr-mem" data-go="${x.id}">${ETYPE[x.type].icon} ${esc(x.name)}` +
+          (extra ? `<span class="r">${esc(extra)}</span>` : '') + '</button>';
+        let out = '';
+        const mem = membersOf(id);
+        out += `<div class="jr-blhead">ผู้สังกัดที่นี่ ${mem.length} คน</div>` +
+          (mem.length
+            ? '<div class="jr-memlist">' + mem.map(x => chip(x, entField(x, 'role'))).join('') + '</div>'
+            : '<div class="jr-pempty">ยังไม่มีใครสังกัดที่นี่</div>');
+        if (e.type === 'place') {
+          const sub = childrenOf(id, 'parent', 'place');
+          const fac = childrenOf(id, 'base', 'faction');
+          if (sub.length) out += '<div class="jr-blhead">สถานที่ย่อย ' + sub.length + '</div>' +
+            '<div class="jr-memlist">' + sub.map(x => chip(x)).join('') + '</div>';
+          if (fac.length) out += '<div class="jr-blhead">กลุ่มที่ตั้งฐานที่นี่ ' + fac.length + '</div>' +
+            '<div class="jr-memlist">' + fac.map(x => chip(x, entField(x, 'focus'))).join('') + '</div>';
+        }
+        return out;
+      })() : '') +
+      `<div class="jr-blhead">ถูกเอ่ยถึง ${total} ครั้ง</div>` +
+      `<div class="jr-bllist">${body}</div>` +
+      '<div class="jr-erow">' +
+        '<button data-s="write">✍️ เขียนถึง</button>' +
+        '<button data-s="rename">✏️ เปลี่ยนชื่อ</button>' +
+        '<button data-s="del" class="danger">🗑️ ลบ</button>' +
+      '</div>' +
+      '<button data-s="close">ปิด</button>' +
+    '</div>';
+  }
+
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('button');
+    if (!b) { if (ev.target === el) closeEnt(); return; }
+    if (b.dataset.f) {
+      const r = entFields(e.type).find(x => x[0] === b.dataset.f);
+      if (r) rollField(id, r[0], r[1], r[2], r[3],
+                       el.querySelector(`.fv[data-k="${r[0]}"]`));
+      return;
+    }
+    if (b.dataset.relx) { relSet(id, b.dataset.relx, null); reopen(); return; }
+    if (b.dataset.rel)  { chooseRel(id, b.dataset.rel, reopen); return; }
+    if (b.dataset.go)   { closeEnt(); openEntSheet(b.dataset.go); return; }
+    if (b.dataset.jump) { closeEnt(); jumpTo(b.dataset.jump); return; }
+    const s = b.dataset.s;
+    if (s === 'write') {
+      closeEnt();
+      insertToken(e); setMode('note');
+      if (ui.panelOpen) closePanel();
+      return;
+    }
+    if (s === 'rename') {
+      const v = prompt('เปลี่ยนชื่อ', e.name);
+      if (v !== null && v.trim()) { entRename(id, v); closeEnt(); openEntSheet(id); return; }
+    } else if (s === 'del') {
+      if (confirm('ลบ "' + e.name + '"?\nชิปในบันทึกเก่าจะกลายเป็น "(ถูกลบแล้ว)"')) {
+        entDelete(id); closeEnt(); return;
+      }
+    } else if (s === 'close') { closeEnt(); return; }
+  });
+
+  function reopen() { closeEnt(); openEntSheet(id); }
+
+  function closeEnt() {
+    if (e) {
+      const ta = el.querySelector('.jr-enotes');
+      if (ta && ta.value !== (e.notes || '')) { e.notes = ta.value; entSave(); }
+    }
+    el.remove();
+  }
+
+  document.body.appendChild(el);
+
+  /* ช่องค่า: เซฟทันทีที่พิมพ์ + ปรับความสูงตามเนื้อหา */
+  el.querySelectorAll('.jr-frow .fv').forEach(inp => {
+    fitField(inp);
+    inp.addEventListener('input', () => { fitField(inp); setEntField(id, inp.dataset.k, inp.value); });
+  });
+  const nt = el.querySelector('.jr-enotes');
+  if (nt) nt.addEventListener('input', () => { if (e) { e.notes = nt.value; entSave(); } });
+}
+
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
 const API = {
   init, render, activate, addEntry, addSystemEntry, route, bridge, CFG,
@@ -6633,7 +7729,14 @@ const API = {
   /* ── ชั้นโลก ── */
   get world()   { return world; },
   showWorldScreen, enterWorld,
-  worldOf, worldName,
+  worldOf, worldName, fixZeroStats,
+  /* ── entity ── */
+  get entities() { return ents.list; },
+  entCreate, entGet, entSearch, entDelete, entRename, extractRefs, linkify,
+  openPicker, openEntSheet, backlinks, rollInto, jumpTo, entFields, entField, setEntField,
+  entRels, relGet, relSet, relText, membersOf, childrenOf, placePath, affLabel, fixWords,
+  suggestLinks, applySuggest, entFromPending, entRank, recentIds,
+  get suggestion() { return ui.suggest; },
   get data()    { return data; },
   get pending() { return pending; },
   get panelOpen() { return ui.panelOpen; },
@@ -6649,6 +7752,7 @@ const API = {
     if (unpatchToast) unpatchToast();
     if (unpatchTab) unpatchTab();
     if (unpatchWorld) unpatchWorld();
+    if (unpatchZero) unpatchZero();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
