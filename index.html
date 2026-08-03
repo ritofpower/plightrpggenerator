@@ -5578,6 +5578,7 @@ body.jr-live .dice-dock{
   top:var(--jr-navtop); bottom:auto;
 }
 /* toast เดิมโผล่มุมขวาบน → ย้ายมาอยู่ใต้แถบเต๋าพอดี */
+body #toastContainer{z-index:10060}      /* toast ต้องอยู่เหนือแผ่นอีกที */
 body.jr-live #toastContainer{
   top:calc(var(--jr-navtop) + var(--jr-dockh) + 8px);
   left:50%; right:auto; transform:translateX(-50%);
@@ -5733,7 +5734,7 @@ body.jr-live #toastContainer{
   font-size:.72rem;color:var(--text-muted,#8E94A5);
   padding:9px 12px 3px;border-top:1px solid var(--border-color,#2F3346);margin-top:5px;
 }
-.jr-pick .jr-pcancel{margin-top:5px;color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-pick .jr-pcancel{margin-top:5px;color:var(--text-muted,#8E94A5)}
 .jr-pempty{text-align:center;padding:24px 14px;color:#5A6073;font-size:.83rem}
 
 /* แผ่นข้อมูล entity */
@@ -5786,33 +5787,33 @@ body.jr-live #toastContainer{
 .jr-entsheet .jr-frow .rel.none{color:#4C5666}
 .jr-entsheet .jr-frow .rel:active{border-color:var(--accent-gold,#E5A93C);transform:none}
 .jr-entsheet .jr-memlist{display:flex;flex-wrap:wrap;gap:6px;padding:2px 2px 4px}
-.jr-entsheet .jr-mem{
+.jr-sheet.jr-entsheet .jr-mem{
   width:auto;flex:0 0 auto;display:flex;align-items:center;gap:6px;
   padding:6px 11px;font-size:.8rem;font-weight:400;border-radius:20px;
   background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
   color:var(--text-main,#E0E2EC);
 }
-.jr-entsheet .jr-mem .r{font-size:.68rem;color:var(--text-muted,#8E94A5)}
-.jr-entsheet .jr-mem:active{border-color:var(--accent-gold,#E5A93C);transform:none}
-.jr-chsheet .jr-chrow{
+.jr-sheet.jr-entsheet .jr-mem .r{font-size:.68rem;color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-entsheet .jr-mem:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-sheet.jr-chsheet .jr-chrow{
   display:flex;align-items:center;width:100%;text-align:left;padding:0;
   margin-bottom:5px;border-radius:11px;font-weight:400;min-height:52px;
   background:var(--card-bg,#1E202D);border:1px solid transparent;
   color:var(--text-main,#E0E2EC);overflow:hidden;
 }
-.jr-chsheet .jr-chrow.on{border-color:var(--accent-gold,#E5A93C)}
-.jr-chsheet .jr-chrow .tx{
+.jr-sheet.jr-chsheet .jr-chrow.on{border-color:var(--accent-gold,#E5A93C)}
+.jr-sheet.jr-chsheet .jr-chrow .tx{
   flex:1;min-width:0;display:flex;flex-direction:column;gap:1px;padding:9px 12px;
 }
-.jr-chsheet .jr-chrow .tx b{font-size:.9rem;font-weight:600;
+.jr-sheet.jr-chsheet .jr-chrow .tx b{font-size:.9rem;font-weight:600;
   overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.jr-chsheet .jr-chrow .tx i{font-style:normal;font-size:.68rem;color:var(--text-muted,#8E94A5)}
-.jr-chsheet .jr-chrow .ed{
+.jr-sheet.jr-chsheet .jr-chrow .tx i{font-style:normal;font-size:.68rem;color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-chsheet .jr-chrow .ed{
   flex:0 0 auto;width:46px;align-self:stretch;display:flex;align-items:center;
   justify-content:center;font-size:.9rem;opacity:.5;
   border-left:1px solid var(--border-color,#2F3346);
 }
-.jr-chsheet .jr-chrow .ed:active{opacity:1;background:var(--bg-color,#12131C)}
+.jr-sheet.jr-chsheet .jr-chrow .ed:active{opacity:1;background:var(--bg-color,#12131C)}
 .jr-bdsheet .jr-bdgrid{display:flex;flex-wrap:wrap;gap:7px;padding:4px 2px 10px}
 .jr-bdsheet .jr-bdgrid button{
   width:auto;flex:0 0 auto;padding:9px 14px;border-radius:10px;font-size:.85rem;font-weight:400;
@@ -5867,13 +5868,71 @@ body.jr-live #toastContainer{
 #npcModal .jr-npcpick:active{
   background:var(--accent-gold,#E5A93C); color:#12131C; transform:none;
 }
-.jr-affpick .jr-arow{
+/* ── ระดับสถานที่ ── */
+.jr-entsheet .jr-scales{flex:1;display:flex;flex-wrap:wrap;gap:5px;padding:2px 0}
+.jr-entsheet .jr-scales .sc{
+  width:auto;flex:0 0 auto;display:flex;flex-direction:column;align-items:center;gap:1px;
+  padding:5px 9px;border-radius:9px;font-size:.85rem;font-weight:400;
+  background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
+  color:var(--text-main,#E0E2EC);
+}
+.jr-entsheet .jr-scales .sc i{font-style:normal;font-size:.6rem;color:var(--text-muted,#8E94A5)}
+.jr-entsheet .jr-scales .sc.on{
+  background:var(--accent-gold,#E5A93C);border-color:var(--accent-gold,#E5A93C);
+}
+.jr-entsheet .jr-scales .sc.on i{color:#12131C;font-weight:700}
+.jr-entsheet .jr-scales .sc:active{transform:none}
+
+/* ── แผนผังสถานที่ ──
+   ⚠️ กฎ .jr-sheet .jr-sheet-in button{width:100%} ด้านล่างในไฟล์นี้เอง
+   อยู่ทีหลัง จึงชนะกฎที่ specificity เท่ากัน — ปุ่มในแผ่นทุกอันต้องใช้
+   .jr-sheet.<ชื่อแผ่น> เพื่อให้ได้ (0,3,x) ไม่ใช่ (0,2,x)              */
+.jr-maphead{
+  display:flex;align-items:center;gap:6px;padding:0 2px 8px;
+  font-size:.68rem;color:var(--text-muted,#8E94A5);
+}
+.jr-maphead span{flex:1;min-width:0}
+.jr-sheet.jr-mapsheet .jr-maphead button{
+  width:auto;flex:0 0 auto;padding:4px 10px;border-radius:14px;font-size:.66rem;font-weight:400;
+  background:transparent;border:1px solid var(--border-color,#2F3346);
+  color:var(--text-muted,#8E94A5);
+}
+.jr-sheet.jr-mapsheet .jr-maphead button:active{border-color:var(--accent-gold,#E5A93C);
+  color:var(--accent-gold,#E5A93C);transform:none}
+.jr-tree{max-height:58vh;overflow-y:auto;overflow-x:hidden;padding:1px 0}
+.jr-tree.inner{max-height:none;overflow:visible;margin-left:-4px}
+.jr-sheet .jr-trow{display:flex;align-items:stretch;gap:0;width:100%;min-width:0}
+.jr-sheet .jr-trow .tw{
+  flex:0 0 auto;width:26px;padding:0;border:none;background:none;border-radius:6px;
+  color:var(--text-muted,#8E94A5);font-size:.7rem;font-weight:400;text-align:center;
+}
+.jr-sheet .jr-trow .tw.dot{
+  display:flex;align-items:center;justify-content:center;color:#3A4152;font-size:.9rem;
+}
+.jr-sheet .jr-trow .tw:active{background:var(--card-bg,#1E202D);transform:none}
+.jr-sheet .jr-trow .tn{
+  flex:1;min-width:0;display:flex;align-items:baseline;gap:6px;
+  padding:5px 8px;border-radius:7px;border:none;background:none;font-weight:400;
+  color:var(--text-main,#E0E2EC);text-align:left;
+}
+.jr-sheet .jr-trow .tn:active{background:var(--card-bg,#1E202D);transform:none}
+.jr-sheet .jr-trow .tn .ic{flex:0 0 auto;font-size:.9rem}
+.jr-sheet .jr-trow .tn .nm{
+  flex:0 1 auto;font-size:.85rem;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.jr-sheet .jr-trow .tn .mt{
+  flex:1 1 auto;min-width:0;font-size:.63rem;color:var(--text-muted,#8E94A5);
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+}
+.jr-sheet .jr-trow.fac .tn .nm{color:#B58BD9;font-weight:400}
+.jr-sheet.jr-affpick .jr-arow{
   display:flex;align-items:center;width:100%;text-align:left;
   padding:14px;font-size:.95rem;font-weight:400;border-radius:10px;
   background:none;border:none;color:var(--text-main,#E0E2EC);
 }
-.jr-affpick .jr-arow .ar{margin-left:auto;color:var(--text-muted,#8E94A5)}
-.jr-affpick .jr-arow:active{background:var(--bg-color,#12131C);transform:none}
+.jr-sheet.jr-affpick .jr-arow .ar{margin-left:auto;color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-affpick .jr-arow:active{background:var(--bg-color,#12131C);transform:none}
 .jr-affpick hr{border:none;border-top:1px solid var(--border-color,#2F3346);margin:5px 0}
 .jr-entsheet .jr-nhead{
   font-size:.72rem; color:var(--text-muted,#8E94A5); letter-spacing:.06em;
@@ -5889,13 +5948,13 @@ body.jr-live #toastContainer{
   font-size:.7rem;color:#5A6073;padding:9px 12px 3px;
   border-top:1px solid var(--border-color,#2F3346);margin-top:6px;
 }
-.jr-entsheet .jr-bl{
+.jr-sheet.jr-entsheet .jr-bl{
   display:block;width:100%;text-align:left;padding:8px 12px;font-weight:400;
   border:none;border-left:2px solid var(--border-color,#2F3346);border-radius:0 8px 8px 0;
   margin:0 0 7px 12px;background:none;color:var(--text-main,#E0E2EC);
 }
-.jr-entsheet .jr-bl.go:active{background:var(--bg-color,#12131C);transform:none}
-.jr-entsheet .jr-bl.go{border-left-color:color-mix(in srgb,var(--accent-gold,#E5A93C) 55%,transparent)}
+.jr-sheet.jr-entsheet .jr-bl.go:active{background:var(--bg-color,#12131C);transform:none}
+.jr-sheet.jr-entsheet .jr-bl.go{border-left-color:color-mix(in srgb,var(--accent-gold,#E5A93C) 55%,transparent)}
 .jr-entsheet .jr-bl .d{
   font-size:.68rem;color:#5A6073;display:flex;align-items:center;gap:6px;margin-bottom:2px;
 }
@@ -6073,15 +6132,25 @@ body.jr-live #toastContainer{
 /* ══ [5] ถาดรอ ════════════════════════════════════════════════════ */
 .jr-scope .jr-tray{display:flex;flex-direction:column;gap:5px;margin-bottom:7px}
 .jr-scope .jr-tray:empty{display:none}
-.jr-scope .jr-pend{display:flex;align-items:center;gap:9px;width:100%;
+.jr-scope .jr-pend{
   background:color-mix(in srgb,var(--jr-light) 10%,transparent);
   border:1px dashed color-mix(in srgb,var(--jr-light) 42%,transparent);
-  border-radius:10px;padding:7px 10px;font-size:.74rem;color:var(--jr-dim);text-align:left}
-.jr-scope .jr-pend .tx{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.jr-scope .jr-pend .add{flex:0 0 auto;color:var(--jr-light);font-weight:700;font-size:.72rem}
-.jr-scope .jr-pend .x{flex:0 0 auto;width:22px;height:22px;border-radius:50%;
-  color:var(--jr-faint);font-size:.8rem;text-align:center;line-height:22px}
+  border-radius:11px;padding:7px 9px 8px;color:var(--jr-dim);text-align:left;
+}
+.jr-scope .jr-pend .hd{display:flex;align-items:flex-start;gap:7px}
+.jr-scope .jr-pend .tx{flex:1;min-width:0;font-size:.74rem;line-height:1.45;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.jr-scope .jr-pend .x{flex:0 0 auto;width:24px;height:24px;margin:-2px -2px 0 0;
+  border-radius:50%;color:var(--jr-faint);font-size:.8rem;text-align:center}
 .jr-scope .jr-pend .x:active{background:var(--jr-line);color:var(--jr-text)}
+.jr-scope .jr-pend .acts{display:flex;gap:6px;margin-top:6px}
+.jr-scope .jr-pend .a{
+  flex:1;padding:5px 8px;border-radius:8px;font-size:.72rem;font-weight:700;
+  background:transparent;border:1px solid color-mix(in srgb,var(--jr-light) 45%,transparent);
+  color:var(--jr-light);text-align:center;
+}
+.jr-scope .jr-pend .a.go{background:var(--jr-light);border-color:var(--jr-light);color:#12131C}
+.jr-scope .jr-pend .a:active{transform:none;opacity:.75}
 
 /* ══ [6] COMPOSER ═════════════════════════════════════════════════ */
 .jr-scope .jr-chips{display:flex;gap:6px;margin-bottom:7px;overflow-x:auto;scrollbar-width:none}
@@ -6123,7 +6192,9 @@ body.jr-live #toastContainer{
 /* ⚠️ แผ่นทั้งหมด append ที่ body จึงอยู่นอก #jr-root/#jr-bar
    ต้องประกาศ box-sizing เองซ้ำ ไม่งั้น width:100% + padding = ล้นขอบขวา */
 .jr-sheet, .jr-sheet *{box-sizing:border-box}
-.jr-sheet{position:fixed;inset:0;z-index:8000;display:flex;align-items:flex-end;
+/* ⚠️ .modal-overlay ของแอปเดิมอยู่ที่ z-index 10000
+   แผ่นเลือกจึงต้องสูงกว่า ไม่งั้นเปิดจากในกล่องเพิ่มสหายแล้วไปโผล่ข้างหลัง */
+.jr-sheet{position:fixed;inset:0;z-index:10050;display:flex;align-items:flex-end;
   background:rgba(0,0,0,.6);animation:jr-fade .15s}
 @keyframes jr-fade{from{opacity:0}to{opacity:1}}
 .jr-sheet .jr-sheet-in{width:100%;max-width:680px;margin:0 auto;
@@ -6158,7 +6229,8 @@ const CFG = {
   maxSysLen   : 240,
   maxPending  : 3,
   armDelay    : 800,
-  alwaysAskWorld: false   // true = ให้เลือกโลกใหม่ทุกครั้งที่เปิดแอป
+  alwaysAskWorld: false,  // true = ให้เลือกโลกใหม่ทุกครั้งที่เปิดแอป
+  strictRules: true       // false = ปิดกติกา Travel/Rest ทั้งชุด
 };
 
 /* ══════ [2] BRIDGE ◄── จุดเดียวที่คุยกับแอปเดิม ═════════════════ */
@@ -6430,11 +6502,17 @@ function jumpTo(entryId) {
 function renderTray() {
   if (!$tray) return;
   $tray.innerHTML = pending.map((p, i) => {
-    const ent = (p.kind && p.name)
-      ? `<span class="ent" data-e="${i}">+ ${ETYPE[p.kind].icon}</span>` : '';
-    return `<button class="jr-pend" data-i="${i}">` +
-      `<span class="tx">${esc(p.t)}</span>${ent}` +
-      `<span class="add">+ เก็บ</span><span class="x" data-x="${i}">✕</span></button>`;
+    const hasEnt = !!(p.kind && p.name);
+    return '<div class="jr-pend" data-i="' + i + '">' +
+      '<div class="hd">' +
+        `<span class="tx">${esc(p.t)}</span>` +
+        `<button class="x" data-x="${i}">✕</button>` +
+      '</div>' +
+      '<div class="acts">' +
+        (hasEnt ? `<button class="a" data-e="${i}">+ บันทึก</button>` : '') +
+        `<button class="a go" data-i="${i}">` +
+          (hasEnt ? '@ บันทึกและอ้างถึง' : '✍️ ลงบันทึก') + '</button>' +
+      '</div></div>';
   }).join('');
   measureBar();
 }
@@ -6447,7 +6525,8 @@ function updateNow() {
     `<div class="d1">วันที่ ${c.day} · ${SEASON_TH[c.season]}</div>` +
     `<div class="d2"><span class="jr-orb ${lit ? 'light' : 'dark'}"></span>` +
       `${WATCH_TH[c.watch]} · ${lit ? '☀️ สว่าง' : '🌑 มืด'}` +
-      (wx ? ` · ${esc(wx)}` : '') + '</div>';
+      (wx ? ` · ${esc(wx)}` : '') +
+      '</div>';
   if ($chap) {
     ensureChapters();
     const viewing = ui.viewCh === 'all' ? null : chapterOf(ui.viewCh);
@@ -6551,11 +6630,20 @@ function clean(msg) {
 }
 
 /** meta = { kind, name } มาจากกล่องผล Oracle ที่สร้าง "ชื่อ" (ดู BOX_KIND) */
+/* ⚠️ doActivityExplore/Forage/Hunt เขียน log() ก่อนเรียก advanceWatch()
+   ถ้าบันทึกทันที ผลลัพธ์จะถูกประทับ "ยามเก่า" แล้วหัวข้อยามใหม่จะโผล่
+   ตามมาข้างล่าง ซึ่งอ่านแล้วสลับที่ — จึงหน่วงไว้ให้นาฬิกาเดินก่อน   */
+const DEFER = [/^🔍/, /^🌿/, /^🏹/, /^🗝️/, /^☕/, /^🌙/, /^✨/];
+
 function route(msg, meta) {
   if (!armed) return;
   const t = clean(msg);
   if (!t) return;
-  if (AUTO.some(r => r.test(t)))   { addSystemEntry(t); return; }
+  if (AUTO.some(r => r.test(t))) {
+    if (DEFER.some(r => r.test(t))) setTimeout(() => addSystemEntry(t), 0);
+    else addSystemEntry(t);
+    return;
+  }
   if (PROMPT.some(r => r.test(t))) { pushPending(t, meta); return; }
 }
 
@@ -6566,8 +6654,7 @@ function pushPending(t, meta) {
   if (pending.length > CFG.maxPending) pending.shift();
   renderTray();
 }
-/** "+ เก็บ" = ลงไดอารี่ + ถ้าเป็นชื่อที่ทอยได้ ให้สร้าง entity แล้วฝังลิงก์เลย
-    (ไม่งั้นผู้เล่นต้องมาก๊อปชื่อไปลิงก์เองทีหลัง ซึ่งย้อนแย้ง)          */
+/** "@ บันทึกและอ้างถึง" = สร้างข้อมูล + เขียนลงไดอารี่พร้อมลิงก์ในคราวเดียว */
 function acceptPending(i) {
   const p = pending[i]; if (!p) return;
   pending.splice(i, 1); renderTray();
@@ -6582,17 +6669,14 @@ function acceptPending(i) {
 }
 function dropPending(i) { pending.splice(i, 1); renderTray(); }
 
-/** [2d] เก็บชื่อที่ทอยได้เป็น entity แล้วแทรก token ให้เขียนต่อทันที */
+/** "+ บันทึก" — เก็บชื่อที่ทอยได้ไว้เป็นข้อมูลเฉย ๆ ไม่ยุ่งกับช่องพิมพ์
+    ใช้ตอนทอยชื่อไว้ก่อนแล้วค่อยเอาไปใช้ทีหลัง                        */
 function entFromPending(i) {
   const p = pending[i];
   if (!p || !p.kind || !p.name) return;
   const e = entCreate(p.kind, p.name);
   pending.splice(i, 1); renderTray();
-  if (e) {
-    insertToken(e);
-    setMode('note');
-    try { showToast('✅ เพิ่ม ' + ETYPE[e.type].icon + ' ' + e.name + ' แล้ว'); } catch (err) {}
-  }
+  if (e) safeToast('✅ บันทึก ' + iconOf(e) + ' ' + e.name + ' แล้ว');
 }
 
 let unpatchLog = null, unpatchToast = null, observer = null;
@@ -6886,7 +6970,7 @@ function bindUI() {
     if (x) { ev.stopPropagation(); dropPending(+x.dataset.x); return; }
     const en = ev.target.closest('[data-e]');
     if (en) { ev.stopPropagation(); entFromPending(+en.dataset.e); return; }
-    const p = ev.target.closest('[data-i]');
+    const p = ev.target.closest('button[data-i]');
     if (p) acceptPending(+p.dataset.i);
   });
 
@@ -6929,7 +7013,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -7041,7 +7125,9 @@ function buildWorldScreen() {
       '<p style="font-size:.85rem;color:var(--text-muted);text-align:center;margin-bottom:15px;">' +
         'แต่ละโลกมี NPC สถานที่ และกลุ่มอำนาจเป็นของตัวเอง<br>' +
         'ตัวละครในโลกเดียวกันใช้ข้อมูลชุดเดียวกัน</p>' +
-      '<button class="btn-green" style="margin-bottom:15px" data-w="new">➕ สร้างโลกใหม่</button>' +
+      '<button class="btn-green" style="margin-bottom:9px" data-w="new">➕ สร้างโลกใหม่</button>' +
+      '<button style="margin-bottom:15px;background:transparent;border:1px solid var(--border-color);' +
+        'color:var(--text-muted);font-weight:400;" data-w="backup">💾 สำรอง / กู้คืนข้อมูล</button>' +
       '<div id="jr-worldList" class="char-card-list"></div>' +
     '</div>';
   host.appendChild(el);
@@ -7084,6 +7170,7 @@ function onWorldClick(ev) {
       saveWorld(); renderWorlds();
       break;
     }
+    case 'backup': openBackup(); break;
     case 'enter':  enterWorld(id); break;
     case 'rename': {
       const w = world.worlds.find(x => x.id === id); if (!w) return;
@@ -7251,7 +7338,7 @@ function hookWorld() {
         if (w && w !== world.current) { world.current = w; saveWorld(); entLoad(w); }
       } catch (e) {}
       const r = o.game.apply(this, arguments);
-      try { applySeasonLen(); activate(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
+      try { applySeasonLen(); activate(); syncTravelBtn(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
       return r;
     };
 
@@ -7361,6 +7448,28 @@ const ETYPE = {
 };
 const TOKEN_RE = /\[\[(npc|place|faction):([A-Za-z0-9_]+)(?:\|([^\]]*))?\]\]/g;
 
+/* ระดับของสถานที่ ใหญ่ → เล็ก · ใช้ไอคอนต่างกันเพื่อให้กวาดตาแล้วรู้ทันที
+   เก็บที่ ent.scale (1-6) ค่าเริ่มต้น 6 = สถานที่ทั่วไป              */
+const PLACE_SCALE = [
+  { n: 1, icon: '👑', label: 'อาณาจักร' },
+  { n: 2, icon: '🏛️', label: 'นคร' },
+  { n: 3, icon: '🏰', label: 'เมือง' },
+  { n: 4, icon: '🏘️', label: 'หมู่บ้าน' },
+  { n: 5, icon: '⛺', label: 'ชุมชน' },
+  { n: 6, icon: '📍', label: 'สถานที่' }
+];
+const scaleOf = e => PLACE_SCALE[Math.min(5, Math.max(0, ((e && e.scale) || 6) - 1))];
+
+/** ไอคอนที่ควรใช้แทน entity นี้ — สถานที่ใช้ตามระดับ ที่เหลือใช้ของชนิด */
+function iconOf(e) {
+  if (!e) return '❓';
+  return e.type === 'place' ? scaleOf(e).icon : ETYPE[e.type].icon;
+}
+function labelOf(e) {
+  if (!e) return '';
+  return e.type === 'place' ? scaleOf(e).label : ETYPE[e.type].label;
+}
+
 /* กล่องผลลัพธ์ Oracle → ชนิด entity (ใช้ตอนกด "+ NPC" ในถาดรอ) */
 const BOX_KIND = {
   nameNpcResult    : 'npc',
@@ -7453,7 +7562,7 @@ function linkify(escaped) {
     const e = entGet(id);
     const show = alias || (e ? e.name : '(ถูกลบแล้ว)');
     const cls  = e ? 'jr-ent' : 'jr-ent gone';
-    return `<span class="${cls}" data-t="${type}" data-ent="${id}">${esc(show)}</span>`;
+    return `<span class="${cls}" data-t="${type}" data-s="${e && e.type === 'place' ? ((e.scale)||6) : ''}" data-ent="${id}">${esc(show)}</span>`;
   });
 }
 
@@ -7545,14 +7654,14 @@ function openPicker(opts) {
     }
     if (e.type === 'place') {
       const pp = placePath(e.id);
-      return pp.length ? 'ใน ' + ((entGet(pp[0]) || {}).name || '') : '';
+      return scaleOf(e).label + (pp.length ? ' · ใน ' + ((entGet(pp[0]) || {}).name || '') : '');
     }
     return entField(e, 'focus') || '';
   };
   const rowHTML = e => {
     const sub = subOf(e);
     return `<button class="jr-prow" data-pick="${e.id}">` +
-      `<span class="ic">${ETYPE[e.type].icon}</span>` +
+      `<span class="ic">${iconOf(e)}</span>` +
       '<span class="tx">' +
         `<b>${esc(e.name)}</b>` +
         (sub ? `<i>${esc(sub)}</i>` : '') +
@@ -7733,7 +7842,7 @@ function relText(ent, key) {
   if (!r || !r.k) return '';
   if (AFF_KIND[r.k] && !r.id) return AFF_KIND[r.k].icon + ' ' + AFF_KIND[r.k].label;
   const tgt = entGet(r.id);
-  return tgt ? ETYPE[tgt.type].icon + ' ' + tgt.name : '(ถูกลบแล้ว)';
+  return tgt ? iconOf(tgt) + ' ' + tgt.name : '(ถูกลบแล้ว)';
 }
 
 function relSet(id, key, k, targetId) {
@@ -7779,7 +7888,7 @@ function affLabel(e) {
   if (!r || !r.k) return 'ยังไม่ระบุสังกัด';
   if (!r.id) return AFF_KIND[r.k].icon + ' ' + AFF_KIND[r.k].label;
   const t = entGet(r.id);
-  return t ? ETYPE[t.type].icon + ' ' + t.name : 'สังกัดที่ถูกลบแล้ว';
+  return t ? iconOf(t) + ' ' + t.name : 'สังกัดที่ถูกลบแล้ว';
 }
 
 /* ป้ายชื่อทุกอันคัดมาจากหัวข้อการ์ดในแท็บ Oracle ตรง ๆ
@@ -7913,6 +8022,116 @@ function chooseRel(id, key, done) {
   document.body.appendChild(el);
 }
 
+
+/* ── แผนผังสถานที่ทั้งโลก ────────────────────────────────────────
+   แสดงเป็นต้นไม้จริง ไม่ใช่รายการเรียงกัน เพื่อให้เห็นว่าอะไรอยู่ในอะไร
+   สำคัญกับแคมเปญใหญ่ที่มีอาณาจักร → นคร → เมือง → หมู่บ้าน ซ้อนกันหลายชั้น */
+function placeChildren(id) {
+  return ents.list
+    .filter(x => x.type === 'place' && (relGet(x, 'parent') || {}).id === id)
+    .sort((a, b) => ((a.scale || 6) - (b.scale || 6)) || a.name.localeCompare(b.name, 'th'));
+}
+function rootPlaces() {
+  return ents.list
+    .filter(x => x.type === 'place' && !((relGet(x, 'parent') || {}).id &&
+                 entGet(relGet(x, 'parent').id)))
+    .sort((a, b) => ((a.scale || 6) - (b.scale || 6)) || a.name.localeCompare(b.name, 'th'));
+}
+
+/* เก็บว่าโหนดไหนถูกกางไว้ — ยุบได้เพื่อไม่ให้เละเวลามีหลายอาณาจักร */
+const treeOpen = {};
+function countTree(list, seen) {
+  seen = seen || {}; let n = 0;
+  list.forEach(e => {
+    if (seen[e.id]) return; seen[e.id] = 1;
+    n += 1 + countTree(placeChildren(e.id), seen) + childrenOf(e.id, 'base', 'faction').length;
+  });
+  return n;
+}
+
+function treeHTML(list, depth, seen) {
+  depth = depth || 0; seen = seen || {};
+  return list.map(e => {
+    if (seen[e.id] || depth > 6) return '';          // กันผูกวน
+    seen[e.id] = 1;
+    const kids = placeChildren(e.id);
+    const fac  = childrenOf(e.id, 'base', 'faction');
+    const mem  = membersOf(e.id);
+    const kid  = kids.length + fac.length;
+    const open = treeOpen[e.id] !== false;           // ค่าเริ่มต้น = กาง
+    const bits = [scaleOf(e).label];
+    if (fac.length) bits.push('⚑' + fac.length);
+    if (mem.length) bits.push('👤' + mem.length);
+    if (kid && !open) bits.push('▸ ' + kid);
+
+    return '<div class="jr-trow" style="padding-left:' + (depth * 15) + 'px">' +
+             (kid ? `<button class="tw" data-tw="${e.id}">${open ? '▾' : '▸'}</button>`
+                  : '<span class="tw dot">·</span>') +
+             `<button class="tn" data-go="${e.id}">` +
+               `<span class="ic">${iconOf(e)}</span>` +
+               `<span class="nm">${esc(e.name)}</span>` +
+               `<span class="mt">${bits.join(' · ')}</span>` +
+             '</button>' +
+           '</div>' +
+           (open ? treeHTML(kids, depth + 1, seen) +
+             fac.map(f =>
+               '<div class="jr-trow fac" style="padding-left:' + ((depth + 1) * 15) + 'px">' +
+                 '<span class="tw dot">·</span>' +
+                 `<button class="tn" data-go="${f.id}">` +
+                   '<span class="ic">⚑</span>' +
+                   `<span class="nm">${esc(f.name)}</span>` +
+                   `<span class="mt">${esc(entField(f, 'focus') || 'กลุ่มอำนาจ')}</span>` +
+                 '</button></div>').join('')
+            : '');
+  }).join('');
+}
+
+function openPlaceMap() {
+  entSync();
+  const roots = rootPlaces();
+  /* ต้นไม้ใหญ่ → ยุบไว้ก่อน เหลือแค่ชั้นบนสุด จะได้ไม่เละตั้งแต่เปิด */
+  if (countTree(roots) > 14)
+    ents.list.forEach(e => {
+      /* ต้องยุบ "โหนดที่มีลูก" — การยุบโหนดที่มีแม่ไม่มีผล
+         เพราะการมองเห็นขึ้นกับสถานะของแม่ ไม่ใช่ของตัวเอง */
+      if (e.type === 'place' && (placeChildren(e.id).length ||
+          childrenOf(e.id, 'base', 'faction').length)) treeOpen[e.id] = false;
+    });
+
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-mapsheet';
+  const body = () =>
+    roots.length ? treeHTML(roots) : '<div class="jr-pempty">ยังไม่มีสถานที่ในโลกนี้</div>';
+
+  el.innerHTML = '<div class="jr-sheet-in">' +
+    `<div class="jr-ptitle">🗺️ แผนผัง ${esc(worldName(world.current))}</div>` +
+    '<div class="jr-maphead">' +
+      `<span>${ents.list.filter(x => x.type === 'place').length} สถานที่ · ` +
+      `${ents.list.filter(x => x.type === 'faction').length} กลุ่ม</span>` +
+      '<button data-all="1">ขยายทั้งหมด</button>' +
+      '<button data-all="0">ยุบทั้งหมด</button>' +
+    '</div>' +
+    `<div class="jr-tree">${body()}</div>` +
+    '<button class="jr-pcancel">ปิด</button></div>';
+
+  const redraw = () => { el.querySelector('.jr-tree').innerHTML = body(); };
+
+  el.addEventListener('click', ev => {
+    if (ev.target === el || ev.target.closest('.jr-pcancel')) { el.remove(); return; }
+    const al = ev.target.closest('[data-all]');
+    if (al) {
+      const on = al.dataset.all === '1';
+      ents.list.forEach(e => { if (e.type === 'place') treeOpen[e.id] = on; });
+      redraw(); return;
+    }
+    const tw = ev.target.closest('[data-tw]');
+    if (tw) { treeOpen[tw.dataset.tw] = (treeOpen[tw.dataset.tw] === false); redraw(); return; }
+    const g = ev.target.closest('[data-go]');
+    if (g) { el.remove(); openEntSheet(g.dataset.go); }
+  });
+  document.body.appendChild(el);
+}
+
 /* ── แผ่นข้อมูล entity + backlinks ทั้งโลก ─────────────────────── */
 function backlinks(id) {
   const out = [];
@@ -7969,14 +8188,22 @@ function openEntSheet(id) {
 
     el.innerHTML = '<div class="jr-sheet-in">' +
       '<div class="jr-ehead">' +
-        `<span class="ic">${ETYPE[e.type].icon}</span>` +
-        `<div><b>${esc(e.name)}</b><span class="ty">${ETYPE[e.type].label}` +
+        `<span class="ic">${iconOf(e)}</span>` +
+        `<div><b>${esc(e.name)}</b><span class="ty">${labelOf(e)}` +
         (e.born ? ` · พบวันที่ ${e.born}` : '') +
         (() => { const pp = placePath(id);
           return pp.length ? ' · ' + pp.map(x => esc((entGet(x) || {}).name || '')).join(' ‹ ') : ''; })() +
         `</span></div>` +
       '</div>' +
       (fields.length ? `<div class="jr-fields">${fieldHTML}</div>` : '') +
+      (e.type === 'place'
+        ? '<div class="jr-fields jr-scalerow"><div class="jr-frow">' +
+            '<span class="lb">ระดับ</span>' +
+            '<div class="jr-scales">' + PLACE_SCALE.map(s =>
+              `<button class="sc${((e.scale || 6) === s.n) ? ' on' : ''}" data-sc="${s.n}">` +
+              `${s.icon}<i>${s.label}</i></button>`).join('') + '</div>' +
+          '</div></div>'
+        : '') +
       (entRels(e.type).length
         ? '<div class="jr-fields jr-rels">' + entRels(e.type).map(([k, lb]) => {
             const v = relText(e, k);
@@ -7993,7 +8220,7 @@ function openEntSheet(id) {
         esc(e.notes || '') + '</textarea>' +
       (e.type !== 'npc' ? (() => {
         const chip = (x, extra) =>
-          `<button class="jr-mem" data-go="${x.id}">${ETYPE[x.type].icon} ${esc(x.name)}` +
+          `<button class="jr-mem" data-go="${x.id}">${iconOf(x)} ${esc(x.name)}` +
           (extra ? `<span class="r">${esc(extra)}</span>` : '') + '</button>';
         let out = '';
         const mem = membersOf(id);
@@ -8002,10 +8229,10 @@ function openEntSheet(id) {
             ? '<div class="jr-memlist">' + mem.map(x => chip(x, entField(x, 'role'))).join('') + '</div>'
             : '<div class="jr-pempty">ยังไม่มีใครสังกัดที่นี่</div>');
         if (e.type === 'place') {
-          const sub = childrenOf(id, 'parent', 'place');
+          const sub = placeChildren(id);
           const fac = childrenOf(id, 'base', 'faction');
-          if (sub.length) out += '<div class="jr-blhead">สถานที่ย่อย ' + sub.length + '</div>' +
-            '<div class="jr-memlist">' + sub.map(x => chip(x)).join('') + '</div>';
+          if (sub.length) out += '<div class="jr-blhead">ภายในที่นี่</div>' +
+            `<div class="jr-tree inner">${treeHTML(sub)}</div>`;
           if (fac.length) out += '<div class="jr-blhead">กลุ่มที่ตั้งฐานที่นี่ ' + fac.length + '</div>' +
             '<div class="jr-memlist">' + fac.map(x => chip(x, entField(x, 'focus'))).join('') + '</div>';
         }
@@ -8032,8 +8259,10 @@ function openEntSheet(id) {
                        el.querySelector(`.fv[data-k="${r[0]}"]`));
       return;
     }
+    if (b.dataset.sc)   { e.scale = +b.dataset.sc; entSave(); reopen(); return; }
     if (b.dataset.relx) { relSet(id, b.dataset.relx, null); reopen(); return; }
     if (b.dataset.rel)  { chooseRel(id, b.dataset.rel, reopen); return; }
+    if (b.dataset.tw)   { treeOpen[b.dataset.tw] = (treeOpen[b.dataset.tw] === false); reopen(); return; }
     if (b.dataset.go)   { closeEnt(); openEntSheet(b.dataset.go); return; }
     if (b.dataset.jump) { closeEnt(); jumpTo(b.dataset.jump); return; }
     const s = b.dataset.s;
@@ -8158,7 +8387,9 @@ function openChapterMenu() {
     '<button data-a="new">➕ เริ่มบทใหม่</button>' +
     `<button data-a="read">${ui.read ? '💬 กลับโหมดแชท' : '📖 โหมดอ่าน (ซ่อนระบบ/นอกเรื่อง)'}</button>` +
     '<button data-a="pin">📌 ดูเฉพาะที่ปักหมุด</button>' +
+    '<button data-a="map">🗺️ แผนผังสถานที่</button>' +
     '<button data-a="export">📤 ส่งออกเป็น Markdown</button>' +
+    '<button data-a="backup">💾 สำรอง / กู้คืนข้อมูล</button>' +
     '<button data-a="close">ปิด</button>' +
   '</div>';
 
@@ -8185,7 +8416,9 @@ function openChapterMenu() {
       if (t !== null) newChapter(t);
     } else if (act === 'read')   setRead(!ui.read);
     else if (act === 'pin')      openFind({ pinned: true });
+    else if (act === 'map')      openPlaceMap();
     else if (act === 'export')   openExport();
+    else if (act === 'backup')   openBackup();
   });
   document.body.appendChild(el);
 }
@@ -8501,7 +8734,10 @@ function hookClock() {
   window.renderClockCard = function () {
     const r = orig.apply(this, arguments);
     clearTimeout(clockTimer);
-    clockTimer = setTimeout(() => { try { render(); } catch (e) {} }, 40);
+    clockTimer = setTimeout(() => {
+      try { render(); } catch (e) {}
+      try { syncTravelBtn(); } catch (e) {}     // ปุ่มถูกวาดใหม่ ต้องเขียนโควตากลับ
+    }, 40);
     return r;
   };
   unpatchClock = () => { window.renderClockCard = orig; unpatchClock = null; };
@@ -8520,6 +8756,416 @@ function hookNpcModal() {
   unpatchNpc = () => { window.openNpcModal = orig; unpatchNpc = null; };
 }
 
+
+/* ══════ [21] สำรอง / กู้คืนข้อมูลทั้งก้อน ══════════════════════
+   เก็บทุก key ที่ขึ้นต้นด้วย 'plight_' ไว้เป็นไฟล์เดียว :
+     plight_characters_list_v3   ตัวละครทั้งหมด (ของแอปเดิม)
+     plight_world_v1             โลก + การผูกตัวละครเข้าโลก
+     plight_ent_v1::<worldId>    NPC / สถานที่ / กลุ่ม ของแต่ละโลก
+     plight_journal_v1::<charId> บันทึกของแต่ละตัวละคร
+   เก็บเป็น "สตริงดิบ" ไม่ parse ซ้ำ เพื่อไม่ให้ข้อมูลเพี้ยนตอนแปลงกลับ
+   ═══════════════════════════════════════════════════════════════ */
+const BK_TAG   = 'plight-journal-backup';
+const BK_PREFIX = 'plight_';
+const BK_UNDO  = '__jr_undo_snapshot';      // ไม่ขึ้นต้น plight_ จะได้ไม่ถูกสำรองซ้อนตัวเอง
+
+function bkKeys() {
+  return Store.keys().filter(k => k.indexOf(BK_PREFIX) === 0);
+}
+
+function bkCollect() {
+  const out = {};
+  bkKeys().forEach(k => { const v = Store.read(k); if (v != null) out[k] = v; });
+  return out;
+}
+
+/** นับของในก้อนข้อมูล เพื่อโชว์ให้ดูก่อนตัดสินใจ */
+function bkSummary(map) {
+  const s = { worlds: 0, chars: 0, entries: 0, ents: 0, journals: 0 };
+  const J = k => { try { return JSON.parse(map[k]); } catch (e) { return null; } };
+  Object.keys(map).forEach(k => {
+    if (k === 'plight_world_v1') { const w = J(k); s.worlds = (w && w.worlds || []).length; }
+    else if (k === 'plight_characters_list_v3') { const c = J(k); s.chars = (c || []).length; }
+    else if (k.indexOf('plight_ent_v1::') === 0) { const e = J(k); s.ents += ((e && e.list) || []).length; }
+    else if (k.indexOf('plight_journal_v1::') === 0) {
+      const b = J(k); const n = ((b && b.entries) || []).length;
+      if (n) { s.journals++; s.entries += n; }
+    }
+  });
+  return s;
+}
+const bkText = s =>
+  `${s.worlds} โลก · ${s.chars} ตัวละคร · ${s.entries} บันทึก · ${s.ents} ข้อมูลในโลก`;
+
+function bkBuild() {
+  const map = bkCollect();
+  return JSON.stringify({
+    app: BK_TAG, v: 1,
+    at: new Date().toISOString(),
+    summary: bkSummary(map),
+    data: map
+  }, null, 1);
+}
+
+function bkParse(raw) {
+  let p;
+  try { p = JSON.parse(raw); } catch (e) { return { err: 'ไฟล์ไม่ใช่ JSON ที่อ่านได้' }; }
+  if (!p || p.app !== BK_TAG) return { err: 'ไม่ใช่ไฟล์สำรองของแอปนี้' };
+  if (!p.data || typeof p.data !== 'object') return { err: 'ไฟล์สำรองไม่มีข้อมูล' };
+  const bad = Object.keys(p.data).filter(k => typeof p.data[k] !== 'string');
+  if (bad.length) return { err: 'ข้อมูลบางส่วนเสียหาย: ' + bad.slice(0, 3).join(', ') };
+  return { ok: p, summary: bkSummary(p.data) };
+}
+
+/** รวมสองก้อนแบบ "เติมของที่ขาด ไม่ทับของเดิม" */
+function bkMerge(cur, inc) {
+  const out = Object.assign({}, cur);
+  const J = v => { try { return JSON.parse(v); } catch (e) { return null; } };
+
+  Object.keys(inc).forEach(k => {
+    if (!(k in out)) { out[k] = inc[k]; return; }
+    const a = J(out[k]), b = J(inc[k]);
+    if (!a || !b) return;                                   // อ่านไม่ออก = ไม่แตะของเดิม
+
+    if (k === 'plight_characters_list_v3' && Array.isArray(a) && Array.isArray(b)) {
+      const have = {}; a.forEach(c => { if (c && c.id) have[c.id] = 1; });
+      b.forEach(c => { if (c && c.id && !have[c.id]) a.push(c); });
+      out[k] = JSON.stringify(a); return;
+    }
+    if (k === 'plight_world_v1') {
+      const have = {}; (a.worlds || []).forEach(w => { have[w.id] = 1; });
+      (b.worlds || []).forEach(w => { if (!have[w.id]) a.worlds.push(w); });
+      a.charWorld = Object.assign({}, b.charWorld || {}, a.charWorld || {});
+      out[k] = JSON.stringify(a); return;
+    }
+    if (k.indexOf('plight_ent_v1::') === 0) {
+      const have = {}; (a.list || []).forEach(e => { have[e.id] = 1; });
+      (b.list || []).forEach(e => { if (!have[e.id]) a.list.push(e); });
+      out[k] = JSON.stringify(a); return;
+    }
+    if (k.indexOf('plight_journal_v1::') === 0) {
+      const have = {}; (a.entries || []).forEach(e => { have[e.id] = 1; });
+      (b.entries || []).forEach(e => { if (!have[e.id]) a.entries.push(e); });
+      a.entries.sort((x, y) => (x.day - y.day) || (x.watch - y.watch));
+      const hc = {}; (a.chapters || []).forEach(c => { hc[c.id] = 1; });
+      (b.chapters || []).forEach(c => { if (!hc[c.id]) (a.chapters = a.chapters || []).push(c); });
+      out[k] = JSON.stringify(a); return;
+    }
+  });
+  return out;
+}
+
+function bkApply(map, mode) {
+  Store.write(BK_UNDO, JSON.stringify(bkCollect()));       // ถ่ายรูปไว้ก่อนเสมอ
+  const next = (mode === 'merge') ? bkMerge(bkCollect(), map) : map;
+  if (mode !== 'merge') bkKeys().forEach(k => { if (!(k in next)) Store.drop(k); });
+  Object.keys(next).forEach(k => Store.write(k, next[k]));
+  return bkSummary(next);
+}
+
+function bkUndo() {
+  const raw = Store.read(BK_UNDO);
+  if (!raw) return false;
+  let map; try { map = JSON.parse(raw); } catch (e) { return false; }
+  bkKeys().forEach(k => { if (!(k in map)) Store.drop(k); });
+  Object.keys(map).forEach(k => Store.write(k, map[k]));
+  Store.drop(BK_UNDO);
+  return true;
+}
+
+/* ── หน้าจอ ───────────────────────────────────────────────────── */
+function openBackup() {
+  const now = bkSummary(bkCollect());
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-bksheet';
+  el.innerHTML = '<div class="jr-sheet-in">' +
+    '<div class="jr-ptitle">💾 สำรอง / กู้คืนข้อมูล</div>' +
+    `<div class="jr-bknow">ตอนนี้มี <b>${bkText(now)}</b></div>` +
+
+    '<div class="jr-bksec">สำรองข้อมูล</div>' +
+    '<div class="jr-erow">' +
+      '<button data-b="file">📥 บันทึกเป็นไฟล์</button>' +
+      '<button data-b="copy">📋 คัดลอก</button>' +
+    '</div>' +
+
+    '<div class="jr-bksec">กู้คืนข้อมูล</div>' +
+    '<input type="file" id="jr-bkfile" accept=".json,application/json" hidden>' +
+    '<button data-b="pick" class="jr-bkpick">📁 เลือกไฟล์สำรอง…</button>' +
+    '<textarea class="jr-bkpaste" placeholder="หรือวางข้อความสำรองที่นี่…"></textarea>' +
+    '<div class="jr-ftabs jr-bkmode">' +
+      '<button data-m="replace" class="on">แทนที่ทั้งหมด</button>' +
+      '<button data-m="merge">เติมเฉพาะที่ขาด</button>' +
+    '</div>' +
+    '<div class="jr-bkprev"></div>' +
+    '<button data-b="restore" class="jr-bkgo">↩️ กู้คืน</button>' +
+    (Store.read(BK_UNDO) ? '<button data-b="undo" class="danger">⏪ ย้อนกลับก่อนกู้คืนครั้งล่าสุด</button>' : '') +
+    '<button data-b="close">ปิด</button>' +
+  '</div>';
+  document.body.appendChild(el);
+
+  let mode = 'replace', staged = null;
+  const prev  = el.querySelector('.jr-bkprev');
+  const paste = el.querySelector('.jr-bkpaste');
+  const fileI = el.querySelector('#jr-bkfile');
+
+  const stage = raw => {
+    const r = bkParse(raw);
+    if (r.err) { staged = null; prev.className = 'jr-bkprev bad'; prev.textContent = '⚠️ ' + r.err; return; }
+    staged = r.ok;
+    prev.className = 'jr-bkprev ok';
+    prev.innerHTML = `✅ อ่านไฟล์ได้ · <b>${bkText(r.summary)}</b>` +
+      (r.ok.at ? `<br><span class="d">สำรองเมื่อ ${esc(String(r.ok.at).slice(0, 16).replace('T', ' '))}</span>` : '');
+  };
+
+  paste.addEventListener('input', () => { if (paste.value.trim()) stage(paste.value); });
+  fileI.addEventListener('change', () => {
+    const f = fileI.files && fileI.files[0]; if (!f) return;
+    const rd = new FileReader();
+    rd.onload = () => { paste.value = ''; stage(String(rd.result)); };
+    rd.onerror = () => { prev.className = 'jr-bkprev bad'; prev.textContent = '⚠️ อ่านไฟล์ไม่สำเร็จ'; };
+    rd.readAsText(f);
+  });
+
+  el.addEventListener('click', ev => {
+    const mb = ev.target.closest('[data-m]');
+    if (mb) {
+      mode = mb.dataset.m;
+      el.querySelectorAll('[data-m]').forEach(x => x.classList.toggle('on', x === mb));
+      return;
+    }
+    const b = ev.target.closest('[data-b]');
+    if (!b) { if (ev.target === el) el.remove(); return; }
+    const act = b.dataset.b;
+
+    if (act === 'file') {
+      const md = bkBuild();
+      try {
+        const blob = new Blob([md], { type: 'application/json' });
+        const a = document.createElement('a');
+        const d = new Date(), pad = n => String(n).padStart(2, '0');
+        a.href = URL.createObjectURL(blob);
+        a.download = `plight-backup-${d.getFullYear()}${pad(d.getMonth() + 1)}${pad(d.getDate())}-` +
+                     `${pad(d.getHours())}${pad(d.getMinutes())}.json`;
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+        safeToast('💾 บันทึกไฟล์สำรองแล้ว');
+      } catch (e) { safeToast('⚠️ บันทึกไฟล์ไม่สำเร็จ'); }
+      return;
+    }
+    if (act === 'copy') {
+      const md = bkBuild();
+      paste.value = md; paste.focus(); paste.select();
+      let ok = false; try { ok = document.execCommand('copy'); } catch (e) {}
+      if (!ok && navigator.clipboard) navigator.clipboard.writeText(md).then(
+        () => safeToast('📋 คัดลอกแล้ว'), () => safeToast('⚠️ คัดลอกไม่สำเร็จ'));
+      else safeToast(ok ? '📋 คัดลอกแล้ว' : '⚠️ คัดลอกไม่สำเร็จ');
+      paste.value = '';
+      return;
+    }
+    if (act === 'pick') { fileI.click(); return; }
+
+    if (act === 'restore') {
+      if (!staged) { safeToast('⚠️ ยังไม่ได้เลือกไฟล์สำรอง'); return; }
+      const s = bkSummary(staged.data);
+      const msg = mode === 'replace'
+        ? 'แทนที่ข้อมูลทั้งหมดด้วยไฟล์สำรองนี้?\n\n' +
+          'ของเดิม: ' + bkText(now) + '\nจะกลายเป็น: ' + bkText(s) +
+          '\n\n(ยังย้อนกลับได้ทันทีหลังกู้คืน)'
+        : 'เติมเฉพาะสิ่งที่ยังไม่มี?\n\nของเดิมจะไม่ถูกทับ';
+      if (!confirm(msg)) return;
+      try {
+        const after = bkApply(staged.data, mode);
+        alert('✅ กู้คืนแล้ว: ' + bkText(after) + '\n\nแอปจะโหลดใหม่');
+        location.reload();
+      } catch (e) { safeToast('⚠️ กู้คืนไม่สำเร็จ'); }
+      return;
+    }
+    if (act === 'undo') {
+      if (!confirm('ย้อนข้อมูลกลับไปเป็นก่อนกู้คืนครั้งล่าสุด?')) return;
+      if (bkUndo()) { alert('⏪ ย้อนกลับแล้ว — แอปจะโหลดใหม่'); location.reload(); }
+      else safeToast('⚠️ ไม่มีจุดย้อนกลับ');
+      return;
+    }
+    el.remove();
+  });
+}
+
+
+/* ══════ [22] กติกา Travel / Rest ═══════════════════════════════
+   2) เดินทางได้ 2 watch ต่อรอบ · ครั้งที่ 3 ถือเป็นเร่งรีบ → เตือน แล้ว +1 Fatigue
+   3) Long Rest คืนโควตาเดินทางเป็น 2 watch
+   4) Short Rest ติดกันสองครั้งไม่ได้ · Long Rest ติดกันได้ (กินเสบียงตามกฎเดิม)
+   5) Long Rest ติดกันครั้งที่ 2 ขึ้นไป → สุ่ม Encounter เสมอ
+      ใช้ rollTravelDifficultyText() ซึ่งอิง getCasusStage() อยู่แล้ว
+
+   สถานะเก็บแยกต่อตัวละคร ไม่ยัดลงเซฟของแอปเดิม
+     plight_rules_v1::<charId> = { day, travel, lastRest, longStreak }
+   ปิดกติกาทั้งชุดได้ที่ CFG.strictRules = false
+   ═══════════════════════════════════════════════════════════════ */
+const RKEY = 'plight_rules_v1::';
+const TRAVEL_QUOTA = 2;
+
+let rules = { day: 0, travel: 0, lastRest: null, longStreak: 0 };
+let rulesId = null, inRest = false, unpatchRules = null;
+
+function loadRules() {
+  rulesId = bridge.getCharId();
+  rules = { day: 0, travel: 0, lastRest: null, longStreak: 0 };
+  try {
+    const raw = Store.read(RKEY + rulesId);
+    if (raw) Object.assign(rules, JSON.parse(raw) || {});
+  } catch (e) {}
+}
+function saveRules() { if (rulesId) Store.write(RKEY + rulesId, JSON.stringify(rules)); }
+
+/** เรียกก่อนใช้ทุกครั้ง — สลับตัวละคร หรือขึ้นวันใหม่ ต้องรีเซ็ตโควตา */
+function syncRules() {
+  if (bridge.getCharId() !== rulesId) loadRules();
+  let d = 0;
+  try { d = campaignDay | 0; } catch (e) {}
+  /* ⚠️ โควตาเดินทางผูกกับ "การพัก" ไม่ใช่ปฏิทิน
+     ถ้าคืนโควตาตอนขึ้นวันใหม่ จะเลี่ยงกฎได้ด้วยการกดกิจกรรมจนข้ามวัน
+     แล้วเดินทางต่อโดยไม่ต้องพักเลย — คืนเฉพาะตอน Long/Full Rest เท่านั้น
+     lastRest/longStreak ก็ไม่ล้างตรงนี้ เพราะพักยาวข้ามเที่ยงคืนเป็นเคยปกติ */
+  if (rules.day !== d) { rules.day = d; saveRules(); }
+  return rules;
+}
+const travelLeft = () => Math.max(0, TRAVEL_QUOTA - syncRules().travel);
+
+function addFatigue(n) {
+  try {
+    const f = document.getElementById('fatigueValue');
+    if (!f) return;
+    f.value = (parseInt(f.value, 10) || 0) + n;
+    if (typeof handleFatigueChange === 'function') handleFatigueChange();
+    if (typeof autoSaveCurrentCharacter === 'function') autoSaveCurrentCharacter();
+  } catch (e) {}
+}
+
+/** เขียนโควตาลงบนปุ่ม Travel ของแอปเดิม → "🚶 Travel 2/2"
+    renderClockCard() วาดปุ่มใหม่ทุกครั้ง จึงต้องเขียนซ้ำหลังทุกการวาด   */
+function syncTravelBtn() {
+  if (!CFG.strictRules) return;
+  try {
+    const b = document.querySelector('[onclick="doTravel()"]');
+    if (!b) return;
+    const left = travelLeft();
+    b.innerHTML = `🚶 Travel <span class="jr-tq${left ? '' : ' out'}">${left}/${TRAVEL_QUOTA}</span>`;
+  } catch (e) {}
+}
+
+function hookRules() {
+  if (unpatchRules || !CFG.strictRules) return;
+  const o = {
+    travel: window.doTravel,
+    short : window.restShort,
+    long  : window.restLong,
+    full  : window.restFull,
+    adv   : window.advanceWatch
+  };
+
+  if (typeof o.full === 'function')
+    window.restFull = function () {
+      inRest = true;
+      const res = o.full.apply(this, arguments);
+      inRest = false;
+      const r = syncRules();
+      r.travel = 0; r.lastRest = 'long'; r.longStreak = 0;   // พักเต็มที่ = เริ่มนับใหม่
+      saveRules(); syncTravelBtn();
+      return res;
+    };
+
+  /* ── 2) โควตาเดินทาง ── */
+  if (typeof o.travel === 'function')
+    window.doTravel = function () {
+      const r = syncRules();
+      if (r.travel >= TRAVEL_QUOTA) {
+        const ok = confirm(
+          '🧭 เดินทางครบ ' + TRAVEL_QUOTA + ' watch ในรอบนี้แล้ว\n\n' +
+          'ถ้าเดินทางต่อถือเป็นการ "เร่งรีบ" จะได้รับ Fatigue +1\n' +
+          'พัก Long Rest ก่อนจะคืนโควตาให้เต็ม\n\nยืนยันเดินทางต่อ?');
+        if (!ok) return;
+        addFatigue(1);
+        try { log('🧭 <strong>เดินทางเร่งรีบ</strong> — เกินโควตา ' + TRAVEL_QUOTA +
+                  ' watch จึงได้รับ Fatigue +1'); } catch (e) {}
+      }
+      const res = o.travel.apply(this, arguments);
+      const r2 = syncRules();
+      r2.travel++; r2.lastRest = null; r2.longStreak = 0;
+      saveRules(); syncTravelBtn();
+      return res;
+    };
+
+  /* ── 4) Short Rest ห้ามติดกัน ── */
+  if (typeof o.short === 'function')
+    window.restShort = function () {
+      const r = syncRules();
+      if (r.lastRest === 'short') {
+        alert('☕ เพิ่ง Short Rest ไปแล้ว\n\n' +
+              'พัก Short Rest ติดกันสองครั้งไม่ได้ — ต้องทำอย่างอื่นก่อน ' +
+              'หรือเปลี่ยนไปพัก Long Rest');
+        return;
+      }
+      inRest = true;
+      const res = o.short.apply(this, arguments);
+      inRest = false;
+      const r2 = syncRules();
+      r2.lastRest = 'short'; r2.longStreak = 0;
+      saveRules();
+      return res;
+    };
+
+  /* ── 3+4+5) Long Rest ── */
+  if (typeof o.long === 'function')
+    window.restLong = function () {
+      const before = (typeof getTotalFoodRations === 'function') ? getTotalFoodRations() : null;
+      inRest = true;
+      const res = o.long.apply(this, arguments);
+      inRest = false;
+      /* ถ้าเสบียงไม่ลด แปลว่าโดนกฎเดิมปัดตกไป (ไม่มีอาหาร) — ไม่นับ */
+      const after = (typeof getTotalFoodRations === 'function') ? getTotalFoodRations() : null;
+      if (before !== null && after !== null && after >= before) return res;
+
+      const r = syncRules();
+      r.travel = 0;                            // 3) คืนโควตาเดินทาง
+      r.longStreak = (r.lastRest === 'long') ? r.longStreak + 1 : 1;
+      r.lastRest = 'long';
+      saveRules(); syncTravelBtn();
+
+      if (r.longStreak >= 2) {                 // 5) พักยาวติดกัน = เสี่ยงเจอ
+        setTimeout(() => {
+          try {
+            const txt = (typeof rollTravelDifficultyText === 'function')
+              ? rollTravelDifficultyText() : '';
+            log('🧭 <strong>พักยาวติดกัน ' + r.longStreak + ' ครั้ง</strong> — ' +
+                'สุ่มเหตุการณ์ตามสถานการณ์ปัจจุบัน: ' + (txt || 'ไม่มีอะไรเกิดขึ้น'));
+          } catch (e) {}
+        }, 30);
+      }
+      return res;
+    };
+
+  /* ทำอย่างอื่นคั่น = ล้างสถานะ "เพิ่งพัก" */
+  if (typeof o.adv === 'function')
+    window.advanceWatch = function () {
+      const res = o.adv.apply(this, arguments);
+      if (!inRest) {
+        const r = syncRules();
+        if (r.lastRest || r.longStreak) { r.lastRest = null; r.longStreak = 0; saveRules(); }
+      }
+      return res;
+    };
+
+  unpatchRules = () => {
+    window.doTravel     = o.travel;
+    window.restShort    = o.short;
+    window.restLong     = o.long;
+    window.restFull     = o.full;
+    window.advanceWatch = o.adv;
+    unpatchRules = null;
+  };
+}
+
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
 const API = {
   init, render, activate, addEntry, addSystemEntry, route, bridge, CFG,
@@ -8536,11 +9182,15 @@ const API = {
   newChapter, renameChapter, deleteChapter, openChapterMenu, visibleEntries,
   setBackdate, openWatchPick, chapterForDate, ensureChapters,
   openFind, findEntries, setRead, toMarkdown, openExport,
+  openBackup, bkBuild, bkParse, bkApply, bkUndo, bkSummary, bkMerge, bkCollect,
+  syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn,
+  get rules() { return rules; },
   addEntToParty, fillNpcModal, entSummary, injectNpcPick,
   get readMode() { return ui.read; },
   get chapters() { return data.chapters; },
   get viewCh() { return ui.viewCh; }, set viewCh(v) { ui.viewCh = v; render(true); }, entFields, entField, setEntField,
   entRels, relGet, relSet, relText, membersOf, childrenOf, placePath, affLabel, fixWords,
+  PLACE_SCALE, scaleOf, iconOf, labelOf, placeChildren, rootPlaces, openPlaceMap, treeOpen,
   suggestLinks, applySuggest, entFromPending, entRank, recentIds, checkTrigger, TRIGGERS,
   get suggestion() { return ui.suggest; },
   get data()    { return data; },
@@ -8561,6 +9211,7 @@ const API = {
     if (unpatchZero) unpatchZero();
     if (unpatchNpc) unpatchNpc();
     if (unpatchClock) unpatchClock();
+    if (unpatchRules) unpatchRules();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
