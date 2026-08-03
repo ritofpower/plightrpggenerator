@@ -6606,6 +6606,7 @@ function openSheet(id) {
 /* ══════ [9] ROUTING ของ log → บันทึก ════════════════════════════ */
 const AUTO = [
   /^🌅/, /^🍂/, /^⚔️🔥/, /^⚠️/, /^📖 ได้รับ/, /^📜 ได้รับ/,
+  /^😵/, /^😩/, /^🍞/,          // Deprived · Fatigue สะสม · พ้นสถานะ
   /^🧭/,                       // Travel — ผลของการเดินทางแต่ละ Watch
   /^🔍/, /^🌿/, /^🏹/, /^🗝️/,  // Explore / Forage / Hunt / Delve
   /^☕/, /^🌙/, /^✨/, /^💤/,   // Short / Long / Full Rest / นอน
@@ -7338,7 +7339,7 @@ function hookWorld() {
         if (w && w !== world.current) { world.current = w; saveWorld(); entLoad(w); }
       } catch (e) {}
       const r = o.game.apply(this, arguments);
-      try { applySeasonLen(); activate(); syncTravelBtn(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
+      try { applySeasonLen(); activate(); syncTravelBtn(); syncDeprivedUI(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
       return r;
     };
 
@@ -8736,7 +8737,7 @@ function hookClock() {
     clearTimeout(clockTimer);
     clockTimer = setTimeout(() => {
       try { render(); } catch (e) {}
-      try { syncTravelBtn(); } catch (e) {}     // ปุ่มถูกวาดใหม่ ต้องเขียนโควตากลับ
+      try { syncTravelBtn(); syncDeprivedUI(); } catch (e) {}   // การ์ดวาดใหม่ ต้องเขียนกลับ
     }, 40);
     return r;
   };
@@ -9005,12 +9006,12 @@ function openBackup() {
 const RKEY = 'plight_rules_v1::';
 const TRAVEL_QUOTA = 2;
 
-let rules = { day: 0, travel: 0, lastRest: null, longStreak: 0 };
+let rules = { day: 0, travel: 0, lastRest: null, longStreak: 0, deprived: false, deprivedSince: null };
 let rulesId = null, inRest = false, unpatchRules = null;
 
 function loadRules() {
   rulesId = bridge.getCharId();
-  rules = { day: 0, travel: 0, lastRest: null, longStreak: 0 };
+  rules = { day: 0, travel: 0, lastRest: null, longStreak: 0, deprived: false, deprivedSince: null };
   try {
     const raw = Store.read(RKEY + rulesId);
     if (raw) Object.assign(rules, JSON.parse(raw) || {});
@@ -9032,13 +9033,63 @@ function syncRules() {
 }
 const travelLeft = () => Math.max(0, TRAVEL_QUOTA - syncRules().travel);
 
+/** ใช้ adjustStatValue ของแอปเดิม — ทางเดียวกับที่ Travel Difficulty ใช้อยู่
+    จะได้ผ่าน handleFatigueChange() → renderInventorySlots() → เตือนของล้นเป้
+    ครบวงจรเหมือนกัน ไม่ต้องไปแตะ input ตรง ๆ ให้เสี่ยงหลุด                */
 function addFatigue(n) {
+  if (!n) return;
   try {
+    if (typeof adjustStatValue === 'function') { adjustStatValue('fatigueValue', n); return; }
     const f = document.getElementById('fatigueValue');
     if (!f) return;
-    f.value = (parseInt(f.value, 10) || 0) + n;
+    f.value = Math.max(0, (parseInt(f.value, 10) || 0) + n);
     if (typeof handleFatigueChange === 'function') handleFatigueChange();
     if (typeof autoSaveCurrentCharacter === 'function') autoSaveCurrentCharacter();
+  } catch (e) {}
+}
+const nowFatigue = () => {
+  const f = document.getElementById('fatigueValue');
+  return f ? (parseInt(f.value, 10) || 0) : 0;
+};
+const gv = id => { const e = document.getElementById(id); return e ? (parseInt(e.value, 10) || 0) : 0; };
+const dN = n => Math.floor(Math.random() * n) + 1;
+
+/* ── สถานะ Deprived (กติกาหน้า 15) ─────────────────────────────
+   ขาดสิ่งจำเป็น → ฟื้น HP / attribute ไม่ได้
+   ขาดต่อเนื่องเกิน 1 วัน → +1 Fatigue ต่อวัน (กินช่องเป้)
+   Fatigue หายเมื่อ Long Rest "สำเร็จ" (มีเสบียง) หรือ Full Rest   */
+function setDeprived(on, why) {
+  const r = syncRules();
+  if (!!r.deprived === !!on) return;
+  r.deprived = !!on;
+  r.deprivedSince = on ? (function () { try { return campaignDay | 0; } catch (e) { return 0; } })() : null;
+  saveRules(); syncDeprivedUI();
+  try {
+    log(on ? ('😵 <strong>Deprived</strong> — ' + (why || 'ขาดสิ่งจำเป็น') +
+              ' · ฟื้น HP/Attribute ไม่ได้ และจะได้ Fatigue เพิ่มทุกวัน')
+           : ('🍞 <strong>พ้นสถานะ Deprived</strong> — ' + (why || 'ได้พักและกินอิ่มแล้ว')));
+  } catch (e) {}
+}
+
+/** ปุ่มสวิตช์ Deprived ในการ์ดนาฬิกา — วาดใหม่ทุกครั้งที่การ์ดถูกวาด */
+function syncDeprivedUI() {
+  if (!CFG.strictRules) return;
+  try {
+    const tv = document.querySelector('[onclick="doTravel()"]');
+    if (!tv) return;
+    const row = tv.parentNode;
+    let b = document.getElementById('jr-depbtn');
+    if (!b) {
+      b = document.createElement('button');
+      b.id = 'jr-depbtn';
+      b.type = 'button';
+      b.onclick = () => setDeprived(!syncRules().deprived, 'ปรับด้วยตนเอง');
+      row.appendChild(b);
+    }
+    const on = !!syncRules().deprived;
+    b.className = 'jr-dep' + (on ? ' on' : '');
+    b.textContent = on ? '😵 Deprived' : '🍞 ปกติ';
+    b.title = on ? 'กดเพื่อปลดสถานะ Deprived' : 'กดเพื่อทำเครื่องหมาย Deprived';
   } catch (e) {}
 }
 
@@ -9061,17 +9112,45 @@ function hookRules() {
     short : window.restShort,
     long  : window.restLong,
     full  : window.restFull,
-    adv   : window.advanceWatch
+    adv   : window.advanceWatch,
+    day   : window.newDayTick
   };
+
+  /* ── Deprived เกิน 1 วัน → +1 Fatigue ต่อวัน (หน้า 15) ──
+     advanceDay(n) เรียก newDayTick() วันละครั้งพอดี ข้าม 7 วันจึงได้ 7 หน่วย
+     ซึ่งถูกต้องตามกติกา "one for each day"                            */
+  if (typeof o.day === 'function')
+    window.newDayTick = function () {
+      const res = o.day.apply(this, arguments);
+      try {
+        const r = syncRules();
+        if (r.deprived && r.deprivedSince != null) {
+          const today = campaignDay | 0;
+          if (today - r.deprivedSince >= 1) {
+            addFatigue(1);
+            log('😩 <strong>Deprived ต่อเนื่อง</strong> — วันที่ ' +
+                (today - r.deprivedSince) + ' ของการขาดแคลน · Fatigue +1 (รวม ' +
+                nowFatigue() + ' ช่อง)');
+          }
+        }
+      } catch (e) {}
+      return res;
+    };
 
   if (typeof o.full === 'function')
     window.restFull = function () {
+      /* ⚠️ ต้องปลด Deprived "ก่อน" เรียกของเดิม
+         restFull() ข้ามไป 7 วัน → newDayTick() ทำงาน 7 รอบ
+         ถ้ายังติด Deprived อยู่ Fatigue ที่เพิ่งถูกล้างจะถูกใส่กลับ 7 หน่วยทันที */
+      const r0 = syncRules();
+      if (r0.deprived) setDeprived(false, 'Full Rest ล้างสภาวะระยะยาวทั้งหมด');
       inRest = true;
       const res = o.full.apply(this, arguments);
       inRest = false;
       const r = syncRules();
       r.travel = 0; r.lastRest = 'long'; r.longStreak = 0;   // พักเต็มที่ = เริ่มนับใหม่
-      saveRules(); syncTravelBtn();
+      saveRules();
+      syncTravelBtn(); syncDeprivedUI();
       return res;
     };
 
@@ -9080,14 +9159,27 @@ function hookRules() {
     window.doTravel = function () {
       const r = syncRules();
       if (r.travel >= TRAVEL_QUOTA) {
+        /* กติกาหน้า 34 : ดัน watch ที่ 3 ต้องทอย DEX check
+           ถ้าพลาด เสีย d4 DEX และได้ d4 Fatigue */
+        const dex = gv('dexCur');
         const ok = confirm(
           '🧭 เดินทางครบ ' + TRAVEL_QUOTA + ' watch ในรอบนี้แล้ว\n\n' +
-          'ถ้าเดินทางต่อถือเป็นการ "เร่งรีบ" จะได้รับ Fatigue +1\n' +
-          'พัก Long Rest ก่อนจะคืนโควตาให้เต็ม\n\nยืนยันเดินทางต่อ?');
+          'ถ้าดันต่อ ต้องทอย DEX check (d20 ≤ ' + dex + ')\n' +
+          'ถ้าพลาด: เสีย d4 DEX และได้ d4 Fatigue\n' +
+          'พัก Long Rest ก่อนจะคืนโควตาให้เต็ม\n\nยืนยันดันต่อ?');
         if (!ok) return;
-        addFatigue(1);
-        try { log('🧭 <strong>เดินทางเร่งรีบ</strong> — เกินโควตา ' + TRAVEL_QUOTA +
-                  ' watch จึงได้รับ Fatigue +1'); } catch (e) {}
+        const roll = dN(20);
+        const pass = (roll === 1) || (roll !== 20 && roll <= dex);   // 1 สำเร็จเสมอ · 20 พลาดเสมอ
+        if (pass) {
+          try { log(`🧭 <strong>ดันต่อ watch ที่ ${r.travel + 1}</strong> — DEX check ` +
+                    `(d20=${roll} ≤ ${dex}) → ✅ ผ่าน ไม่เสียอะไร`); } catch (e) {}
+        } else {
+          const dd = dN(4), df = dN(4);
+          try { if (typeof adjustStatValue === 'function') adjustStatValue('dexCur', -dd, 'dexMax'); } catch (e) {}
+          addFatigue(df);
+          try { log(`🧭 <strong>ดันต่อ watch ที่ ${r.travel + 1}</strong> — DEX check ` +
+                    `(d20=${roll} vs ${dex}) → ❌ พลาด · DEX -${dd} · Fatigue +${df}`); } catch (e) {}
+        }
       }
       const res = o.travel.apply(this, arguments);
       const r2 = syncRules();
@@ -9106,33 +9198,78 @@ function hookRules() {
               'หรือเปลี่ยนไปพัก Long Rest');
         return;
       }
+      const dep = r.deprived;
+      const hp0 = gv('hpCur');
       inRest = true;
       const res = o.short.apply(this, arguments);
       inRest = false;
+      if (dep) {
+        /* กติกาหน้า 15 : Deprived = ฟื้น HP/Attribute ไม่ได้
+           ปล่อยให้ของเดิมทำงานปกติแล้วค่อยคืนค่า HP กลับ
+           จะได้ไม่ต้องเขียนตรรกะ Short Rest ซ้ำ                     */
+        const el = document.getElementById('hpCur');
+        if (el && gv('hpCur') !== hp0) {
+          el.value = hp0;
+          try { syncPcHpToCombat(); } catch (e) {}
+          try { autoSaveCurrentCharacter(); } catch (e) {}
+        }
+        try { log('😵 <strong>Deprived</strong> — พัก Short Rest แล้วแต่ไม่ฟื้น HP ' +
+                  `(ยังคง ${hp0}/${gv('hpMax')}) ต้องหาเสบียงแล้ว Long Rest ก่อน`); } catch (e) {}
+      }
       const r2 = syncRules();
       r2.lastRest = 'short'; r2.longStreak = 0;
       saveRules();
       return res;
     };
 
-  /* ── 3+4+5) Long Rest ── */
+  /* ── 3+4+5 + Deprived) Long Rest ──
+     ⚠️ ตรงนี้ "ไม่เรียกของเดิม" เพราะ restLong() เดิม return ทิ้งทันที
+        เมื่อไม่มีเสบียง จึงแทรกกลางไม่ได้ ต้องคุมลำดับเองทั้งหมด
+        แต่ยังใช้ฟังก์ชันของแอปเดิมทุกตัว ไม่ได้เขียนตรรกะซ้ำ :
+          consumeFoodRation · syncPcHpToCombat · handleFatigueChange
+          · autoSaveCurrentCharacter · advanceWatch · log
+        ถ้าวันหลังแก้ restLong() เดิม ต้องมาดูตรงนี้ด้วย                */
   if (typeof o.long === 'function')
     window.restLong = function () {
-      const before = (typeof getTotalFoodRations === 'function') ? getTotalFoodRations() : null;
-      inRest = true;
-      const res = o.long.apply(this, arguments);
-      inRest = false;
-      /* ถ้าเสบียงไม่ลด แปลว่าโดนกฎเดิมปัดตกไป (ไม่มีอาหาร) — ไม่นับ */
-      const after = (typeof getTotalFoodRations === 'function') ? getTotalFoodRations() : null;
-      if (before !== null && after !== null && after >= before) return res;
-
       const r = syncRules();
-      r.travel = 0;                            // 3) คืนโควตาเดินทาง
+      const food = (typeof getTotalFoodRations === 'function') ? getTotalFoodRations() : 1;
+      const hpCur = gv('hpCur'), hpMax = gv('hpMax');
+      const wasFull = hpMax > 0 && hpCur >= hpMax;
+      const fed = food >= 1;
+
+      inRest = true;
+      if (fed) {
+        try { consumeFoodRation(1); } catch (e) {}
+        const el = document.getElementById('hpCur');
+        if (el) { el.value = hpMax; try { syncPcHpToCombat(); } catch (e) {} }
+        const fe = document.getElementById('fatigueValue');
+        if (fe) { fe.value = 0; try { handleFatigueChange(); } catch (e) {} }
+        let msg = '🌙 <strong>Long Rest</strong>: ใช้เสบียง 1 หน่วย · ฟื้น HP เต็ม ' +
+                  `(${hpMax}/${hpMax}) · ล้าง Fatigue`;
+        if (wasFull) msg += ` · HP เต็มอยู่แล้ว ทอย d6 ได้ <span class="badge badge-crit">${dN(6)}</span>` +
+                            ' — นำไปเพิ่ม/รักษา Attribute ด้วยตนเอง';
+        else msg += ' · HP ยังไม่เต็ม จึงไม่ได้ d6 เข้า Attribute';
+        try { autoSaveCurrentCharacter(); } catch (e) {}
+        try { log(msg); } catch (e) {}
+        if (r.deprived) setDeprived(false, 'ได้พักและกินอิ่มแล้ว');
+      } else {
+        /* ไม่มีเสบียง — หนังสือไม่ได้ห้ามพัก แค่ "ไม่ได้ผล" (หน้า 37) */
+        try { log('🌙 <strong>Long Rest (ไม่มีเสบียง)</strong>: ใช้เวลา 1 watch ' +
+                  'แต่ไม่ฟื้น HP · ไม่ได้ d6 · Fatigue ไม่ถูกล้าง'); } catch (e) {}
+        try { autoSaveCurrentCharacter(); } catch (e) {}
+        if (!r.deprived) setDeprived(true, 'พักโดยไม่มีเสบียง');
+      }
+
+      r.travel = 0;                                   // คืนโควตาเดินทางทั้งสองกรณี
       r.longStreak = (r.lastRest === 'long') ? r.longStreak + 1 : 1;
       r.lastRest = 'long';
-      saveRules(); syncTravelBtn();
+      saveRules();
 
-      if (r.longStreak >= 2) {                 // 5) พักยาวติดกัน = เสี่ยงเจอ
+      try { advanceWatch(1, false); } catch (e) {}
+      inRest = false;
+      syncTravelBtn(); syncDeprivedUI();
+
+      if (r.longStreak >= 2) {
         setTimeout(() => {
           try {
             const txt = (typeof rollTravelDifficultyText === 'function')
@@ -9142,7 +9279,6 @@ function hookRules() {
           } catch (e) {}
         }, 30);
       }
-      return res;
     };
 
   /* ทำอย่างอื่นคั่น = ล้างสถานะ "เพิ่งพัก" */
@@ -9162,6 +9298,7 @@ function hookRules() {
     window.restLong     = o.long;
     window.restFull     = o.full;
     window.advanceWatch = o.adv;
+    window.newDayTick   = o.day;
     unpatchRules = null;
   };
 }
@@ -9183,7 +9320,7 @@ const API = {
   setBackdate, openWatchPick, chapterForDate, ensureChapters,
   openFind, findEntries, setRead, toMarkdown, openExport,
   openBackup, bkBuild, bkParse, bkApply, bkUndo, bkSummary, bkMerge, bkCollect,
-  syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn,
+  syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn, setDeprived, syncDeprivedUI, addFatigue,
   get rules() { return rules; },
   addEntToParty, fillNpcModal, entSummary, injectNpcPick,
   get readMode() { return ui.read; },
