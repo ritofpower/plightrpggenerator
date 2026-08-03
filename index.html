@@ -5618,6 +5618,9 @@ body.jr-live #toastContainer{
   border-radius:20px; color:var(--text-muted,#8E94A5); font-weight:400;
 }
 #jr-worldBar .jr-wbtn:active{background:var(--card-bg,#1E202D);transform:none}
+#createScreen .jr-seasonnote{
+  font-size:.72rem;color:var(--accent-gold,#E5A93C);margin-top:6px;line-height:1.5;
+}
 #jr-worldList .jr-wmeta{font-size:.78rem;color:var(--text-muted,#8E94A5);margin-top:3px}
 #jr-worldList .char-card-actions button{font-size:.8rem}
 #jr-worldEmpty{text-align:center;padding:20px;color:var(--text-muted,#8E94A5);font-size:.85rem}
@@ -5818,6 +5821,52 @@ body.jr-live #toastContainer{
 }
 .jr-bdsheet .jr-bdgrid button:active{
   background:var(--accent-gold,#E5A93C);color:#12131C;transform:none}
+/* ── ค้นหา ── */
+.jr-find .jr-fq{
+  width:100%;padding:11px 13px;margin-bottom:9px;font-size:16px;
+  background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
+  border-radius:10px;color:var(--text-main,#E0E2EC);
+}
+.jr-find .jr-fq:focus{outline:none;border-color:var(--accent-gold,#E5A93C)}
+.jr-find .jr-ftabs{display:flex;flex-wrap:wrap;gap:5px;margin-bottom:8px}
+.jr-find .jr-ftabs button{
+  width:auto;flex:0 0 auto;padding:5px 11px;border-radius:16px;
+  font-size:.72rem;font-weight:400;background:transparent;
+  border:1px solid var(--border-color,#2F3346);color:var(--text-muted,#8E94A5);
+}
+.jr-find .jr-ftabs button.on{
+  background:var(--accent-gold,#E5A93C);border-color:var(--accent-gold,#E5A93C);
+  color:#12131C;font-weight:700}
+.jr-fcount{font-size:.68rem;color:var(--text-muted,#8E94A5);padding:2px 4px 7px}
+.jr-find .jr-flist{max-height:52vh;overflow-y:auto}
+.jr-sheet.jr-find .jr-frow2{
+  display:flex;flex-direction:column;gap:2px;width:100%;text-align:left;
+  padding:9px 12px;margin-bottom:5px;border-radius:11px;font-weight:400;
+  background:var(--card-bg,#1E202D);border:1px solid transparent;
+  color:var(--text-main,#E0E2EC);
+}
+.jr-sheet.jr-find .jr-frow2:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-sheet.jr-find .jr-frow2 .hd{font-size:.65rem;color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-find .jr-frow2 .sn{font-size:.84rem;line-height:1.5;
+  display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.jr-sheet.jr-find mark{background:color-mix(in srgb,var(--accent-gold,#E5A93C) 45%,transparent);
+  color:var(--text-main,#E0E2EC);border-radius:3px;padding:0 2px}
+
+/* ── ส่งออก ── */
+.jr-export .jr-md{
+  width:100%;height:38vh;padding:11px;font-size:12px;line-height:1.5;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;
+  background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
+  border-radius:10px;color:var(--text-muted,#8E94A5);resize:none;white-space:pre;
+}
+#npcModal .jr-npcpick{
+  width:auto; margin-top:7px; padding:7px 13px; border-radius:18px;
+  font-size:.78rem; font-weight:400; background:transparent;
+  border:1px solid var(--accent-gold,#E5A93C); color:var(--accent-gold,#E5A93C);
+}
+#npcModal .jr-npcpick:active{
+  background:var(--accent-gold,#E5A93C); color:#12131C; transform:none;
+}
 .jr-affpick .jr-arow{
   display:flex;align-items:center;width:100%;text-align:left;
   padding:14px;font-size:.95rem;font-weight:400;border-radius:10px;
@@ -5878,22 +5927,46 @@ body.jr-live #toastContainer{
 .jr-scope .jr-stream{flex:1 1 auto;min-height:0;overflow-y:auto;
   -webkit-overflow-scrolling:touch;padding:14px 15px 20px}
 
-.jr-scope .jr-day{display:flex;align-items:center;gap:9px;margin:26px 0 12px;
-  color:var(--jr-dim);font-size:.68rem;letter-spacing:.1em}
+.jr-scope .jr-day{
+  display:flex; align-items:center; gap:9px; width:100%; margin:26px 0 12px;
+  padding:2px 0; background:none; border:none; font-weight:400;
+  color:var(--jr-dim); font-size:.68rem; letter-spacing:.1em; text-align:left;
+}
+.jr-scope .jr-day .add{
+  flex:0 0 auto; font-size:.72rem; opacity:.35; padding:2px 4px;
+}
+.jr-scope .jr-day:active .add{opacity:1}
+.jr-scope .jr-day:active b{color:var(--jr-text)}
 .jr-scope .jr-day:first-child{margin-top:2px}
 .jr-scope .jr-day::after{content:"";flex:1;height:1px;background:var(--jr-line)}
 .jr-scope .jr-day b{color:var(--jr-light);font-size:.85rem;letter-spacing:.02em}
 
 .jr-scope .jr-gap{
-  display:block; width:100%; margin:12px 0; padding:7px 12px; font-size:.7rem;
-  color:var(--jr-faint); font-style:italic; font-weight:400; text-align:center;
-  background:transparent; border:1px dashed var(--jr-line); border-radius:10px;
-}
-.jr-scope .jr-gap:active{
-  border-color:var(--jr-light); color:var(--jr-light); transform:none;
+  margin:14px 0; padding:0; font-size:.68rem; letter-spacing:.06em;
+  color:var(--jr-faint); font-style:italic; text-align:center;
 }
 
 /* แถบเขียนย้อนวัน */
+.jr-scope .jr-readbar{
+  display:none; width:100%; padding:11px; border-radius:12px; font-size:.85rem;
+  background:var(--jr-line); color:var(--jr-text); text-align:center; font-weight:600;
+}
+#jr-bar.jr-reading .jr-readbar{display:block}
+/* ⚠️ buildShell() ยกลูกของ .jr-composer ออกมาเป็นลูกตรงของ #jr-bar
+   แล้วลบตัวห่อทิ้ง จึงต้องเล็งลูกโดยตรง ห้ามเล็ง .jr-composer     */
+#jr-bar.jr-reading .jr-chips,
+#jr-bar.jr-reading .jr-speakrow,
+#jr-bar.jr-reading .jr-row,
+#jr-bar.jr-reading .jr-tray,
+#jr-bar.jr-reading .jr-backbar{display:none !important}
+.jr-scope .jr-chmark{
+  display:flex; align-items:center; gap:9px; margin:30px 0 6px;
+  font-size:.78rem; font-weight:700; color:var(--jr-light);
+}
+.jr-scope .jr-chmark::before,.jr-scope .jr-chmark::after{
+  content:""; flex:1; height:1px;
+  background:color-mix(in srgb,var(--jr-light) 35%,transparent);
+}
 .jr-scope .jr-backbar{display:none;flex-wrap:wrap;align-items:center;gap:5px;
   margin-bottom:7px;padding:7px 9px;border-radius:10px;
   background:color-mix(in srgb,var(--jr-ooc) 14%,transparent);
@@ -5980,6 +6053,22 @@ body.jr-live #toastContainer{
 .jr-scope .jr-empty{text-align:center;padding:52px 26px;color:var(--jr-faint);
   font-size:.85rem;line-height:1.9}
 .jr-scope .jr-empty b{display:block;color:var(--jr-dim);font-size:1rem;margin-bottom:8px}
+
+/* ── โหมดอ่าน : ข้อมูลชุดเดิม คนละเลนส์ ── */
+#jr-root.jr-read .jr-e{display:block;margin:0 0 4px}
+#jr-root.jr-read .jr-e .bub{
+  max-width:100%;background:none !important;border:none;border-radius:0;
+  padding:2px 2px 8px;font-style:normal;color:var(--jr-text);
+  font-size:15.5px;line-height:1.78;
+}
+#jr-root.jr-read .jr-e.t-speech .bub{
+  padding-left:14px;border-left:2px solid var(--jr-line);color:#CFD6E4;font-style:italic;
+}
+#jr-root.jr-read .jr-e.t-speech .who{font-size:.72rem;letter-spacing:.06em}
+#jr-root.jr-read .jr-e.pinned .bub{box-shadow:none}
+#jr-root.jr-read .jr-day{margin-top:30px;pointer-events:none}
+#jr-root.jr-read .jr-gap{margin:22px 0}
+#jr-root.jr-read .jr-stream{padding:14px 20px 24px}
 
 /* ══ [5] ถาดรอ ════════════════════════════════════════════════════ */
 .jr-scope .jr-tray{display:flex;flex-direction:column;gap:5px;margin-bottom:7px}
@@ -6115,7 +6204,7 @@ let armed   = false;
 let pending = [];
 let wired   = false;
 let devClock = { day: 1, watch: 0, season: 0 };
-const ui = { mode: 'note', panelOpen: false, tab: null, suggest: null, speakerEnt: null, pcSpeech: false, viewCh: null, backdate: null };
+const ui = { mode: 'note', panelOpen: false, tab: null, suggest: null, speakerEnt: null, pcSpeech: false, viewCh: null, backdate: null, read: false };
 
 const Store = (function () {
   let ok = true, mem = {};
@@ -6169,6 +6258,21 @@ const isLight = (s, w) => !!LIGHT[s][w];
 const uid = () => 'e' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
 
 /** ปกติต่อท้าย — แต่ถ้าเขียนย้อนวัน ต้องแทรกให้ถูกที่ ไม่งั้นหัวข้อวันจะสลับ */
+/** บทที่ "ควร" เป็นเจ้าของวันนี้ — ดูจาก entry ตัวสุดท้ายที่ไม่เกินเวลานั้น
+    ไม่งั้นเขียนย้อนไปวันที่ 12 จะไปโผล่หัวบทล่าสุดแทนที่จะอยู่ในบทเดิม */
+function chapterForDate(day) {
+  ensureChapters();
+  /* 1) ถ้าวันนั้นมีบันทึกอยู่แล้ว → ใช้บทเดียวกับวันนั้น
+        (ถ้าเทียบระดับ "ยาม" จะเพี้ยน เช่นบทใหม่เริ่มตอนบ่าย
+         แล้วเขียนย้อนตอนเช้าวันเดียวกัน จะหล่นไปบทก่อนหน้า) */
+  const same = data.entries.find(e => e.day === day);
+  if (same && same.chId) return same.chId;
+  /* 2) ไม่มีบันทึกวันนั้น → ใช้บทของบันทึกสุดท้ายก่อนหน้า */
+  let best = null;
+  for (const e of data.entries) { if (e.day < day) best = e; else break; }
+  return (best && best.chId) || data.chapters[0].id;
+}
+
 function insertSorted(e) {
   const last = data.entries[data.entries.length - 1];
   if (!last || e.day > last.day || (e.day === last.day && e.watch >= last.watch)) {
@@ -6194,11 +6298,11 @@ function addEntry(type, text, speaker) {
               day: bd ? bd.day : c.day,
               watch: bd ? bd.watch : c.watch,
               season: c.season,
-              chId: data.curCh,
+              chId: bd ? chapterForDate(bd.day) : data.curCh,
               pinned: false, refs: extractRefs(text + ' ' + (speaker || '')), epId: null };
   if (bd) e.back = true;
   if (type === 'speech' && speaker) e.speaker = speaker.trim();
-  if (ui.viewCh !== 'all' && ui.viewCh !== data.curCh) ui.viewCh = data.curCh;
+  if (ui.viewCh !== 'all' && ui.viewCh !== e.chId) ui.viewCh = e.chId;   // ไปให้เห็นที่มันไปตก
   insertSorted(e);
   if (type !== 'sys') {                      // [2e] เฉพาะข้อความที่ผู้เล่นเขียนเอง
     const s = suggestLinks(text);
@@ -6234,7 +6338,7 @@ function togglePin(id) {
 
 /* ══════ [7] RENDER ══════════════════════════════════════════════ */
 let $root, $panel, $bar, $stream, $input, $send, $now, $speaker, $speakRow, $pcsp, $dev, $tray;
-let $chap, $backbar;
+let $chap, $backbar, $readbar;
 const esc = s => String(s).replace(/[&<>"]/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[m]));
 
 function render(toBottom) {
@@ -6246,13 +6350,19 @@ function render(toBottom) {
     $stream.innerHTML = '<div class="jr-empty"><b>ยังไม่มีบันทึก</b>' +
       'เริ่มจากประโยคสั้น ๆ ก็พอ<br>เดี๋ยววันและช่วงยามจะขึ้นให้เอง</div>';
   } else {
-    let html = '', pDay = null, pWatch = null;
+    let html = '', pDay = null, pWatch = null, pCh = null;
     for (const e of list) {
+      if (ui.viewCh === 'all' && e.chId !== pCh) {
+        const ch = chapterOf(e.chId);
+        if (ch) html += `<div class="jr-chmark">📖 ${esc(ch.title)}</div>`;
+        pCh = e.chId; pDay = null; pWatch = null;
+      }
       if (e.day !== pDay) {
         if (pDay !== null && e.day - pDay > 1)
-          html += `<button class="jr-gap" data-gap="${pDay + 1}" data-gapto="${e.day - 1}">` +
-                  `— ผ่านไป ${e.day - pDay - 1} วัน · แตะเพื่อเติมเรื่อง —</button>`;
-        html += `<div class="jr-day"><b>วันที่ ${e.day}</b><span>${SEASON_TH[e.season]}</span></div>`;
+          html += `<div class="jr-gap">— ผ่านไป ${e.day - pDay - 1} วัน —</div>`;
+        html += `<button class="jr-day" data-day="${e.day}">` +
+                `<b>วันที่ ${e.day}</b><span>${SEASON_TH[e.season]}</span>` +
+                (ui.read ? '' : '<span class="add">✍️</span>') + '</button>';
         pDay = e.day; pWatch = null;
       }
       if (e.watch !== pWatch) {
@@ -6591,6 +6701,7 @@ function buildShell() {
   $bar = document.createElement('div');
   $bar.id = 'jr-bar';
   $bar.className = 'jr-scope';
+  $bar.appendChild($readbar);
   $bar.appendChild($backbar);
   $bar.appendChild($tray);
   while ($composer.firstChild) $bar.appendChild($composer.firstChild);
@@ -6696,11 +6807,14 @@ function buildUI() {
   $root.innerHTML =
     '<div class="jr-top">' +
       '<button class="jr-chap"><span class="t"></span><span class="v">▾</span></button>' +
+      '<button class="jr-find-btn" title="ค้นหา">🔍</button>' +
+      '<button class="jr-read-btn" title="โหมดอ่าน">📖</button>' +
       '<div class="jr-now"></div></div>' +
     '<div class="jr-dev"><span>dev clock</span>' +
       '<button data-d="day">วัน +1</button><button data-d="watch">ยาม +1</button>' +
       '<button data-d="season">ฤดู +1</button></div>' +
     '<div class="jr-stream"></div>' +
+    '<button class="jr-readbar">✍️ กลับมาเขียน</button>' +
     '<div class="jr-backbar"></div>' +
     '<div class="jr-tray"></div>' +
     '<div class="jr-composer">' +
@@ -6724,6 +6838,7 @@ function buildUI() {
   $dev       = $root.querySelector('.jr-dev');
   $tray      = $root.querySelector('.jr-tray');
   $backbar   = $root.querySelector('.jr-backbar');
+  $readbar   = $root.querySelector('.jr-readbar');
   $chap      = $root.querySelector('.jr-chap');
   $composer  = $root.querySelector('.jr-composer');
 }
@@ -6734,6 +6849,11 @@ function bindUI() {
   if (lk) lk.onclick = () => openPicker();
   if ($pcsp) $pcsp.onclick = () => setPcSpeech(!ui.pcSpeech);
   if ($chap) $chap.onclick = openChapterMenu;
+  const fb = $root.querySelector('.jr-find-btn');
+  if (fb) fb.onclick = () => openFind();
+  const rb = $root.querySelector('.jr-read-btn');
+  if (rb) rb.onclick = () => setRead(!ui.read);
+  if ($readbar) $readbar.onclick = () => setRead(false);
   if ($backbar) $backbar.addEventListener('click', ev => {
     const w = ev.target.closest('[data-bw]');
     if (w) { setBackdate(ui.backdate.day, +w.dataset.bw); return; }
@@ -6751,8 +6871,8 @@ function bindUI() {
   $input.addEventListener('input', () => { autoGrow(); refreshSend(); checkTrigger(); });
 
   $stream.addEventListener('click', ev => {
-    const gp = ev.target.closest('[data-gap]');
-    if (gp) { openBackdate(+gp.dataset.gap, +gp.dataset.gapto); return; }
+    const dy = ev.target.closest('[data-day]');
+    if (dy) { openWatchPick(+dy.dataset.day); return; }
     const sg = ev.target.closest('[data-sug]');
     if (sg) { ev.stopPropagation(); sg.dataset.sug === 'ok' ? applySuggest() : dropSuggest(); return; }
     const en = ev.target.closest('[data-ent]');
@@ -6809,7 +6929,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -6837,6 +6957,22 @@ let unpatchWorld = null;
 
 const wUid = () => 'w' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5);
 
+const SEASON_LEN_DEFAULT = 30;
+const worldSeasonLen = id =>
+  ((world.worlds.find(w => w.id === (id || world.current)) || {}).seasonLen) || SEASON_LEN_DEFAULT;
+
+/** ดันค่าจากโลกลงตัวแปรของแอปเดิม — เรียกทุกครั้งที่เข้าเกม/เปลี่ยนค่า
+    seasonChangeInterval เดิมเป็นของตัวละคร ทำให้ตัวละครในโลกเดียวกัน
+    มีความยาวฤดูไม่ตรงกัน ซึ่งขัดกับการเล่นขนานในโลกเดียว              */
+function applySeasonLen() {
+  try {
+    const n = worldSeasonLen();
+    if (typeof seasonChangeInterval === 'number' && seasonChangeInterval !== n)
+      seasonChangeInterval = n;
+    else if (typeof seasonChangeInterval === 'number') seasonChangeInterval = n;
+  } catch (e) {}
+}
+
 function loadWorld() {
   try {
     const raw = Store.read(WKEY);
@@ -6848,7 +6984,8 @@ function loadWorld() {
 
   /* ── migrate: ต้องมีอย่างน้อย 1 โลกเสมอ ── */
   if (!world.worlds.length)
-    world.worlds.push({ id: wUid(), name: 'โลกแรก', born: Date.now() });
+    world.worlds.push({ id: wUid(), name: 'โลกแรก', born: Date.now(), seasonLen: SEASON_LEN_DEFAULT });
+  world.worlds.forEach(w => { if (!w.seasonLen) w.seasonLen = SEASON_LEN_DEFAULT; });
 
   /* ── ตัวละครเก่าที่ยังไม่มีสังกัด → ยัดเข้าโลกแรก (ไม่มีอะไรหาย) ── */
   migrateUnmapped();
@@ -6923,7 +7060,8 @@ function renderWorlds() {
 function worldCard(w, n) {
   return '<div class="char-card-info">' +
            '<h4>' + esc(w.name) + '</h4>' +
-           '<div class="jr-wmeta">' + (n ? n + ' ตัวละคร' : 'ยังไม่มีตัวละคร') + '</div>' +
+           '<div class="jr-wmeta">' + (n ? n + ' ตัวละคร' : 'ยังไม่มีตัวละคร') +
+             ' · ฤดูละ ' + (w.seasonLen || SEASON_LEN_DEFAULT) + ' วัน</div>' +
          '</div>' +
          '<div class="char-card-actions">' +
            '<button class="btn-green" data-w="enter" data-id="' + w.id + '">เข้าโลก</button>' +
@@ -6939,7 +7077,10 @@ function onWorldClick(ev) {
     case 'new': {
       const n = prompt('ตั้งชื่อโลกใหม่', 'โลกที่ ' + (world.worlds.length + 1));
       if (n === null) return;
-      world.worlds.push({ id: wUid(), name: (n || 'ไม่มีชื่อ').trim(), born: Date.now() });
+      const d = prompt('หนึ่งฤดูยาวกี่วันในโลกนี้?\n(ใช้ร่วมกันทุกตัวละครในโลก)', SEASON_LEN_DEFAULT);
+      if (d === null) return;
+      world.worlds.push({ id: wUid(), name: (n || 'ไม่มีชื่อ').trim(), born: Date.now(),
+                          seasonLen: Math.max(1, parseInt(d, 10) || SEASON_LEN_DEFAULT) });
       saveWorld(); renderWorlds();
       break;
     }
@@ -6948,7 +7089,11 @@ function onWorldClick(ev) {
       const w = world.worlds.find(x => x.id === id); if (!w) return;
       const n = prompt('เปลี่ยนชื่อโลก', w.name);
       if (n === null) return;
-      w.name = (n || w.name).trim(); saveWorld(); renderWorlds();
+      w.name = (n || w.name).trim();
+      const d = prompt('หนึ่งฤดูยาวกี่วันในโลกนี้?\n(มีผลกับทุกตัวละครในโลก)',
+                       w.seasonLen || SEASON_LEN_DEFAULT);
+      if (d !== null) w.seasonLen = Math.max(1, parseInt(d, 10) || SEASON_LEN_DEFAULT);
+      saveWorld(); renderWorlds(); applySeasonLen();
       break;
     }
     case 'del': deleteWorld(id); break;
@@ -6985,7 +7130,7 @@ function showWorldScreen() {
 
 function enterWorld(id) {
   if (!world.worlds.some(w => w.id === id)) return;
-  world.current = id; saveWorld(); entLoad(id);
+  world.current = id; saveWorld(); entLoad(id); applySeasonLen();
   try { goToSelectScreen(); } catch (e) {
     document.querySelectorAll('.app-screen').forEach(s => s.classList.remove('active'));
     const sc = document.getElementById('selectScreen');
@@ -7045,12 +7190,20 @@ function filterCharCards() {
 function hookWorld() {
   if (unpatchWorld) return;
   const o = {
+    create2: window.goToCreateScreen,
     render : window.renderCharacterListCard,
     create : window.confirmCreateCharacter,
     select : window.goToSelectScreen,
     del    : window.deleteCharacter,
     game   : window.goToGameScreen
   };
+
+  if (typeof o.create2 === 'function')
+    window.goToCreateScreen = function () {
+      const r = o.create2.apply(this, arguments);
+      try { tameCharSeasonField(); } catch (e) {}
+      return r;
+    };
 
   if (typeof o.render === 'function')
     window.renderCharacterListCard = function () {
@@ -7098,11 +7251,12 @@ function hookWorld() {
         if (w && w !== world.current) { world.current = w; saveWorld(); entLoad(w); }
       } catch (e) {}
       const r = o.game.apply(this, arguments);
-      try { activate(); } catch (e) {}
+      try { applySeasonLen(); activate(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
       return r;
     };
 
   unpatchWorld = () => {
+    window.goToCreateScreen        = o.create2;
     window.renderCharacterListCard = o.render;
     window.confirmCreateCharacter  = o.create;
     window.goToSelectScreen        = o.select;
@@ -7113,8 +7267,27 @@ function hookWorld() {
 }
 
 /** เรียกตอน init : ยังไม่เลือกโลก + อยู่จอรายชื่อ → เด้งไปจอโลกก่อน */
+/** ช่อง "ความยาวฤดู" ในหน้าสร้างตัวละครไม่ใช้แล้ว — ค่าอยู่ที่โลก
+    ปิดช่องแล้วอธิบายแทน ไม่ลบทิ้งเพื่อไม่ให้โค้ดเดิมที่อ่านค่าพัง      */
+function tameCharSeasonField() {
+  const el = document.getElementById('newCharSeasonInterval');
+  if (!el) return;
+  el.readOnly = true;
+  el.style.opacity = '.5';
+  el.value = worldSeasonLen();          // ต้องรีเฟรชทุกครั้ง โค้ดเดิมรีเซ็ตเป็น 30
+  let note = (el.parentNode || el).querySelector('.jr-seasonnote');
+  if (!note) {
+    note = document.createElement('div');
+    note.className = 'jr-seasonnote';
+    (el.parentNode || el).appendChild(note);
+  }
+  note.textContent = '🌍 ค่านี้มาจากโลก “' + worldName(world.current) +
+                     '” แล้ว — แก้ได้ที่จอเลือกโลก';
+}
+
 function bootWorld() {
   loadWorld();
+  applySeasonLen();
   buildWorldScreen();
   hookWorld();
   const sc = document.getElementById('selectScreen');
@@ -7842,6 +8015,7 @@ function openEntSheet(id) {
       `<div class="jr-bllist">${body}</div>` +
       '<div class="jr-erow">' +
         '<button data-s="write">✍️ เขียนถึง</button>' +
+        (e.type === 'npc' ? '<button data-s="party">👥 เข้าปาร์ตี้</button>' : '') +
         '<button data-s="rename">✏️ เปลี่ยนชื่อ</button>' +
         '<button data-s="del" class="danger">🗑️ ลบ</button>' +
       '</div>' +
@@ -7863,6 +8037,7 @@ function openEntSheet(id) {
     if (b.dataset.go)   { closeEnt(); openEntSheet(b.dataset.go); return; }
     if (b.dataset.jump) { closeEnt(); jumpTo(b.dataset.jump); return; }
     const s = b.dataset.s;
+    if (s === 'party') { closeEnt(); addEntToParty(id); return; }
     if (s === 'write') {
       closeEnt();
       insertToken(e); setMode('note');
@@ -7960,8 +8135,9 @@ function deleteChapter(id) {
 /** entry ที่จะเอามาแสดง ตามบทที่กำลังดู */
 function visibleEntries() {
   ensureChapters();
-  if (ui.viewCh === 'all') return data.entries;
-  return data.entries.filter(e => e.chId === ui.viewCh);
+  let l = (ui.viewCh === 'all') ? data.entries : data.entries.filter(e => e.chId === ui.viewCh);
+  if (ui.read) l = l.filter(e => e.type !== 'sys' && e.type !== 'ooc');   // โหมดอ่าน = เหลือแต่เนื้อเรื่อง
+  return l;
 }
 
 function openChapterMenu() {
@@ -7980,6 +8156,9 @@ function openChapterMenu() {
         `<span class="ed" data-ed="${c.id}">✏️</span></button>`).join('') +
     '<hr>' +
     '<button data-a="new">➕ เริ่มบทใหม่</button>' +
+    `<button data-a="read">${ui.read ? '💬 กลับโหมดแชท' : '📖 โหมดอ่าน (ซ่อนระบบ/นอกเรื่อง)'}</button>` +
+    '<button data-a="pin">📌 ดูเฉพาะที่ปักหมุด</button>' +
+    '<button data-a="export">📤 ส่งออกเป็น Markdown</button>' +
     '<button data-a="close">ปิด</button>' +
   '</div>';
 
@@ -8000,30 +8179,43 @@ function openChapterMenu() {
     const a = ev.target.closest('[data-a]');
     if (!a) { if (ev.target === el) el.remove(); return; }
     el.remove();
-    if (a.dataset.a === 'new') {
+    const act = a.dataset.a;
+    if (act === 'new') {
       const t = prompt('ชื่อบทใหม่', 'บทที่ ' + (data.chapters.length + 1));
       if (t !== null) newChapter(t);
-    }
+    } else if (act === 'read')   setRead(!ui.read);
+    else if (act === 'pin')      openFind({ pinned: true });
+    else if (act === 'export')   openExport();
   });
   document.body.appendChild(el);
 }
 
 /* ── เขียนย้อนวัน ─────────────────────────────────────────────── */
-function openBackdate(from, to) {
-  const days = [];
-  for (let d = from; d <= to && days.length < 40; d++) days.push(d);
+/** แตะหัวข้อวัน → เลือกยาม แล้วเขียนเพิ่มในวันนั้นได้เลย
+    จำเป็นเพราะ newDayTick() เขียน "🌅 เริ่มวันที่ N" ให้ทุกวันอยู่แล้ว
+    วันจึงต่อเนื่องเสมอ ไม่มีช่องว่างให้กดหลัง Full Rest             */
+function openWatchPick(day) {
+  const now = clock();
   const el = document.createElement('div');
   el.className = 'jr-sheet jr-bdsheet';
   el.innerHTML = '<div class="jr-sheet-in">' +
-    '<div class="jr-ptitle">✍️ เติมเรื่องระหว่างวันที่ผ่านไป</div>' +
+    `<div class="jr-ptitle">✍️ เขียนเพิ่มใน<b> วันที่ ${day}</b></div>` +
+    '<div class="jr-fcount">' +
+      (day === now.day ? 'วันปัจจุบัน' : 'ย้อนหลัง ' + (now.day - day) + ' วัน') +
+      (() => { const ch = chapterOf(chapterForDate(day));
+               return ch ? ' · จะลงใน “' + esc(ch.title) + '”' : ''; })() + '</div>' +
     '<div class="jr-bdgrid">' +
-      days.map(d => `<button data-d="${d}">วันที่ ${d}</button>`).join('') +
-    '</div><button data-d="" class="jr-pcancel">ยกเลิก</button></div>';
+      WATCH_TH.map((w, i) => `<button data-w="${i}">${w}</button>`).join('') +
+    '</div><button data-w="" class="jr-pcancel">ยกเลิก</button></div>';
   el.addEventListener('click', ev => {
-    const b = ev.target.closest('[data-d]');
+    const b = ev.target.closest('[data-w]');
     if (!b) { if (ev.target === el) el.remove(); return; }
     el.remove();
-    if (b.dataset.d) setBackdate(+b.dataset.d, 0);
+    if (b.dataset.w === '') return;
+    const w = +b.dataset.w;
+    /* ถ้าเป็นวัน+ยามปัจจุบันอยู่แล้ว ไม่ต้องตั้งโหมดย้อนหลังให้รก */
+    if (day === now.day && w === now.watch) { setBackdate(null); $input && $input.focus(); return; }
+    setBackdate(day, w);
   });
   document.body.appendChild(el);
 }
@@ -8047,6 +8239,287 @@ function renderBackBar() {
   measureBar();
 }
 
+
+/* ══════ [19] ค้นหา · ปักหมุด · โหมดอ่าน · ส่งออก ═══════════════
+   เฟส 4-5 ของโรดแมป — ทั้งหมดทำงานบน data.entries ชุดเดิม
+   ไม่เพิ่มโครงข้อมูลใหม่ ใช้ chId/pinned/refs ที่มีอยู่แล้ว
+   ═══════════════════════════════════════════════════════════════ */
+const FIND_TYPES = [
+  ['note',   '✒ เรื่องราว'],
+  ['speech', '💬 บทพูด'],
+  ['sys',    '⚙ ระบบ'],
+  ['ooc',    '📝 นอกเรื่อง']
+];
+
+/** ข้อความที่ใช้ค้น = เนื้อความ + ชื่อผู้พูด + ชื่อ entity ที่อ้างถึง */
+function searchText(e) {
+  let s = e.text + ' ' + (e.speaker || '');
+  (e.refs || []).forEach(id => { const t = entGet(id); if (t) s += ' ' + t.name; });
+  return s.replace(TOKEN_RE, ' ').toLowerCase();
+}
+
+function findEntries(q, f) {
+  q = (q || '').trim().toLowerCase();
+  return data.entries.filter(e => {
+    if (f.pinned && !e.pinned) return false;
+    if (f.types.length && f.types.indexOf(e.type) < 0) return false;
+    if (f.ch && f.ch !== 'all' && e.chId !== f.ch) return false;
+    return !q || searchText(e).indexOf(q) >= 0;
+  });
+}
+
+/** ตัดข้อความรอบคำที่เจอ แล้วไฮไลต์ — ตัด token ออกก่อนเพื่อไม่ให้เห็นโค้ดดิบ */
+function snippet(e, q) {
+  let plain = e.text.replace(TOKEN_RE, (_, ty, id) => {
+    const t = entGet(id); return t ? t.name : '';
+  });
+  if (!q) return esc(plain.slice(0, 110));
+  const i = plain.toLowerCase().indexOf(q.toLowerCase());
+  if (i < 0) return esc(plain.slice(0, 110));
+  const a = Math.max(0, i - 28);
+  const cut = (a ? '…' : '') + plain.slice(a, i + q.length + 60);
+  const j = cut.toLowerCase().indexOf(q.toLowerCase());
+  return esc(cut.slice(0, j)) + '<mark>' + esc(cut.slice(j, j + q.length)) +
+         '</mark>' + esc(cut.slice(j + q.length));
+}
+
+function openFind(preset) {
+  ensureChapters();
+  const f = { types: [], pinned: !!(preset && preset.pinned), ch: 'all' };
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-find';
+  el.innerHTML = '<div class="jr-sheet-in">' +
+    '<input class="jr-fq" placeholder="ค้นหาในบันทึกทั้งเล่ม">' +
+    '<div class="jr-ftabs">' +
+      `<button data-p="1" class="${f.pinned ? 'on' : ''}">📌 ปักหมุด</button>` +
+      FIND_TYPES.map(([k, lb]) => `<button data-t="${k}">${lb}</button>`).join('') +
+    '</div>' +
+    '<div class="jr-fcount"></div>' +
+    '<div class="jr-flist"></div>' +
+    '<button class="jr-pcancel">ปิด</button>' +
+  '</div>';
+  document.body.appendChild(el);
+
+  const q = el.querySelector('.jr-fq');
+  const list = el.querySelector('.jr-flist');
+  const cnt = el.querySelector('.jr-fcount');
+
+  const draw = () => {
+    const term = q.value.trim();
+    const hits = findEntries(term, f).slice().reverse();       // ใหม่สุดก่อน
+    cnt.textContent = hits.length ? `พบ ${hits.length} บันทึก` :
+      (term || f.pinned || f.types.length ? 'ไม่พบ' : 'พิมพ์เพื่อค้นหา หรือเลือกตัวกรอง');
+    list.innerHTML = hits.slice(0, 120).map(e => {
+      const ch = chapterOf(e.chId);
+      return `<button class="jr-frow2" data-go="${e.id}">` +
+        `<span class="hd">${e.pinned ? '📌 ' : ''}วันที่ ${e.day} · ${WATCH_TH[e.watch]}` +
+        (ch ? ` · ${esc(ch.title)}` : '') + '</span>' +
+        `<span class="sn">${snippet(e, term)}</span></button>`;
+    }).join('');
+  };
+
+  q.addEventListener('input', draw);
+  el.addEventListener('click', ev => {
+    if (ev.target === el || ev.target.closest('.jr-pcancel')) { el.remove(); return; }
+    const pb = ev.target.closest('[data-p]');
+    if (pb) { f.pinned = !f.pinned; pb.classList.toggle('on', f.pinned); draw(); return; }
+    const tb = ev.target.closest('[data-t]');
+    if (tb) {
+      const k = tb.dataset.t, i = f.types.indexOf(k);
+      i >= 0 ? f.types.splice(i, 1) : f.types.push(k);
+      tb.classList.toggle('on', i < 0); draw(); return;
+    }
+    const g = ev.target.closest('[data-go]');
+    if (g) {
+      const e = findEntry(g.dataset.go);
+      el.remove();
+      if (e && e.chId !== ui.viewCh && ui.viewCh !== 'all') { ui.viewCh = e.chId; }
+      jumpTo(g.dataset.go);
+    }
+  });
+  draw();
+  setTimeout(() => q.focus(), 60);
+}
+
+/* ── โหมดอ่าน ─────────────────────────────────────────────────
+   ข้อมูลชุดเดียวกัน คนละเลนส์ : ซ่อนระบบ+นอกเรื่อง เหลือแต่เนื้อเรื่อง  */
+function setRead(on) {
+  ui.read = !!on;
+  if ($root) $root.classList.toggle('jr-read', ui.read);
+  if ($bar)  $bar.classList.toggle('jr-reading', ui.read);   // ซ่อนช่องพิมพ์ตอนอ่าน
+  const rb = $root && $root.querySelector('.jr-read-btn');
+  if (rb) rb.classList.toggle('on', ui.read);
+  if (ui.read) setBackdate(null);
+  measureBar(); render(true);
+}
+
+/* ── ส่งออกเป็น Markdown ─────────────────────────────────────── */
+function toMarkdown(scope) {
+  ensureChapters();
+  const list = (scope === 'all') ? data.entries : data.entries.filter(e => e.chId === scope);
+  const name = bridge.getCharName();
+  const chTitle = scope === 'all' ? 'บันทึกทั้งหมด' : (chapterOf(scope) || {}).title || '';
+  let out = `# ${chTitle}\n\n_บันทึกของ ${name} · โลก ${worldName(world.current)}_\n`;
+  let pDay = null, pWatch = null;
+
+  /* ในเนื้อความ : ชื่อ entity เป็นตัวหนา
+     ในช่องผู้พูด : เอาชื่อล้วน เพราะจะถูกทำตัวหนาอีกชั้นอยู่แล้ว */
+  const nameOf = (id, alias) => { const t = entGet(id); return alias || (t ? t.name : '?'); };
+  const plain     = s => String(s).replace(TOKEN_RE, (_, ty, id, alias) => '**' + nameOf(id, alias) + '**');
+  const plainName = s => String(s).replace(TOKEN_RE, (_, ty, id, alias) => nameOf(id, alias));
+
+  list.forEach(e => {
+    if (e.day !== pDay) {
+      out += `\n\n## วันที่ ${e.day} · ${SEASON_TH[e.season]}\n`;
+      pDay = e.day; pWatch = null;
+    }
+    if (e.watch !== pWatch) {
+      out += `\n### ${WATCH_TH[e.watch]}${isLight(e.season, e.watch) ? '' : ' (มืด)'}\n\n`;
+      pWatch = e.watch;
+    }
+    if (e.type === 'speech')
+      out += `**${plainName(e.speaker || '?')}:** "${plain(e.text)}"\n\n`;
+    else if (e.type === 'sys')  out += `> ${plain(e.text)}\n\n`;
+    else if (e.type === 'ooc')  out += `_[${plain(e.text)}]_\n\n`;
+    else out += plain(e.text) + '\n\n';
+  });
+  return out.replace(/\n{3,}/g, '\n\n').trim() + '\n';
+}
+
+function openExport() {
+  ensureChapters();
+  const scope = (ui.viewCh === 'all') ? 'all' : ui.viewCh;
+  const md = toMarkdown(scope);
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-export';
+  el.innerHTML = '<div class="jr-sheet-in">' +
+    '<div class="jr-ptitle">📤 ส่งออกเป็น Markdown</div>' +
+    `<div class="jr-fcount">${scope === 'all' ? 'ทั้งเล่ม' : esc((chapterOf(scope) || {}).title || '')}` +
+      ` · ${md.length.toLocaleString()} ตัวอักษร</div>` +
+    `<textarea class="jr-md" readonly>${esc(md)}</textarea>` +
+    '<div class="jr-erow">' +
+      '<button data-x="copy">📋 คัดลอกทั้งหมด</button>' +
+      '<button data-x="file">💾 บันทึกเป็นไฟล์</button>' +
+    '</div><button data-x="close">ปิด</button></div>';
+  document.body.appendChild(el);
+
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-x]');
+    if (!b) { if (ev.target === el) el.remove(); return; }
+    const ta = el.querySelector('.jr-md');
+    if (b.dataset.x === 'copy') {
+      ta.focus(); ta.select(); ta.setSelectionRange(0, md.length);
+      let ok = false;
+      try { ok = document.execCommand('copy'); } catch (e) {}
+      if (!ok && navigator.clipboard) navigator.clipboard.writeText(md).then(
+        () => safeToast('📋 คัดลอกแล้ว'), () => safeToast('⚠️ คัดลอกไม่สำเร็จ'));
+      else safeToast(ok ? '📋 คัดลอกแล้ว' : '⚠️ คัดลอกไม่สำเร็จ');
+      return;
+    }
+    if (b.dataset.x === 'file') {
+      try {
+        const blob = new Blob([md], { type: 'text/markdown;charset=utf-8' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = 'journal-' + (bridge.getCharName() || 'pc') + '.md';
+        document.body.appendChild(a); a.click();
+        setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 400);
+      } catch (e) { safeToast('⚠️ บันทึกไฟล์ไม่สำเร็จ'); }
+      return;
+    }
+    el.remove();
+  });
+}
+
+
+/* ── [20] ปาร์ตี้ ↔ บันทึก ────────────────────────────────────────
+   สองทาง :
+     ก) ในกล่องเพิ่ม NPC สหาย → ปุ่ม "เลือกจากบันทึก" เติมชื่อ+โน้ตให้
+     ข) ในแผ่นข้อมูล NPC     → ปุ่ม "เพิ่มเข้าปาร์ตี้" เปิดกล่องพร้อมข้อมูล
+   ไม่แตะโครงข้อมูลปาร์ตี้เดิม แค่ช่วยกรอกฟอร์มให้                    */
+function entSummary(e) {
+  const bits = [];
+  const r = entField(e, 'role');    if (r) bits.push(r);
+  const sp = entField(e, 'species'); if (sp) bits.push(sp);
+  const af = affLabel(e);
+  if (af && af.indexOf('ยังไม่ระบุ') < 0) bits.push('สังกัด ' + af.replace(/^\S+\s/, ''));
+  const am = entField(e, 'ambition'); if (am) bits.push('เป้าหมาย: ' + am);
+  if (e.notes) bits.push(e.notes.replace(/\s+/g, ' ').slice(0, 120));
+  return bits.join(' · ');
+}
+
+/** เติมข้อมูลจาก entity ลงกล่อง NPC ของแอปเดิม */
+function fillNpcModal(e) {
+  if (!e) return;
+  const nm = document.getElementById('npcName');
+  const nt = document.getElementById('npcNote');
+  if (nm) nm.value = e.name;
+  if (nt) {
+    const s = entSummary(e);
+    if (s && !nt.value.trim()) nt.value = s;
+  }
+}
+
+/** ปุ่ม "เลือกจากบันทึก" ในกล่องเพิ่ม NPC — ฉีดตอน runtime ไม่แก้ HTML เดิม */
+function injectNpcPick() {
+  const nm = document.getElementById('npcName');
+  if (!nm || document.getElementById('jr-npcpick')) return;
+  const b = document.createElement('button');
+  b.id = 'jr-npcpick';
+  b.type = 'button';
+  b.className = 'jr-npcpick';
+  b.textContent = '👤 เลือกจากบันทึก';
+  b.onclick = () => openPicker({
+    type: 'npc', title: 'เลือก NPC จากบันทึก',
+    onPick: e => fillNpcModal(e)
+  });
+  (nm.parentNode || nm).appendChild(b);
+}
+
+/** เปิดกล่องเพิ่มสหาย พร้อมกรอกข้อมูลจาก entity ให้เลย */
+function addEntToParty(id) {
+  const e = entGet(id); if (!e) return;
+  try {
+    if (typeof window.openNpcModal === 'function') {
+      openNpcModal();
+      injectNpcPick();
+      fillNpcModal(e);
+      openPanel('partyTab');
+      safeToast('👥 กรอกข้อมูล ' + e.name + ' ให้แล้ว — กดบันทึกเพื่อเข้าปาร์ตี้');
+    } else safeToast('⚠️ ไม่พบระบบปาร์ตี้');
+  } catch (err) { safeToast('⚠️ เปิดกล่องปาร์ตี้ไม่สำเร็จ'); }
+}
+
+/* ── ปลุกบันทึกเมื่อนาฬิกาเดิน ────────────────────────────────
+   advanceWatch()/advanceDay() เรียก renderClockCard() เสมอ
+   แต่ไม่มีอะไรบอกบันทึกให้วาดใหม่ → หลัง Full Rest (ข้าม 7 วัน)
+   หัวบันทึกกับปุ่มเติมเรื่องจึงค้างอยู่ที่วันเก่า                     */
+let unpatchClock = null, clockTimer = null;
+function hookClock() {
+  if (unpatchClock || typeof window.renderClockCard !== 'function') return;
+  const orig = window.renderClockCard;
+  window.renderClockCard = function () {
+    const r = orig.apply(this, arguments);
+    clearTimeout(clockTimer);
+    clockTimer = setTimeout(() => { try { render(); } catch (e) {} }, 40);
+    return r;
+  };
+  unpatchClock = () => { window.renderClockCard = orig; unpatchClock = null; };
+}
+
+/** ห่อ openNpcModal เพื่อฉีดปุ่มทุกครั้งที่เปิด */
+let unpatchNpc = null;
+function hookNpcModal() {
+  if (unpatchNpc || typeof window.openNpcModal !== 'function') return;
+  const orig = window.openNpcModal;
+  window.openNpcModal = function () {
+    const r = orig.apply(this, arguments);
+    try { injectNpcPick(); } catch (e) {}
+    return r;
+  };
+  unpatchNpc = () => { window.openNpcModal = orig; unpatchNpc = null; };
+}
+
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
 const API = {
   init, render, activate, addEntry, addSystemEntry, route, bridge, CFG,
@@ -8055,13 +8528,16 @@ const API = {
   /* ── ชั้นโลก ── */
   get world()   { return world; },
   showWorldScreen, enterWorld,
-  worldOf, worldName, fixZeroStats,
+  worldOf, worldName, fixZeroStats, worldSeasonLen, applySeasonLen,
   /* ── entity ── */
   get entities() { return ents.list; },
   entCreate, entGet, entSearch, entDelete, entRename, extractRefs, linkify,
   openPicker, openEntSheet, backlinks, rollInto, jumpTo,
   newChapter, renameChapter, deleteChapter, openChapterMenu, visibleEntries,
-  setBackdate, openBackdate, ensureChapters,
+  setBackdate, openWatchPick, chapterForDate, ensureChapters,
+  openFind, findEntries, setRead, toMarkdown, openExport,
+  addEntToParty, fillNpcModal, entSummary, injectNpcPick,
+  get readMode() { return ui.read; },
   get chapters() { return data.chapters; },
   get viewCh() { return ui.viewCh; }, set viewCh(v) { ui.viewCh = v; render(true); }, entFields, entField, setEntField,
   entRels, relGet, relSet, relText, membersOf, childrenOf, placePath, affLabel, fixWords,
@@ -8083,6 +8559,8 @@ const API = {
     if (unpatchTab) unpatchTab();
     if (unpatchWorld) unpatchWorld();
     if (unpatchZero) unpatchZero();
+    if (unpatchNpc) unpatchNpc();
+    if (unpatchClock) unpatchClock();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
