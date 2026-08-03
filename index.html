@@ -6722,6 +6722,7 @@ function hookLog() {
   window.log = function (msg) {
     const r = orig.apply(this, arguments);
     try { route(msg); } catch (e) {}
+    try { sniffDeprived(msg); } catch (e) {}
     return r;
   };
   unpatchLog = () => { window.log = orig; unpatchLog = null; };
@@ -7339,7 +7340,7 @@ function hookWorld() {
         if (w && w !== world.current) { world.current = w; saveWorld(); entLoad(w); }
       } catch (e) {}
       const r = o.game.apply(this, arguments);
-      try { applySeasonLen(); activate(); syncTravelBtn(); syncDeprivedUI(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
+      try { applySeasonLen(); activate(); syncTravelBtn(); syncDeprivedUI(); reflowCharTab(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
       return r;
     };
 
@@ -8737,7 +8738,7 @@ function hookClock() {
     clearTimeout(clockTimer);
     clockTimer = setTimeout(() => {
       try { render(); } catch (e) {}
-      try { syncTravelBtn(); syncDeprivedUI(); } catch (e) {}   // การ์ดวาดใหม่ ต้องเขียนกลับ
+      try { syncTravelBtn(); syncDeprivedUI(); reflowCharTab(); } catch (e) {}
     }, 40);
     return r;
   };
@@ -9058,6 +9059,18 @@ const dN = n => Math.floor(Math.random() * n) + 1;
    ขาดสิ่งจำเป็น → ฟื้น HP / attribute ไม่ได้
    ขาดต่อเนื่องเกิน 1 วัน → +1 Fatigue ต่อวัน (กินช่องเป้)
    Fatigue หายเมื่อ Long Rest "สำเร็จ" (มีเสบียง) หรือ Full Rest   */
+/* Mark 3/5/7 และ Arcane Disaster 8-9 เขียนไว้แล้วว่า "ตกอยู่ในสถานะ Deprived"
+   แต่ไม่เคยมีอะไรติดตาม — ดักจากข้อความ log แล้วตั้งสถานะให้อัตโนมัติ
+   (ข้ามข้อความของตัวเองที่ขึ้นต้นด้วย 😵 / 🍞 กันวนซ้ำ)                */
+function sniffDeprived(msg) {
+  if (!CFG.strictRules) return;
+  const t = String(msg || '');
+  if (/^\s*(😵|🍞)/.test(t)) return;
+  if (!/Deprived|ขาดแคลน/i.test(t.replace(/<[^>]+>/g, ''))) return;
+  if (syncRules().deprived) return;
+  setDeprived(true, 'ผลจากเหตุการณ์ในเกม');
+}
+
 function setDeprived(on, why) {
   const r = syncRules();
   if (!!r.deprived === !!on) return;
@@ -9071,25 +9084,24 @@ function setDeprived(on, why) {
   } catch (e) {}
 }
 
-/** ปุ่มสวิตช์ Deprived ในการ์ดนาฬิกา — วาดใหม่ทุกครั้งที่การ์ดถูกวาด */
+/** แถบสถานะในการ์ดนาฬิกา — อ่านอย่างเดียว ระบบเป็นคนตั้งให้
+    ไม่ทำเป็นปุ่มกด เพราะกดพลาดแล้วกติกาเพี้ยนทั้งสาย                */
 function syncDeprivedUI() {
   if (!CFG.strictRules) return;
   try {
     const tv = document.querySelector('[onclick="doTravel()"]');
     if (!tv) return;
-    const row = tv.parentNode;
-    let b = document.getElementById('jr-depbtn');
-    if (!b) {
-      b = document.createElement('button');
-      b.id = 'jr-depbtn';
-      b.type = 'button';
-      b.onclick = () => setDeprived(!syncRules().deprived, 'ปรับด้วยตนเอง');
-      row.appendChild(b);
+    let box = document.getElementById('jr-status');
+    if (!box) {
+      box = document.createElement('div');
+      box.id = 'jr-status';
+      (tv.parentNode.parentNode || tv.parentNode).insertBefore(box, tv.parentNode.nextSibling);
     }
-    const on = !!syncRules().deprived;
-    b.className = 'jr-dep' + (on ? ' on' : '');
-    b.textContent = on ? '😵 Deprived' : '🍞 ปกติ';
-    b.title = on ? 'กดเพื่อปลดสถานะ Deprived' : 'กดเพื่อทำเครื่องหมาย Deprived';
+    const on = !!syncRules().deprived, fat = nowFatigue();
+    box.innerHTML =
+      `<span class="s ${on ? 'bad' : 'ok'}">${on ? '😵 Deprived' : '🍞 ปกติ'}</span>` +
+      `<span class="s ${fat > 0 ? 'warn' : ''}">😩 Fatigue <b>${fat}</b></span>` +
+      (on ? '<span class="note">ฟื้น HP/Attribute ไม่ได้ · Fatigue เพิ่มทุกวัน</span>' : '');
   } catch (e) {}
 }
 
@@ -9103,6 +9115,52 @@ function syncTravelBtn() {
     const left = travelLeft();
     b.innerHTML = `🚶 Travel <span class="jr-tq${left ? '' : ' out'}">${left}/${TRAVEL_QUOTA}</span>`;
   } catch (e) {}
+}
+
+/* ── [3][4] จัดผังแท็บตัวละครใหม่ ────────────────────────────────
+   3) Attribute ขึ้นก่อน · ข้อมูลตัวละครลงล่างสุด
+   4) ปุ่มพักผ่อนทั้ง 3 ย้ายเข้าไปในกล่อง Activity
+   ทำด้วยการ "ย้าย DOM node" ตอน runtime — ไม่แก้ HTML เดิม
+   ย้าย node ไม่ทำให้ onclick/id หาย ฟังก์ชันเดิมจึงยังทำงานปกติ    */
+let reflowed = false;
+
+function reflowCharTab() {
+  if (reflowed) return;
+  try {
+    const tab = document.getElementById('charTab');
+    if (!tab) return;
+    const cards = [...tab.querySelectorAll(':scope > .card')];
+    if (cards.length < 3) return;
+
+    /* หาการ์ดจากเนื้อหา ไม่ยึดลำดับ เผื่อวันหลังมีการ์ดแทรก */
+    const info = cards.find(c => /ข้อมูลตัวละคร/.test(c.textContent));
+    const attr = cards.find(c => c.querySelector('#strCur'));
+    if (attr && info && attr.compareDocumentPosition(info) & Node.DOCUMENT_POSITION_PRECEDING) {
+      tab.insertBefore(attr, info);          // Attribute ขึ้นก่อนข้อมูลตัวละคร
+    }
+    if (info) tab.appendChild(info);         // ข้อมูลตัวละครลงล่างสุด
+
+    /* ย้ายแถวปุ่มพักผ่อนเข้ากล่อง Activity */
+    const rest = document.querySelector('[onclick="restShort()"]');
+    const modal = document.querySelector('#activityModal .modal-card');
+    if (rest && modal) {
+      const row = rest.parentNode;
+      const closeBtn = modal.querySelector('[onclick="closeActivityModal()"]');
+      const head = document.createElement('div');
+      head.className = 'jr-resthead';
+      head.textContent = 'พักผ่อน';
+      row.classList.add('jr-restrow');
+      modal.insertBefore(head, closeBtn);
+      modal.insertBefore(row, closeBtn);
+      /* ปุ่มเดิมไม่ได้ปิดกล่องให้ — ปิดให้หลังกดเสร็จ */
+      row.addEventListener('click', ev => {
+        if (ev.target.closest('button')) {
+          setTimeout(() => { try { closeActivityModal(); } catch (e) {} }, 0);
+        }
+      });
+    }
+    reflowed = true;
+  } catch (e) { console.warn('[JRNL] จัดผังแท็บตัวละครไม่สำเร็จ', e); }
 }
 
 function hookRules() {
@@ -9321,6 +9379,7 @@ const API = {
   openFind, findEntries, setRead, toMarkdown, openExport,
   openBackup, bkBuild, bkParse, bkApply, bkUndo, bkSummary, bkMerge, bkCollect,
   syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn, setDeprived, syncDeprivedUI, addFatigue,
+  sniffDeprived, reflowCharTab,
   get rules() { return rules; },
   addEntToParty, fillNpcModal, entSummary, injectNpcPick,
   get readMode() { return ui.read; },
