@@ -6408,6 +6408,26 @@ body.jr-live #toastContainer{
   border-color:var(--border-color,#2F3346);color:#5A6073;font-weight:400;
 }
 
+/* ── ยุบรายการ Casus Belli ── */
+.jr-casusbar{
+  display:flex;align-items:center;gap:6px;margin-bottom:8px;
+  font-size:.68rem;color:var(--text-muted,#8E94A5);
+}
+.jr-casusbar span{flex:1;min-width:0}
+.jr-casusbar button{
+  width:auto!important;flex:0 0 auto;padding:4px 10px!important;
+  font-size:.66rem!important;border-radius:14px!important;font-weight:400!important;
+  background:transparent!important;border:1px solid var(--border-color,#2F3346)!important;
+  color:var(--text-muted,#8E94A5)!important;
+}
+.jr-casusbar button:active{
+  border-color:var(--accent-gold,#E5A93C)!important;color:var(--accent-gold,#E5A93C)!important;
+}
+.jr-casushead{display:flex;align-items:center;gap:8px;cursor:pointer;margin-bottom:0!important}
+.jr-casushead .v{margin-left:auto;font-size:.7rem;opacity:.6}
+.jr-casusbody{display:none;margin-top:6px}
+.stat-box.open .jr-casusbody{display:block}
+
 /* ══ [7] ACTION SHEET ═════════════════════════════════════════════ */
 /* ⚠️ แผ่นทั้งหมด append ที่ body จึงอยู่นอก #jr-root/#jr-bar
    ต้องประกาศ box-sizing เองซ้ำ ไม่งั้น width:100% + padding = ล้นขอบขวา */
@@ -7040,6 +7060,7 @@ function showTab(id) {
 function openPanel(id) {
   ui.tab = id; ui.panelOpen = true;
   showTab(id);
+  reflowTextareasSoon();                // แท็บเพิ่งถูกแสดง scrollHeight ถึงจะใช้ได้
   $panel.classList.add('jr-open');
   const pb = $panel.querySelector('.jr-pbody');
   if (pb) pb.scrollTop = 0;
@@ -7236,7 +7257,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff(); hookDelveCtx(); hookScavenge();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff(); hookDelveCtx(); hookScavenge(); hookCasusHistory();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -7562,7 +7583,10 @@ function hookWorld() {
         if (w && w !== world.current) { world.current = w; saveWorld(); entLoad(w); }
       } catch (e) {}
       const r = o.game.apply(this, arguments);
-      try { applySeasonLen(); activate(); syncTravelBtn(); syncDeprivedUI(); reflowCharTab(); } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
+      try {
+        applySeasonLen(); activate(); syncTravelBtn(); syncDeprivedUI(); reflowCharTab();
+        reflowTextareasSoon();          // ช่องข้อความหุบตอนโหลด ต้องคลี่หลังแสดงผลแล้ว
+      } catch (e) {}   // ทับค่าที่โหลดมาจากตัวละคร
       return r;
     };
 
@@ -9834,21 +9858,31 @@ const costOf = id => {
 };
 /** มูลค่ารวมโดยประมาณของผลลัพธ์ 1 ชุด */
 function lootValue(rows) {
-  return rows.reduce((s, r) => s + (r.gold || 0) + (r.item ? (r.item.cost || 0) : 0) +
-    (r.est || 0) + (r.food ? r.food * (costOf('gd_food_ration') || 1) : 0), 0);
+  return rows.reduce((s, r) => s + (r.coin || 0) + (r.item ? (r.item.cost || 0) : 0) +
+    (r.gear ? (r.gear.value || 0) : 0) +
+    (r.food ? r.food * (costOf('gd_food_ration') || 1) : 0), 0);
 }
+
+/* ── รูปแบบผลลัพธ์ ────────────────────────────────────────────
+   coin : เหรียญจริง → เข้ากระเป๋าเงิน
+   gear : "ของ" ที่ต้องเก็บใส่กระเป๋าแล้วเอาไปขายเอง (มีมูลค่ากำกับ)
+   item : ของจาก MARKET_DATABASE (ใช้ id/size/damage/ar ของจริง)
+   food : เสบียง
+   ⚠️ อัญมณี งานศิลปะ เครื่องประดับ = gear ไม่ใช่ coin
+      ไม่งั้นผู้เล่นจะได้เงินสดฟรีโดยไม่ต้องแบกของไปขาย ผิดหลักเกม   */
+const gear = (name, size, value, note) => ({ name, size: size || 'S', value: value || 0, note });
 
 /* ── ตาราง Common ───────────────────────────────────────────── */
 function lootCommon(depth) {
   const r = dRoll(20);
   const tag = `d20=${r}`;
-  if (r <= 5)  { const c = sumD(1, 6);  return [{ tag, text: `เศษเหรียญ ${c}c`, gold: c }]; }
-  if (r <= 9)  { const c = sumD(2, 6);  return [{ tag, text: `ถุงเหรียญ ${c}c`, gold: c }]; }
-  if (r <= 12) { const f = dRoll(4);    return [{ tag, text: `เสบียง ${f} หน่วย`, food: f }]; }
+  if (r <= 5)  { const c = sumD(1, 6); return [{ tag, text: `เศษเหรียญ ${c}c`, coin: c }]; }
+  if (r <= 9)  { const c = sumD(2, 6); return [{ tag, text: `ถุงเหรียญ ${c}c`, coin: c }]; }
+  if (r <= 12) { const f = dRoll(4);   return [{ tag, text: `เสบียง ${f} หน่วย`, food: f }]; }
   if (r <= 14) {
-    let tk = 'ของกระจุกกระจิกไม่มีค่า';
+    let tk = 'ของกระจุกกระจิก';
     try { tk = getRandom(CHAR_CREATION_DB.trinkets); } catch (e) {}
-    return [{ tag, text: `ของกระจุกกระจิก — ${tk}` }];
+    return [{ tag, text: `ของกระจุกกระจิก — ${tk}`, gear: gear(tk, 'T', 0, 'ไม่มีมูลค่า') }];
   }
   if (r <= 16) {
     const it = marketPick(['goods'], 'C');
@@ -9863,8 +9897,16 @@ function lootCommon2(depth, from) {
     const it = marketPick(['goods'], 'C');
     return [{ tag, text: `เครื่องมือ — ${itemLine(it)}`, item: it }];
   }
-  if (r <= 15) { const c = sumD(1, 6) * 5; return [{ tag, text: `เครื่องประดับเก่า ๆ ${c}c`, gold: c }]; }
-  if (r <= 18) return [{ tag, text: 'คบเพลิง 3 อัน', est: EST_VALUE.torch3 }];
+  if (r <= 15) {
+    const c = sumD(1, 6) * 5;
+    return [{ tag, text: `เครื่องประดับเก่า ๆ (${c}c)`, gear: gear('เครื่องประดับเก่า', 'T', c) }];
+  }
+  if (r <= 18) {
+    const it = marketPick(['goods'], 'C');
+    const torch = (function () { try { return MARKET_DATABASE.find(x => /คบเพลิง|Torch/i.test(x.name)); } catch (e) { return null; } })();
+    return [{ tag, text: 'คบเพลิง 3 อัน',
+      gear: gear('คบเพลิง ×3', 'S', (torch ? torch.cost : 1) * 3, 'ใช้ได้ 3 ครั้ง'), uses: 3 }];
+  }
   if (r === 19) return [{ tag, text: 'ไม่มีอะไรมีค่า' }];
   return twice(tag, depth, lootCommon2);
 }
@@ -9873,17 +9915,19 @@ function lootCommon2(depth, from) {
 function lootUncommon(depth) {
   const r = dRoll(20);
   const tag = `d20=${r}`;
-  if (r <= 5) { const c = sumD(3, 6) * 5; return [{ tag, text: `ถุงเหรียญอวบ ${c}c`, gold: c }]; }
+  if (r <= 5) { const c = sumD(3, 6) * 5; return [{ tag, text: `ถุงเหรียญอวบ ${c}c`, coin: c }]; }
   if (r <= 8) {
     const s = dRoll(6);
-    const o = s <= 2 ? ['ภาพวาด', 50] : s <= 4 ? ['งานสลัก', 100] : ['ผ้าทอ', 200];
-    return [{ tag: `${tag}·d6=${s}`, text: `งานศิลปะเล็ก — ${o[0]} ${o[1]}c`, gold: o[1] }];
+    const o = s <= 2 ? ['ภาพวาด', 50, 'S'] : s <= 4 ? ['งานสลัก', 100, 'B'] : ['ผ้าทอ', 200, 'S'];
+    return [{ tag: `${tag}·d6=${s}`, text: `งานศิลปะเล็ก — ${o[0]} (${o[1]}c)`,
+      gear: gear(o[0], o[2], o[1]) }];
   }
-  if (r <= 11) return [{ tag, text: 'อัญมณีระดับกลาง 100c', gold: 100 }];
+  if (r <= 11) return [{ tag, text: 'อัญมณีระดับกลาง (100c)', gear: gear('อัญมณีระดับกลาง', 'T', 100) }];
   if (r <= 14) {
     let sp = '';
     try { sp = String(rollSpellByMethod('random') || '').replace(/<[^>]+>/g, ' ').trim(); } catch (e) {}
-    return [{ tag, text: 'Scroll' + (sp ? ` — ${sp}` : ' — สุ่มสเปลล์ 1 อัน'), est: EST_VALUE.scroll }];
+    return [{ tag, text: 'Scroll' + (sp ? ` — ${sp}` : ' — สุ่มสเปลล์ 1 อัน'),
+      gear: gear('ม้วนคาถา' + (sp ? ': ' + sp.slice(0, 24) : ''), 'T', EST_VALUE.scroll) }];
   }
   if (r <= 16) {
     const it = marketPick(['melee', 'ranged', 'armor'], 'U');
@@ -9894,8 +9938,12 @@ function lootUncommon(depth) {
 function lootUncommon2(depth, from) {
   const r = dRoll(20);
   const tag = `${from} · d20=${r}`;
-  if (r <= 12) { const c = 50 + dRoll(4) * 50; return [{ tag, text: `เครื่องประดับดี ๆ ${c}c`, gold: c }]; }
-  if (r <= 18) return [{ tag, text: 'Potion of Healing — ฟื้นฟูค่าพลังกลับเต็ม', est: EST_VALUE.potion }];
+  if (r <= 12) {
+    const c = 50 + dRoll(4) * 50;
+    return [{ tag, text: `เครื่องประดับดี ๆ (${c}c)`, gear: gear('เครื่องประดับชั้นดี', 'T', c) }];
+  }
+  if (r <= 18) return [{ tag, text: 'Potion of Healing — ฟื้นฟูค่าพลังกลับเต็ม',
+    gear: gear('โพชั่นรักษา', 'T', EST_VALUE.potion, 'ดื่มแล้วฟื้นค่าพลังเต็ม') }];
   return twice(tag, depth, lootUncommon2);
 }
 
@@ -9905,25 +9953,31 @@ function lootRare(depth) {
   const tag = `d20=${r}`;
   if (r <= 5) {
     const s = dRoll(2);
-    if (s === 1) return [{ tag: `${tag}·d2=1`, text: 'สมบัติก้อนใหญ่ — อัญมณีหายาก/งานศิลปะเอก 500c', gold: 500 }];
+    if (s === 1) return [{ tag: `${tag}·d2=1`, text: 'สมบัติก้อนใหญ่ — อัญมณีหายาก/งานศิลปะเอก (500c)',
+      gear: gear('อัญมณีหายาก', 'B', 500) }];
     const c = sumD(2, 6) * 50;
-    return [{ tag: `${tag}·d2=2`, text: `สมบัติก้อนใหญ่ — ทอง ${c}c`, gold: c }];
+    return [{ tag: `${tag}·d2=2`, text: `สมบัติก้อนใหญ่ — ทอง ${c}c`, coin: c }];
   }
-  if (r <= 9)  return [{ tag, text: 'อาวุธวิเศษ — ' + magicLine(), est: EST_VALUE.magicWeapon }];
-  if (r <= 12) return [{ tag, text: 'Relic — ของวิเศษที่ชาร์จพลังใหม่ได้ (หน้า 25)', est: EST_VALUE.relic }];
+  if (r <= 9) { const t = magicLine();
+    return [{ tag, text: 'อาวุธวิเศษ — ' + t, gear: gear('อาวุธวิเศษ', 'S', EST_VALUE.magicWeapon, t) }]; }
+  if (r <= 12) return [{ tag, text: 'Relic — ของวิเศษที่ชาร์จพลังใหม่ได้ (หน้า 25)',
+    gear: gear('Relic', 'S', EST_VALUE.relic) }];
   if (r <= 15) {
     let sp = '';
     try { sp = String(rollSpellByMethod('random') || '').replace(/<[^>]+>/g, ' ').trim(); } catch (e) {}
-    return [{ tag, text: 'Spellbook' + (sp ? ` — ${sp}` : ' (1d100 หน้า 28–32)'), est: EST_VALUE.spellbook }];
+    return [{ tag, text: 'Spellbook' + (sp ? ` — ${sp}` : ' (1d100 หน้า 28–32)'),
+      gear: gear('ตำราเวท' + (sp ? ': ' + sp.slice(0, 24) : ''), 'S', EST_VALUE.spellbook) }];
   }
   return lootRare2(depth, `${tag} → ทอยต่อ`);
 }
 function lootRare2(depth, from) {
   const r = dRoll(20);
   const tag = `${from} · d20=${r}`;
-  if (r <= 14) return [{ tag, text: 'เกราะวิเศษ — ' + magicLine(), est: EST_VALUE.magicArmor }];
+  if (r <= 14) { const t = magicLine();
+    return [{ tag, text: 'เกราะวิเศษ — ' + t, gear: gear('เกราะวิเศษ', 'B', EST_VALUE.magicArmor, t) }]; }
   return twice(tag, depth, lootRare2, 'รางวัลคู่!');
 }
+
 
 function magicLine() {
   try {
@@ -10090,40 +10144,55 @@ function renderLoot(rows, t) {
     '<div class="jr-llist">' + rows.map((r, i) =>
       `<div class="jr-lrow${r.header ? ' hd' : ''}">` +
         `<div class="tx"><b>${esc(r.text)}</b><i>${esc(r.tag)}</i></div>` +
-        ((r.gold || r.food || r.item)
-          ? `<button class="tk" data-take="${i}">+ รับ</button>` : '') +
+        ((r.coin || r.food || r.item || r.gear)
+          ? `<button class="tk" data-take="${i}">${r.coin ? '+ เข้ากระเป๋าเงิน' : '+ ใส่กระเป๋า'}</button>` : '') +
       '</div>').join('') + '</div>';
 }
 
-/** รับของเข้าตัวละครจริง — เงิน / เสบียง / ไอเทมจาก Market */
+/** รับของเข้าตัวละครจริง
+    เหรียญ → กระเป๋าเงิน · เสบียง → ration · ของ → ช่องกระเป๋า
+    ⚠️ ของมีค่า (อัญมณี/งานศิลปะ/เครื่องประดับ) ต้องกินช่องกระเป๋า
+       แล้วเอาไปขายเอง ไม่ใช่แปลงเป็นเหรียญให้ฟรี                   */
+function invPush(o) {
+  let i = inventorySlotsData.findIndex(x => !x);
+  if (i === -1) { inventorySlotsData.push(null); i = inventorySlotsData.length - 1; }
+  inventorySlotsData[i] = o;
+  return i;
+}
+
 function takeLoot(el, i) {
   const rows = el.__rows || [];
   const r = rows[i];
   if (!r || r.taken) return;
-  let done = [];
+  const done = [];
   try {
-    if (r.gold) {
+    if (r.coin) {
       const g = document.getElementById('charGold');
-      if (g) { g.value = (parseInt(g.value, 10) || 0) + r.gold; done.push(`+${r.gold}c`); }
+      if (g) { g.value = (parseInt(g.value, 10) || 0) + r.coin; done.push(`+${r.coin}c`); }
     }
     if (r.food && typeof addFoodRations === 'function') {
       addFoodRations(r.food); done.push(`+เสบียง ${r.food}`);
     }
     if (r.item) {
       const it = r.item;
-      inventorySlotsData.push({
-        id: it.id, name: it.name, size: it.size, damage: it.damage, ar: it.ar,
-        hasUses: ['T', 'S'].indexOf(it.size) >= 0 && !it.damage && !it.ar, uses: 1
-      });
-      renderInventorySlots();
-      done.push(`+${it.name}`);
+      invPush({ id: it.id, name: it.name, size: it.size, damage: it.damage, ar: it.ar,
+        hasUses: ['T', 'S'].indexOf(it.size) >= 0 && !it.damage && !it.ar, uses: 1 });
+      done.push('+' + it.name);
     }
+    if (r.gear) {
+      const g = r.gear;
+      const label = g.name + (g.value ? ` (${g.value}c)` : '');
+      invPush({ id: 'jr_loot_' + Date.now().toString(36) + Math.random().toString(36).slice(2, 5),
+        name: label, size: g.size, hasUses: !!r.uses, uses: r.uses || 1, lootValue: g.value || 0 });
+      done.push('+' + label);
+    }
+    if (r.item || r.gear) renderInventorySlots();
     autoSaveCurrentCharacter();
-  } catch (e) { safeToast('⚠️ รับของไม่สำเร็จ'); return; }
+  } catch (e) { safeToast('⚠️ รับของไม่สำเร็จ — กระเป๋าอาจเต็ม'); return; }
   r.taken = true;
   safeToast('🎁 ' + (done.join(' · ') || 'รับแล้ว'));
   const btn = el.querySelector(`[data-take="${i}"]`);
-  if (btn) { btn.textContent = '✓ รับแล้ว'; btn.classList.add('done'); btn.removeAttribute('data-take'); }
+  if (btn) { btn.textContent = '✓ เก็บแล้ว'; btn.classList.add('done'); btn.removeAttribute('data-take'); }
 }
 
 /* ── ทอยได้ "โอกาสเก็บของ" ตอนเดินทาง → เก็บของให้เลย ─────────
@@ -10144,6 +10213,96 @@ function hookScavenge() {
     return html;
   };
   unpatchScav = () => { window.rollEncScavengeHTML = orig; unpatchScav = null; };
+}
+
+
+/* ══════ [26] แก้ textarea หุบ + ยุบรายการ Casus Belli ═══════════
+   2) autoExpandTextarea() ใช้ scrollHeight ซึ่งเป็น 0 ตอนอิลิเมนต์ถูกซ่อน
+      แอปเรียกตอนโหลดตัวละครขณะที่แท็บยังไม่แสดง ช่องจึงหุบเหลือบรรทัดเดียว
+      → คลี่ใหม่ทุกครั้งที่ "มองเห็นได้จริง"
+   3) Casus Belli 6 รายการเต็ม ๆ ยาวมาก → ยุบเหลือหัวข้อ กดเปิดทีละอัน
+   ═══════════════════════════════════════════════════════════════ */
+function reflowTextareas(root) {
+  try {
+    (root || document).querySelectorAll('textarea').forEach(el => {
+      if (!el.offsetParent && el.offsetHeight === 0) return;   // ยังซ่อนอยู่ ข้ามไปก่อน
+      el.style.height = 'auto';
+      const h = el.scrollHeight;
+      if (h > 0) el.style.height = h + 'px';
+    });
+  } catch (e) {}
+}
+
+/** คลี่ซ้ำหลายจังหวะ เพราะบางแท็บเพิ่งถูกแสดงหลัง layout รอบแรก */
+function reflowTextareasSoon() {
+  reflowTextareas();
+  setTimeout(reflowTextareas, 60);
+  setTimeout(reflowTextareas, 260);
+}
+
+/* ── ยุบรายการ Casus Belli ── */
+let casusOpen = {}, unpatchCasus = null;
+
+function hookCasusHistory() {
+  if (unpatchCasus || typeof window.renderCasusHistory !== 'function') return;
+  const orig = window.renderCasusHistory;
+  window.renderCasusHistory = function () {
+    const r = orig.apply(this, arguments);
+    try { foldCasus(); } catch (e) {}
+    return r;
+  };
+  unpatchCasus = () => { window.renderCasusHistory = orig; unpatchCasus = null; };
+}
+
+function foldCasus() {
+  const box = document.getElementById('casusHistoryList');
+  if (!box) return;
+  const cards = [...box.children].filter(c => c.classList.contains('stat-box'));
+  if (!cards.length) return;
+
+  cards.forEach((card, i) => {
+    if (card.dataset.jrFold) return;
+    card.dataset.jrFold = '1';
+    const head = card.firstElementChild;                 // บรรทัด "Casus Belli #n"
+    const body = [...card.children].slice(1);
+    const wrap = document.createElement('div');
+    wrap.className = 'jr-casusbody';
+    body.forEach(b => wrap.appendChild(b));
+    card.appendChild(wrap);
+    if (head) {
+      head.classList.add('jr-casushead');
+      head.insertAdjacentHTML('beforeend', '<span class="v">▾</span>');
+      head.onclick = () => {
+        const on = card.classList.toggle('open');
+        casusOpen[i] = on;
+        head.querySelector('.v').textContent = on ? '▾' : '▸';
+      };
+    }
+    const open = casusOpen[i] === undefined ? (i === cards.length - 1) : casusOpen[i];
+    card.classList.toggle('open', open);                 // เปิดอันล่าสุดไว้ให้
+    if (head) head.querySelector('.v').textContent = open ? '▾' : '▸';
+  });
+
+  if (!box.previousElementSibling || !box.previousElementSibling.classList.contains('jr-casusbar')) {
+    const bar = document.createElement('div');
+    bar.className = 'jr-casusbar';
+    bar.innerHTML = `<span>${cards.length} เหตุการณ์</span>` +
+      '<button type="button" data-ca="1">ขยายทั้งหมด</button>' +
+      '<button type="button" data-ca="0">ยุบทั้งหมด</button>';
+    /* ⚠️ ห้ามปิดทับตัวแปร cards ไว้ในนี้
+       renderCasusHistory() สร้างการ์ดใหม่ทุกครั้ง ตัวเก่าจะกลายเป็น node ที่หลุดจาก DOM
+       ต้องค้นใหม่ตอนกดเสมอ                                                        */
+    bar.onclick = ev => {
+      const b = ev.target.closest('[data-ca]'); if (!b) return;
+      const on = b.dataset.ca === '1';
+      const live = document.querySelectorAll('#casusHistoryList .stat-box');
+      live.forEach((c, i) => {
+        casusOpen[i] = on; c.classList.toggle('open', on);
+        const v = c.querySelector('.jr-casushead .v'); if (v) v.textContent = on ? '▾' : '▸';
+      });
+    };
+    box.parentNode.insertBefore(bar, box);
+  }
 }
 
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
@@ -10167,6 +10326,7 @@ const API = {
   sniffDeprived, reflowCharTab, askFatigueChoice,
   injectRerollButtons, rrOne, rrAllParts, openPartSheet,
   openLoot, rollLoot, creatureTier, effTier, scavengeTier, marketPick, injectLootButtons, logLoot,
+  reflowTextareas, reflowTextareasSoon, foldCasus, invPush,
   lootValue, EST_VALUE,
   TIER_TH, get lootCtx() { return lootCtx; }, set lootCtx(v) { lootCtx = v; },
   get rules() { return rules; },
@@ -10200,6 +10360,7 @@ const API = {
     if (unpatchTravelDiff) unpatchTravelDiff();
     if (unpatchDelve) unpatchDelve();
     if (unpatchScav) unpatchScav();
+    if (unpatchCasus) unpatchCasus();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
