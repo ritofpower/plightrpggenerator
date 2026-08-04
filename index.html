@@ -6642,6 +6642,7 @@ function openSheet(id) {
 const AUTO = [
   /^🌅/, /^🍂/, /^⚔️🔥/, /^⚠️/, /^📖 ได้รับ/, /^📜 ได้รับ/,
   /^😵/, /^😩/, /^🍞/,          // Deprived · Fatigue สะสม · พ้นสถานะ
+  /^🎁/,                       // Loot
   /^🧭/,                       // Travel — ผลของการเดินทางแต่ละ Watch
   /^🔍/, /^🌿/, /^🏹/, /^🗝️/,  // Explore / Forage / Hunt / Delve
   /^☕/, /^🌙/, /^✨/, /^💤/,   // Short / Long / Full Rest / นอน
@@ -7050,7 +7051,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff(); hookDelveCtx();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -9176,6 +9177,8 @@ function reflowCharTab() {
     }
     if (info) tab.appendChild(info);         // ข้อมูลตัวละครลงล่างสุด
 
+    injectLootButtons();
+
     /* ปุ่ม Sleep ซ้ำกับ Long Rest ที่ย้ายเข้ามาแล้ว — เอาออก */
     const sleep = document.querySelector('#activityModal [onclick="doActivitySleep()"]');
     if (sleep) sleep.remove();
@@ -9279,6 +9282,7 @@ function hookRules() {
                     `(d20=${roll} vs ${dex}) → ❌ พลาด · DEX -${dd} · Fatigue +${df}`); } catch (e) {}
         }
       }
+      lootCtx = 'travel';
       const res = o.travel.apply(this, arguments);
       const r2 = syncRules();
       r2.travel++; r2.lastRest = null; r2.longStreak = 0;
@@ -9411,6 +9415,15 @@ function hookRules() {
    → คืนค่าที่เพิ่งเพิ่มกลับ แล้วเปิดให้เลือกแทน
    (วัดจากส่วนต่างจริง ไม่แกะตัวเลขจากข้อความ จะได้ไม่พังถ้าคำเปลี่ยน) */
 let unpatchTravelDiff = null;
+
+/** กด Delve → จำบริบทไว้ให้ Loot เลือกตารางถูก */
+let unpatchDelve = null;
+function hookDelveCtx() {
+  if (unpatchDelve || typeof window.doActivityDelve !== 'function') return;
+  const orig = window.doActivityDelve;
+  window.doActivityDelve = function () { lootCtx = 'delve'; return orig.apply(this, arguments); };
+  unpatchDelve = () => { window.doActivityDelve = orig; unpatchDelve = null; };
+}
 
 function hookTravelDiff() {
   if (unpatchTravelDiff || typeof window.rollTravelDifficultyText !== 'function') return;
@@ -9592,6 +9605,329 @@ function injectRerollButtons() {
   });
 }
 
+
+/* ══════ [25] LOOT TIER ══════════════════════════════════════════
+   3 เทียร์ตามระบบ Market เดิม (C/U/R)
+     Creature Tier จาก hpMax : ≤5 Common · 6–9 Uncommon · 10+ Rare
+     Effective Tier = Creature Tier + โบนัสสถานที่
+       Travel → ตรง ๆ · Delve → เลื่อนขึ้น 1 ขั้น (สูงสุด Rare)
+
+   ทุกผลลัพธ์ดึงจากตารางที่แอปมีอยู่แล้ว ไม่คัดลอกข้อมูลมาเก็บซ้ำ :
+     MARKET_DATABASE (rarity C/U/R) · MARKET_ITEMS · CHAR_CREATION_DB.trinkets
+     rollMagicItemResult · rollSpellByMethod · describeTreasure
+   ═══════════════════════════════════════════════════════════════ */
+const TIER_KEY  = ['common', 'uncommon', 'rare'];
+const TIER_TH   = ['Common', 'Uncommon', 'Rare'];
+const TIER_ICON = ['🥉', '🥈', '🥇'];
+const RARITY_OF = ['C', 'U', 'R'];
+
+const creatureTier = hp => (hp <= 5 ? 0 : hp <= 9 ? 1 : 2);
+const effTier = (base, ctx) => (ctx === 'delve' ? Math.min(2, base + 1) : base);
+
+const dRoll = n => { try { return rollDie(n); } catch (e) { return Math.floor(Math.random() * n) + 1; } };
+const sumD  = (n, f) => { let s = 0; for (let i = 0; i < n; i++) s += dRoll(f); return s; };
+
+/** สุ่มของจาก MARKET_DATABASE ตามหมวด+เทียร์ (ใช้บ่อเดียวกับร้านค้า) */
+function marketPick(cats, rarity) {
+  try {
+    const pool = MARKET_DATABASE.filter(x =>
+      cats.indexOf(x.category) >= 0 && x.rarity === rarity);
+    return pool.length ? pool[Math.floor(Math.random() * pool.length)] : null;
+  } catch (e) { return null; }
+}
+const itemLine = it => it ? `${it.name}${it.cost ? ` (${it.cost}c)` : ''}` : 'ของใช้ทั่วไป 1 ชิ้น';
+
+/* มูลค่าประมาณของรางวัลที่ไม่ใช่เหรียญ — ใช้ตรวจสมดุลเท่านั้น ไม่กระทบการเล่น
+   อ้างอิงจากเอกสารออกแบบ: Common ~9.5c · Uncommon ~82c · Rare ~630c        */
+const EST_VALUE = {
+  potion: 100, scroll: 100, spellbook: 500,
+  relic: 700, magicWeapon: 800, magicArmor: 800, torch3: 3
+};
+const costOf = id => {
+  try { const it = MARKET_DATABASE.find(x => x.id === id); return it ? it.cost : 0; }
+  catch (e) { return 0; }
+};
+/** มูลค่ารวมโดยประมาณของผลลัพธ์ 1 ชุด */
+function lootValue(rows) {
+  return rows.reduce((s, r) => s + (r.gold || 0) + (r.item ? (r.item.cost || 0) : 0) +
+    (r.est || 0) + (r.food ? r.food * (costOf('gd_food_ration') || 1) : 0), 0);
+}
+
+/* ── ตาราง Common ───────────────────────────────────────────── */
+function lootCommon(depth) {
+  const r = dRoll(20);
+  const tag = `d20=${r}`;
+  if (r <= 5)  { const c = sumD(1, 6);  return [{ tag, text: `เศษเหรียญ ${c}c`, gold: c }]; }
+  if (r <= 9)  { const c = sumD(2, 6);  return [{ tag, text: `ถุงเหรียญ ${c}c`, gold: c }]; }
+  if (r <= 12) { const f = dRoll(4);    return [{ tag, text: `เสบียง ${f} หน่วย`, food: f }]; }
+  if (r <= 14) {
+    let tk = 'ของกระจุกกระจิกไม่มีค่า';
+    try { tk = getRandom(CHAR_CREATION_DB.trinkets); } catch (e) {}
+    return [{ tag, text: `ของกระจุกกระจิก — ${tk}` }];
+  }
+  if (r <= 16) {
+    const it = marketPick(['goods'], 'C');
+    return [{ tag, text: `ของใช้ทั่วไป — ${itemLine(it)}`, item: it }];
+  }
+  return lootCommon2(depth, `${tag} → ทอยต่อ`);
+}
+function lootCommon2(depth, from) {
+  const r = dRoll(20);
+  const tag = `${from} · d20=${r}`;
+  if (r <= 8) {
+    const it = marketPick(['goods'], 'C');
+    return [{ tag, text: `เครื่องมือ — ${itemLine(it)}`, item: it }];
+  }
+  if (r <= 15) { const c = sumD(1, 6) * 5; return [{ tag, text: `เครื่องประดับเก่า ๆ ${c}c`, gold: c }]; }
+  if (r <= 18) return [{ tag, text: 'คบเพลิง 3 อัน', est: EST_VALUE.torch3 }];
+  if (r === 19) return [{ tag, text: 'ไม่มีอะไรมีค่า' }];
+  return twice(tag, depth, lootCommon2);
+}
+
+/* ── ตาราง Uncommon ─────────────────────────────────────────── */
+function lootUncommon(depth) {
+  const r = dRoll(20);
+  const tag = `d20=${r}`;
+  if (r <= 5) { const c = sumD(3, 6) * 5; return [{ tag, text: `ถุงเหรียญอวบ ${c}c`, gold: c }]; }
+  if (r <= 8) {
+    const s = dRoll(6);
+    const o = s <= 2 ? ['ภาพวาด', 50] : s <= 4 ? ['งานสลัก', 100] : ['ผ้าทอ', 200];
+    return [{ tag: `${tag}·d6=${s}`, text: `งานศิลปะเล็ก — ${o[0]} ${o[1]}c`, gold: o[1] }];
+  }
+  if (r <= 11) return [{ tag, text: 'อัญมณีระดับกลาง 100c', gold: 100 }];
+  if (r <= 14) {
+    let sp = '';
+    try { sp = String(rollSpellByMethod('random') || '').replace(/<[^>]+>/g, ' ').trim(); } catch (e) {}
+    return [{ tag, text: 'Scroll' + (sp ? ` — ${sp}` : ' — สุ่มสเปลล์ 1 อัน'), est: EST_VALUE.scroll }];
+  }
+  if (r <= 16) {
+    const it = marketPick(['melee', 'ranged', 'armor'], 'U');
+    return [{ tag, text: `อาวุธ/เกราะ Uncommon — ${itemLine(it)}`, item: it }];
+  }
+  return lootUncommon2(depth, `${tag} → ทอยต่อ`);
+}
+function lootUncommon2(depth, from) {
+  const r = dRoll(20);
+  const tag = `${from} · d20=${r}`;
+  if (r <= 12) { const c = 50 + dRoll(4) * 50; return [{ tag, text: `เครื่องประดับดี ๆ ${c}c`, gold: c }]; }
+  if (r <= 18) return [{ tag, text: 'Potion of Healing — ฟื้นฟูค่าพลังกลับเต็ม', est: EST_VALUE.potion }];
+  return twice(tag, depth, lootUncommon2);
+}
+
+/* ── ตาราง Rare ─────────────────────────────────────────────── */
+function lootRare(depth) {
+  const r = dRoll(20);
+  const tag = `d20=${r}`;
+  if (r <= 5) {
+    const s = dRoll(2);
+    if (s === 1) return [{ tag: `${tag}·d2=1`, text: 'สมบัติก้อนใหญ่ — อัญมณีหายาก/งานศิลปะเอก 500c', gold: 500 }];
+    const c = sumD(2, 6) * 50;
+    return [{ tag: `${tag}·d2=2`, text: `สมบัติก้อนใหญ่ — ทอง ${c}c`, gold: c }];
+  }
+  if (r <= 9)  return [{ tag, text: 'อาวุธวิเศษ — ' + magicLine(), est: EST_VALUE.magicWeapon }];
+  if (r <= 12) return [{ tag, text: 'Relic — ของวิเศษที่ชาร์จพลังใหม่ได้ (หน้า 25)', est: EST_VALUE.relic }];
+  if (r <= 15) {
+    let sp = '';
+    try { sp = String(rollSpellByMethod('random') || '').replace(/<[^>]+>/g, ' ').trim(); } catch (e) {}
+    return [{ tag, text: 'Spellbook' + (sp ? ` — ${sp}` : ' (1d100 หน้า 28–32)'), est: EST_VALUE.spellbook }];
+  }
+  return lootRare2(depth, `${tag} → ทอยต่อ`);
+}
+function lootRare2(depth, from) {
+  const r = dRoll(20);
+  const tag = `${from} · d20=${r}`;
+  if (r <= 14) return [{ tag, text: 'เกราะวิเศษ — ' + magicLine(), est: EST_VALUE.magicArmor }];
+  return twice(tag, depth, lootRare2, 'รางวัลคู่!');
+}
+
+function magicLine() {
+  try {
+    const t = document.getElementById('magicItemResult');
+    const before = t ? t.innerHTML : null;
+    rollMagicItemResult();
+    const txt = t ? t.innerText.replace(/\s+/g, ' ').trim() : '';
+    if (t && before !== null) t.innerHTML = before;
+    return txt || 'ใช้ Magical Effects oracle (หน้า 26–27)';
+  } catch (e) { return 'ใช้ Magical Effects oracle (หน้า 26–27)'; }
+}
+
+/** "ทอยซ้ำตารางนี้ 2 ครั้ง" — จำกัดความลึกกันวนไม่รู้จบ */
+function twice(tag, depth, fn, label) {
+  if (depth >= 3) return [{ tag, text: 'ทอยซ้ำเกินขีดจำกัด — หยุดที่นี่' }];
+  const out = [{ tag, text: (label || 'ทอยซ้ำตารางนี้ 2 ครั้ง'), header: true }];
+  for (let i = 0; i < 2; i++) out.push(...fn(depth + 1, `รอบ ${i + 1}`));
+  return out;
+}
+
+const LOOT_FN = [lootCommon, lootUncommon, lootRare];
+function rollLoot(tierIdx) {
+  return LOOT_FN[Math.min(2, Math.max(0, tierIdx))](0);
+}
+
+/** Loot นอกการต่อสู้ — Travel ทอย d4 · Delve = Uncommon เสมอ */
+function scavengeTier(ctx) {
+  if (ctx === 'delve') return { tier: 1, note: 'Delve — ใช้ตาราง Uncommon เสมอ' };
+  const r = dRoll(4);
+  return { tier: r <= 3 ? 0 : 1, note: `Travel — d4=${r} → ${r <= 3 ? 'Common' : 'Uncommon'}` };
+}
+
+/** ปุ่มเข้าใช้งาน — ฉีดตอน runtime ไม่แก้ HTML เดิม
+    1) ในกล่อง Activity (ใช้ระหว่างเล่น)
+    2) ในการ์ดสมบัติของแท็บ Oracle (คู่กับตาราง d12 เดิม)      */
+function injectLootButtons() {
+  try {
+    const modal = document.querySelector('#activityModal .modal-card');
+    if (modal && !modal.querySelector('#jr-lootbtn')) {
+      const close = modal.querySelector('[onclick="closeActivityModal()"]');
+      const b = document.createElement('button');
+      b.id = 'jr-lootbtn'; b.type = 'button'; b.className = 'jr-lootbtn';
+      b.textContent = '🎁 เก็บของ (Loot)';
+      b.onclick = () => { try { closeActivityModal(); } catch (e) {} openLoot(); };
+      const head = document.createElement('div');
+      head.className = 'jr-resthead'; head.textContent = 'เก็บของ';
+      modal.insertBefore(head, close); modal.insertBefore(b, close);
+    }
+    const tre = document.getElementById('treasureResult');
+    if (tre && !document.getElementById('jr-loottier')) {
+      const b = document.createElement('button');
+      b.id = 'jr-loottier'; b.type = 'button'; b.className = 'jr-loottier';
+      b.innerHTML = '🎁 เก็บของแบบแบ่งเทียร์ <small>อิงระดับศัตรู + สถานที่</small>';
+      b.onclick = () => openLoot();
+      tre.parentNode.insertBefore(b, tre);
+    }
+  } catch (e) {}
+}
+
+/* ── หน้าจอ Loot ─────────────────────────────────────────────── */
+let lootCtx = 'travel';                 // จำบริบทล่าสุดไว้เลือกให้อัตโนมัติ
+
+function monsterList() {
+  try { return MONSTER_DATABASE.slice().sort((a, b) => (a.hpMax || 0) - (b.hpMax || 0)); }
+  catch (e) { return []; }
+}
+
+function openLoot(opts) {
+  opts = opts || {};
+  const mons = monsterList();
+  let mIdx = -1;                                    // -1 = ไม่ได้มาจากศัตรู
+  let ctx  = opts.ctx || lootCtx;
+  let manual = null;                                // ผู้เล่นล็อกเทียร์เอง
+
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-lootsheet';
+  document.body.appendChild(el);
+
+  const curTier = () => {
+    if (manual !== null) return { t: manual, why: 'เลือกเอง' };
+    if (mIdx < 0) {
+      const s = scavengeTier(ctx);
+      return { t: s.tier, why: s.note };
+    }
+    const m = mons[mIdx], base = creatureTier(m.hpMax || 0);
+    const t = effTier(base, ctx);
+    return { t, why: `${m.name} HP ${m.hpMax} → ${TIER_TH[base]}` +
+      (t !== base ? ` · Delve เลื่อนขึ้นเป็น ${TIER_TH[t]}` : '') };
+  };
+
+  const draw = (rows) => {
+    const { t, why } = curTier();
+    el.innerHTML = '<div class="jr-sheet-in">' +
+      '<div class="jr-ptitle">🎁 เก็บของ (Loot)</div>' +
+
+      '<div class="jr-lsec">มาจากไหน</div>' +
+      '<select class="jr-lsel">' +
+        `<option value="-1"${mIdx < 0 ? ' selected' : ''}>ไม่ได้มาจากศัตรู (ค้นห้อง/หีบ/ซาก)</option>` +
+        mons.map((m, i) =>
+          `<option value="${i}"${i === mIdx ? ' selected' : ''}>` +
+          `${TIER_ICON[creatureTier(m.hpMax || 0)]} ${esc(m.name)} · HP ${m.hpMax}</option>`).join('') +
+      '</select>' +
+
+      '<div class="jr-ltabs">' +
+        `<button data-x="travel" class="${ctx === 'travel' ? 'on' : ''}">🧭 Travel</button>` +
+        `<button data-x="delve" class="${ctx === 'delve' ? 'on' : ''}">🗝️ Delve</button>` +
+      '</div>' +
+
+      `<div class="jr-lwhy"><b>${TIER_ICON[t]} ${TIER_TH[t]}</b><span>${esc(why)}</span></div>` +
+      '<div class="jr-ltabs small">' +
+        TIER_TH.map((n, i) =>
+          `<button data-t="${i}" class="${manual === i ? 'on' : ''}">${TIER_ICON[i]} ${n}</button>`).join('') +
+        `<button data-t="auto" class="${manual === null ? 'on' : ''}">อัตโนมัติ</button>` +
+      '</div>' +
+
+      '<button class="jr-lgo" data-a="roll">🎲 ทอย Loot</button>' +
+      (rows ? renderLoot(rows, t) : '') +
+      '<button data-a="close">ปิด</button>' +
+    '</div>';
+    el.querySelector('.jr-lsel').onchange = ev => { mIdx = +ev.target.value; draw(); };
+  };
+
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-x],[data-t],[data-a],[data-take]');
+    if (!b) { if (ev.target === el) el.remove(); return; }
+    if (b.dataset.x) { ctx = lootCtx = b.dataset.x; draw(); return; }
+    if (b.dataset.t) { manual = b.dataset.t === 'auto' ? null : +b.dataset.t; draw(); return; }
+    if (b.dataset.take !== undefined) { takeLoot(el, +b.dataset.take); return; }
+    if (b.dataset.a === 'roll') {
+      const { t, why } = curTier();
+      const rows = rollLoot(t);
+      el.__rows = rows;
+      draw(rows);
+      try {
+        log(`🎁 <strong>Loot ${TIER_TH[t]}</strong> (${why}) — ` +
+            rows.filter(x => !x.header).map(x => x.text).join(' · '));
+      } catch (e) {}
+      return;
+    }
+    el.remove();
+  });
+
+  draw();
+}
+
+function renderLoot(rows, t) {
+  const v = lootValue(rows);
+  return `<div class="jr-lsec">ผลลัพธ์ · ${TIER_ICON[t]} ${TIER_TH[t]}` +
+    `<span class="v">มูลค่ารวมราว ${v}c</span></div>` +
+    '<div class="jr-llist">' + rows.map((r, i) =>
+      `<div class="jr-lrow${r.header ? ' hd' : ''}">` +
+        `<div class="tx"><b>${esc(r.text)}</b><i>${esc(r.tag)}</i></div>` +
+        ((r.gold || r.food || r.item)
+          ? `<button class="tk" data-take="${i}">+ รับ</button>` : '') +
+      '</div>').join('') + '</div>';
+}
+
+/** รับของเข้าตัวละครจริง — เงิน / เสบียง / ไอเทมจาก Market */
+function takeLoot(el, i) {
+  const rows = el.__rows || [];
+  const r = rows[i];
+  if (!r || r.taken) return;
+  let done = [];
+  try {
+    if (r.gold) {
+      const g = document.getElementById('charGold');
+      if (g) { g.value = (parseInt(g.value, 10) || 0) + r.gold; done.push(`+${r.gold}c`); }
+    }
+    if (r.food && typeof addFoodRations === 'function') {
+      addFoodRations(r.food); done.push(`+เสบียง ${r.food}`);
+    }
+    if (r.item) {
+      const it = r.item;
+      inventorySlotsData.push({
+        id: it.id, name: it.name, size: it.size, damage: it.damage, ar: it.ar,
+        hasUses: ['T', 'S'].indexOf(it.size) >= 0 && !it.damage && !it.ar, uses: 1
+      });
+      renderInventorySlots();
+      done.push(`+${it.name}`);
+    }
+    autoSaveCurrentCharacter();
+  } catch (e) { safeToast('⚠️ รับของไม่สำเร็จ'); return; }
+  r.taken = true;
+  safeToast('🎁 ' + (done.join(' · ') || 'รับแล้ว'));
+  try { log(`🎁 <strong>เก็บของ</strong> — ${r.text}`); } catch (e) {}
+  const btn = el.querySelector(`[data-take="${i}"]`);
+  if (btn) { btn.textContent = '✓ รับแล้ว'; btn.classList.add('done'); btn.removeAttribute('data-take'); }
+}
+
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
 const API = {
   init, render, activate, addEntry, addSystemEntry, route, bridge, CFG,
@@ -9612,6 +9948,9 @@ const API = {
   syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn, setDeprived, syncDeprivedUI, addFatigue,
   sniffDeprived, reflowCharTab, askFatigueChoice,
   injectRerollButtons, rrOne, rrAllParts, openPartSheet,
+  openLoot, rollLoot, creatureTier, effTier, scavengeTier, marketPick, injectLootButtons,
+  lootValue, EST_VALUE,
+  TIER_TH, get lootCtx() { return lootCtx; }, set lootCtx(v) { lootCtx = v; },
   get rules() { return rules; },
   addEntToParty, fillNpcModal, entSummary, injectNpcPick,
   get readMode() { return ui.read; },
@@ -9641,6 +9980,7 @@ const API = {
     if (unpatchClock) unpatchClock();
     if (unpatchRules) unpatchRules();
     if (unpatchTravelDiff) unpatchTravelDiff();
+    if (unpatchDelve) unpatchDelve();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
