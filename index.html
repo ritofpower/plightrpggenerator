@@ -5619,6 +5619,41 @@ body.jr-live #toastContainer{
   border-radius:20px; color:var(--text-muted,#8E94A5); font-weight:400;
 }
 #jr-worldBar .jr-wbtn:active{background:var(--card-bg,#1E202D);transform:none}
+#createScreen .jr-lab{
+  display:flex!important;align-items:center;justify-content:space-between;gap:6px;
+}
+#createScreen .jr-rf{
+  width:auto!important;flex:0 0 auto;padding:2px 9px!important;margin:0!important;
+  font-size:.78rem!important;line-height:1.5;border-radius:14px!important;
+  background:transparent!important;border:1px solid var(--border-color,#2F3346)!important;
+  color:var(--text-muted,#8E94A5)!important;font-weight:400!important;
+}
+#createScreen .jr-rf:active{
+  background:var(--accent-gold,#E5A93C)!important;
+  border-color:var(--accent-gold,#E5A93C)!important;transform:none!important;
+}
+@keyframes jr-rrflash{
+  0%{background:color-mix(in srgb,var(--accent-gold,#E5A93C) 45%,transparent)}
+  100%{}
+}
+#createScreen .jr-rrflash{animation:jr-rrflash 1s ease-out}
+
+.jr-sheet.jr-rrsheet .jr-rrow{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:10px 12px;margin-bottom:5px;border-radius:11px;font-weight:400;
+  background:var(--card-bg,#1E202D);border:1px solid transparent;
+  color:var(--text-main,#E0E2EC);min-height:52px;
+}
+.jr-sheet.jr-rrsheet .jr-rrow:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-sheet.jr-rrsheet .jr-rrow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.jr-sheet.jr-rrsheet .jr-rrow .tx i{font-style:normal;font-size:.66rem;color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-rrsheet .jr-rrow .tx b{font-size:.9rem;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr-sheet.jr-rrsheet .jr-rrow .d{flex:0 0 auto;font-size:1rem;opacity:.6}
+.jr-sheet.jr-rrsheet .jr-rrall{
+  background:var(--accent-gold,#E5A93C);border:none;color:#12131C;
+  font-weight:700;text-align:center;margin-top:4px;
+}
 #createScreen .jr-seasonnote{
   font-size:.72rem;color:var(--accent-gold,#E5A93C);margin-top:6px;line-height:1.5;
 }
@@ -7015,7 +7050,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -7291,6 +7326,7 @@ function hookWorld() {
     window.goToCreateScreen = function () {
       const r = o.create2.apply(this, arguments);
       try { tameCharSeasonField(); } catch (e) {}
+      try { injectRerollButtons(); } catch (e) {}
       return r;
     };
 
@@ -9140,6 +9176,10 @@ function reflowCharTab() {
     }
     if (info) tab.appendChild(info);         // ข้อมูลตัวละครลงล่างสุด
 
+    /* ปุ่ม Sleep ซ้ำกับ Long Rest ที่ย้ายเข้ามาแล้ว — เอาออก */
+    const sleep = document.querySelector('#activityModal [onclick="doActivitySleep()"]');
+    if (sleep) sleep.remove();
+
     /* ย้ายแถวปุ่มพักผ่อนเข้ากล่อง Activity */
     const rest = document.querySelector('[onclick="restShort()"]');
     const modal = document.querySelector('#activityModal .modal-card');
@@ -9361,6 +9401,197 @@ function hookRules() {
   };
 }
 
+
+/* ── [23] Travel Difficulty : หมวด "อ่อนล้า" ต้องให้เลือกก่อน ────
+   กติกา : ได้ d4 Fatigue "เว้นแต่จะใช้ยามถัดไปพักยาว"
+   แต่โค้ดเดิมยัด Fatigue ทันทีโดยไม่ถาม ผู้เล่นเลยไม่มีโอกาสเลือก
+
+   วิธี : ห่อ rollTravelDifficultyText() — ปล่อยของเดิมทำงานตามปกติ
+   แล้ววัดว่า Fatigue ขยับไปเท่าไร ถ้าขยับแปลว่าออกหมวดนี้
+   → คืนค่าที่เพิ่งเพิ่มกลับ แล้วเปิดให้เลือกแทน
+   (วัดจากส่วนต่างจริง ไม่แกะตัวเลขจากข้อความ จะได้ไม่พังถ้าคำเปลี่ยน) */
+let unpatchTravelDiff = null;
+
+function hookTravelDiff() {
+  if (unpatchTravelDiff || typeof window.rollTravelDifficultyText !== 'function') return;
+  const orig = window.rollTravelDifficultyText;
+
+  window.rollTravelDifficultyText = function () {
+    const before = nowFatigue();
+    const text = orig.apply(this, arguments);
+    const gained = nowFatigue() - before;
+    if (!CFG.strictRules || gained <= 0) return text;
+
+    addFatigue(-gained);                       // คืนก่อน ค่อยถาม
+    setTimeout(() => askFatigueChoice(), 40);
+    return String(text).replace(/→[\s\S]*$/,
+      '→ 😩 <strong>อ่อนล้ามาก</strong> — ต้องตัดสินใจว่าจะพักยาวหรือฝืนเดินต่อ');
+  };
+
+  unpatchTravelDiff = () => { window.rollTravelDifficultyText = orig; unpatchTravelDiff = null; };
+}
+
+function askFatigueChoice() {
+  let food = 0;
+  try { food = (typeof getTotalFoodRations === 'function') ? getTotalFoodRations() : 0; } catch (e) {}
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-fatsheet';
+  el.innerHTML = '<div class="jr-sheet-in">' +
+    '<div class="jr-ptitle">😩 เหนื่อยล้ามาก</div>' +
+    '<div class="jr-fattext">' +
+      'การเดินทางหนักหน่วงกว่าที่คิด ขาเริ่มหนัก ลมหายใจเริ่มสั้น<br><br>' +
+      'ถ้าใช้ยามถัดไป<b>พักยาว</b> จะผ่านไปได้โดยไม่เสียอะไร<br>' +
+      'ถ้า<b>ฝืนเดินต่อ</b> จะได้ Fatigue <b>d4</b> (1–4 ช่องเป้)' +
+    '</div>' +
+    '<button class="jr-fatgo" data-c="rest">🌙 พักยาวทันที' +
+      `<small>${food >= 1 ? 'เสบียงเหลือ ' + food + ' หน่วย' : 'ไม่มีเสบียง — พักได้แต่จะติด Deprived'}</small>` +
+    '</button>' +
+    '<button class="jr-fatno" data-c="push">🚶 ฝืนเดินต่อ<small>รับ d4 Fatigue</small></button>' +
+  '</div>';
+
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-c]');
+    if (!b) return;                             // บังคับให้เลือก ปิดทิ้งไม่ได้
+    el.remove();
+    if (b.dataset.c === 'rest') {
+      try { log('🌙 <strong>เลือกพักยาว</strong> — เลี่ยง Fatigue จากความอ่อนล้าได้'); } catch (e) {}
+      try { restLong(); } catch (e) {}
+    } else {
+      const f = dN(4);
+      addFatigue(f);
+      try { log(`😩 <strong>ฝืนเดินต่อ</strong> — ทอย d4 ได้ ${f} · Fatigue +${f} ` +
+                `(รวม ${nowFatigue()} ช่อง)`); } catch (e) {}
+      syncDeprivedUI();
+    }
+  });
+  document.body.appendChild(el);
+}
+
+
+/* ══════ [24] สุ่มใหม่ทีละช่อง ตอนสร้างตัวละคร ═══════════════════
+   เดิมมีแค่ "สุ่มทั้งหมด" ซึ่งล้างของที่ถูกใจไปด้วย
+   แทรกปุ่ม 🎲 เข้าไปใน <label> ของแต่ละช่อง — ไม่รื้อโครง input เดิม
+   ใช้บ่อตารางเดียวกับ generateRandomNewCharForm() ทุกตัว
+   ถ้าแอปเดิมเปลี่ยนบ่อ ปุ่มจะหายไปเองเพราะเช็คก่อนว่าใช้ได้จริง     */
+const RR_SIMPLE = {
+  newCharName      : () => getRandom(names),
+  newCharAncestry  : () => getRandom(ancestries),
+  newCharBackground: () => getRandom(CHAR_CREATION_DB.backgrounds),
+  newCharTrinket   : () => getRandom(CHAR_CREATION_DB.trinkets),
+  newStr           : () => roll3d6(),
+  newDex           : () => roll3d6(),
+  newInt           : () => roll3d6(),
+  newHp            : () => Math.floor(Math.random() * 6) + 1,
+  newGold          : () => roll3d6()
+};
+
+/* ช่องที่รวมหลายอย่างไว้ด้วยกัน — แยกสุ่มทีละส่วนได้ */
+const RR_PARTS = {
+  newCharPhysical: { group: 'physical',
+    keys: [['physique', 'รูปร่าง'], ['face', 'ใบหน้า'], ['hair', 'ผม'], ['speech', 'น้ำเสียง']] },
+  newCharTrait:    { group: 'traits',
+    keys: [['virtue', 'คุณธรรม'], ['iniquity', 'ด้านมืด'],
+           ['reputation', 'ชื่อเสียง'], ['misfortune', 'เคราะห์กรรม']] }
+};
+
+const rrPool = (group, key) => {
+  try { return CHAR_CREATION_DB[group][key]; } catch (e) { return null; }
+};
+
+function rrSet(id, val) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  el.value = val;
+  if (el.tagName === 'TEXTAREA') { try { autoExpandTextarea(el); } catch (e) {} }
+  el.classList.remove('jr-rrflash');
+  void el.offsetWidth;                       // บังคับให้ animation เล่นซ้ำได้
+  el.classList.add('jr-rrflash');
+}
+
+function rrOne(id) {
+  if (RR_SIMPLE[id]) { try { rrSet(id, RR_SIMPLE[id]()); } catch (e) {} return; }
+  if (RR_PARTS[id]) openPartSheet(id);
+}
+
+/** สุ่มใหม่ทั้งช่องรวม (ทุกส่วน) */
+function rrAllParts(id) {
+  const cfg = RR_PARTS[id]; if (!cfg) return;
+  const vals = cfg.keys.map(([k]) => {
+    const pool = rrPool(cfg.group, k);
+    return pool ? getRandom(pool) : '';
+  });
+  rrSet(id, vals.join(', '));
+  return vals;
+}
+
+/** อ่านค่าปัจจุบันแยกเป็นส่วน ๆ — ถ้ารูปแบบไม่ตรง 4 ส่วน ให้สุ่มใหม่ทั้งชุด */
+function rrParts(id) {
+  const cfg = RR_PARTS[id];
+  const el = document.getElementById(id);
+  const cur = el ? String(el.value || '').split(', ') : [];
+  return (cur.length === cfg.keys.length) ? cur : rrAllParts(id);
+}
+
+function openPartSheet(id) {
+  const cfg = RR_PARTS[id];
+  const el = document.createElement('div');
+  el.className = 'jr-sheet jr-rrsheet';
+
+  const draw = () => {
+    const vals = rrParts(id);
+    el.innerHTML = '<div class="jr-sheet-in">' +
+      `<div class="jr-ptitle">🎲 สุ่มใหม่ทีละส่วน</div>` +
+      '<div class="jr-fcount">แตะ 🎲 ข้างส่วนที่อยากเปลี่ยน ส่วนอื่นจะคงเดิม</div>' +
+      cfg.keys.map(([k, lb], i) =>
+        `<button class="jr-rrow" data-p="${i}">` +
+          `<span class="tx"><i>${lb}</i><b>${esc(vals[i] || '—')}</b></span>` +
+          '<span class="d">🎲</span></button>').join('') +
+      '<button class="jr-rrall" data-p="all">🎲 สุ่มใหม่ทั้งหมด</button>' +
+      '<button data-p="close">เสร็จแล้ว</button>' +
+    '</div>';
+  };
+
+  el.addEventListener('click', ev => {
+    const b = ev.target.closest('[data-p]');
+    if (!b) { if (ev.target === el) el.remove(); return; }
+    const p = b.dataset.p;
+    if (p === 'close') { el.remove(); return; }
+    if (p === 'all') { rrAllParts(id); draw(); return; }
+    const i = +p, vals = rrParts(id);
+    const pool = rrPool(cfg.group, cfg.keys[i][0]);
+    if (pool) { vals[i] = getRandom(pool); rrSet(id, vals.join(', ')); }
+    draw();
+  });
+
+  draw();
+  document.body.appendChild(el);
+}
+
+/** แทรกปุ่ม 🎲 ลงในป้ายชื่อของทุกช่องที่สุ่มได้ */
+function injectRerollButtons() {
+  const ids = Object.keys(RR_SIMPLE).concat(Object.keys(RR_PARTS));
+  ids.forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    /* เช็คว่าบ่อมีจริงก่อน ไม่งั้นไม่ต้องใส่ปุ่มให้กดแล้วพัง */
+    if (RR_SIMPLE[id]) { try { RR_SIMPLE[id](); } catch (e) { return; } }
+    else { const c = RR_PARTS[id]; if (!c.keys.every(([k]) => rrPool(c.group, k))) return; }
+
+    const cell = el.parentNode;
+    const lab = cell && cell.querySelector('label');
+    if (!lab || lab.querySelector('.jr-rf')) return;
+    lab.classList.add('jr-lab');
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'jr-rf';
+    b.dataset.rf = id;
+    b.textContent = '🎲';
+    b.title = 'สุ่มเฉพาะช่องนี้';
+    b.onclick = ev => { ev.preventDefault(); rrOne(id); };
+    lab.appendChild(b);
+  });
+}
+
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
 const API = {
   init, render, activate, addEntry, addSystemEntry, route, bridge, CFG,
@@ -9379,7 +9610,8 @@ const API = {
   openFind, findEntries, setRead, toMarkdown, openExport,
   openBackup, bkBuild, bkParse, bkApply, bkUndo, bkSummary, bkMerge, bkCollect,
   syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn, setDeprived, syncDeprivedUI, addFatigue,
-  sniffDeprived, reflowCharTab,
+  sniffDeprived, reflowCharTab, askFatigueChoice,
+  injectRerollButtons, rrOne, rrAllParts, openPartSheet,
   get rules() { return rules; },
   addEntToParty, fillNpcModal, entSummary, injectNpcPick,
   get readMode() { return ui.read; },
@@ -9408,6 +9640,7 @@ const API = {
     if (unpatchNpc) unpatchNpc();
     if (unpatchClock) unpatchClock();
     if (unpatchRules) unpatchRules();
+    if (unpatchTravelDiff) unpatchTravelDiff();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
