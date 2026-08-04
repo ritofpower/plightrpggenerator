@@ -6223,6 +6223,191 @@ body.jr-live #toastContainer{
   text-align:center;transition:.13s}
 .jr-scope .jr-send.on{background:var(--jr-light);color:#12131C}
 
+/* ══ [7b] CSS ที่เคยตกหล่น — เติมครบในที่เดียว ═══════════════════
+   ⚠️ เตือนตัวเองในอนาคต : ทุกครั้งที่เพิ่ม class `jr-` ในฝั่ง JS
+   ต้องมีกฎ CSS คู่กันเสมอ มีเทสต์ `css_test.js` ไล่ตรวจให้อัตโนมัติแล้ว
+   และปุ่มที่อยู่ในแผ่นต้องใช้ `.jr-sheet.<ชื่อแผ่น>` เพื่อชนะ (0,3,x) */
+
+/* หัวข้อของทุกแผ่น + หัวข้อกลุ่มในรายการ */
+.jr-ptitle{
+  font-size:1rem;font-weight:700;color:var(--accent-gold,#E5A93C);
+  padding:2px 4px 10px;line-height:1.4;
+}
+.jr-ptitle b{color:var(--text-main,#E0E2EC)}
+.jr-pick .jr-pgrp{
+  display:flex;align-items:center;gap:7px;font-size:.66rem;letter-spacing:.05em;
+  color:var(--text-muted,#8E94A5);padding:11px 10px 5px;margin-top:4px;
+  border-top:1px solid var(--border-color,#2F3346);
+}
+.jr-pick .jr-pgrp:first-child{border-top:none;margin-top:0;padding-top:2px}
+.jr-pick .jr-pgrp .c{
+  font-size:.6rem;padding:1px 7px;border-radius:9px;
+  background:var(--border-color,#2F3346);color:var(--text-muted,#8E94A5);
+}
+
+/* ปุ่มบนหัวบันทึก */
+#jr-root .jr-chap{
+  flex:1 1 auto;min-width:0;display:flex;align-items:center;gap:5px;
+  width:auto;padding:5px 9px;border-radius:9px;font-size:.8rem;font-weight:700;
+  background:var(--jr-bg);border:1px solid var(--jr-line);color:var(--jr-light);text-align:left;
+}
+#jr-root .jr-chap .t{flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#jr-root .jr-chap .v{flex:0 0 auto;color:var(--jr-dim);font-size:.7rem}
+#jr-root .jr-chap:active{border-color:var(--jr-light);transform:none}
+#jr-root .jr-find-btn,#jr-root .jr-read-btn{
+  flex:0 0 auto;width:34px;height:32px;border-radius:9px;font-size:.9rem;text-align:center;
+  background:var(--jr-bg);border:1px solid var(--jr-line);color:var(--jr-dim);
+}
+#jr-root .jr-read-btn.on{background:var(--jr-light);border-color:var(--jr-light);color:#12131C}
+#jr-root .jr-find-btn:active,#jr-root .jr-read-btn:active{
+  border-color:var(--jr-light);color:var(--jr-light);transform:none;
+}
+
+/* หัวข้อคั่นในกล่อง Activity */
+#activityModal .jr-resthead{
+  font-size:.72rem;letter-spacing:.06em;color:var(--text-muted,#8E94A5);
+  padding:12px 2px 6px;margin-top:4px;border-top:1px solid var(--border-color,#2F3346);
+}
+#activityModal .jr-restrow{margin-top:0!important}
+
+/* แถวเลือกระดับสถานที่ */
+.jr-entsheet .jr-scalerow{margin-top:8px}
+
+/* โควตาเดินทางบนปุ่ม Travel + แถบสถานะ */
+.jr-tq{display:inline-block;margin-left:5px;padding:1px 8px;border-radius:11px;
+  font-size:.78rem;font-weight:700;background:rgba(0,0,0,.28)}
+.jr-tq.out{background:var(--accent-red,#E74C3C);color:#fff}
+#jr-status{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:10px}
+#jr-status .s{
+  padding:5px 11px;border-radius:16px;font-size:.76rem;
+  background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
+  color:var(--text-muted,#8E94A5);
+}
+#jr-status .s b{color:var(--text-main,#E0E2EC);font-size:.85rem}
+#jr-status .s.bad{background:var(--accent-red,#E74C3C);border-color:var(--accent-red,#E74C3C);
+  color:#fff;font-weight:700}
+#jr-status .s.warn{border-color:var(--accent-gold,#E5A93C);color:var(--accent-gold,#E5A93C)}
+#jr-status .s.warn b{color:var(--accent-gold,#E5A93C)}
+#jr-status .note{flex:1 1 100%;font-size:.66rem;color:var(--accent-red,#E74C3C);opacity:.85}
+
+/* แผ่นเลือกตอนอ่อนล้า */
+.jr-fatsheet .jr-fattext{font-size:.86rem;line-height:1.7;
+  color:var(--text-muted,#8E94A5);padding:2px 4px 14px}
+.jr-fatsheet .jr-fattext b{color:var(--text-main,#E0E2EC)}
+.jr-sheet.jr-fatsheet .jr-fatgo,.jr-sheet.jr-fatsheet .jr-fatno{
+  display:block;width:100%;text-align:left;padding:13px 15px;margin-bottom:8px;
+  border-radius:12px;font-size:.95rem;font-weight:700;
+}
+.jr-sheet.jr-fatsheet .jr-fatgo{background:var(--accent-gold,#E5A93C);border:none;color:#12131C}
+.jr-sheet.jr-fatsheet .jr-fatno{background:transparent;
+  border:1px solid var(--border-color,#2F3346);color:var(--text-main,#E0E2EC)}
+.jr-sheet.jr-fatsheet small{display:block;font-size:.7rem;font-weight:400;opacity:.8;margin-top:2px}
+.jr-sheet.jr-fatsheet .jr-fatgo:active,.jr-sheet.jr-fatsheet .jr-fatno:active{
+  transform:none;opacity:.8;
+}
+
+/* หน้าสำรอง/กู้คืน */
+.jr-bknow{font-size:.82rem;color:var(--text-muted,#8E94A5);padding:2px 4px 10px}
+.jr-bknow b{color:var(--accent-gold,#E5A93C)}
+.jr-bksec{font-size:.68rem;letter-spacing:.06em;color:var(--text-muted,#8E94A5);
+  padding:12px 4px 6px;border-top:1px solid var(--border-color,#2F3346);margin-top:6px}
+.jr-sheet.jr-bksheet .jr-bkpick{
+  width:100%;padding:12px;border-radius:10px;font-size:.88rem;font-weight:400;
+  background:var(--bg-color,#12131C);border:1px dashed var(--border-color,#2F3346);
+  color:var(--text-main,#E0E2EC);margin-bottom:8px;
+}
+.jr-bksheet .jr-bkpaste{
+  width:100%;height:74px;padding:10px;font-size:12px;line-height:1.4;
+  font-family:ui-monospace,SFMono-Regular,Menlo,monospace;resize:none;
+  background:var(--bg-color,#12131C);border:1px solid var(--border-color,#2F3346);
+  border-radius:10px;color:var(--text-muted,#8E94A5);margin-bottom:9px;
+}
+.jr-bksheet .jr-bkmode{display:flex;gap:5px;margin-bottom:9px}
+.jr-sheet.jr-bksheet .jr-bkmode button{
+  flex:1;width:auto;padding:7px 4px;border-radius:9px;font-size:.74rem;font-weight:400;
+  background:transparent;border:1px solid var(--border-color,#2F3346);
+  color:var(--text-muted,#8E94A5);text-align:center;
+}
+.jr-sheet.jr-bksheet .jr-bkmode button.on{
+  background:var(--accent-gold,#E5A93C);border-color:var(--accent-gold,#E5A93C);
+  color:#12131C;font-weight:700;
+}
+.jr-bkprev{font-size:.78rem;line-height:1.5;padding:9px 11px;border-radius:9px;
+  margin-bottom:9px;background:var(--bg-color,#12131C);color:var(--text-muted,#8E94A5)}
+.jr-bkprev:empty{display:none}
+.jr-bkprev.ok{color:#6FBF8B}
+.jr-bkprev.bad{color:var(--accent-red,#E74C3C)}
+.jr-bkprev .d{font-size:.7rem;opacity:.75}
+.jr-sheet.jr-bksheet .jr-bkgo{
+  background:var(--accent-gold,#E5A93C);border:none;color:#12131C;
+  font-weight:700;text-align:center;
+}
+
+/* ── เก็บของ (Loot) ── */
+.jr-lootwrap{margin-top:14px;padding-top:12px;border-top:1px solid var(--border-color,#2F3346)}
+.jr-loothead{font-size:1rem;font-weight:700;color:var(--accent-gold,#E5A93C);margin-bottom:4px}
+.jr-lootdesc{font-size:.8rem;color:var(--text-muted,#8E94A5);margin-bottom:10px;line-height:1.5}
+.jr-lstep{display:flex;flex-direction:column;gap:2px;padding:2px 4px 12px;
+  font-size:1rem;font-weight:700;color:var(--text-main,#E0E2EC)}
+.jr-lstep span{font-size:.64rem;letter-spacing:.08em;font-weight:400;
+  color:var(--text-muted,#8E94A5)}
+.jr-sheet.jr-lootsheet .jr-lback{
+  width:auto;padding:4px 12px;margin-bottom:10px;border-radius:14px;
+  font-size:.72rem;font-weight:400;background:transparent;
+  border:1px solid var(--border-color,#2F3346);color:var(--text-muted,#8E94A5);
+}
+.jr-sheet.jr-lootsheet .jr-lopt{
+  display:block;width:100%;text-align:left;padding:14px 16px;margin-bottom:8px;
+  border-radius:12px;font-weight:400;background:var(--card-bg,#1E202D);
+  border:1px solid var(--border-color,#2F3346);color:var(--text-main,#E0E2EC);
+}
+.jr-sheet.jr-lootsheet .jr-lopt b{display:block;font-size:.98rem;font-weight:700}
+.jr-sheet.jr-lootsheet .jr-lopt small{display:block;font-size:.72rem;
+  color:var(--text-muted,#8E94A5);margin-top:3px;line-height:1.45}
+.jr-sheet.jr-lootsheet .jr-lopt:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-lmons{max-height:52vh;overflow-y:auto}
+.jr-sheet.jr-lootsheet .jr-lmon{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:10px 12px;margin-bottom:5px;border-radius:11px;font-weight:400;min-height:52px;
+  background:var(--card-bg,#1E202D);border:1px solid transparent;color:var(--text-main,#E0E2EC);
+}
+.jr-sheet.jr-lootsheet .jr-lmon:active{border-color:var(--accent-gold,#E5A93C);transform:none}
+.jr-sheet.jr-lootsheet .jr-lmon .ic{flex:0 0 auto;font-size:1.05rem}
+.jr-sheet.jr-lootsheet .jr-lmon .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.jr-sheet.jr-lootsheet .jr-lmon .tx b{font-size:.9rem;font-weight:600;
+  overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.jr-sheet.jr-lootsheet .jr-lmon .tx i{font-style:normal;font-size:.66rem;
+  color:var(--text-muted,#8E94A5)}
+.jr-lwhy{display:flex;flex-direction:column;gap:3px;padding:12px 14px;margin-bottom:10px;
+  border-radius:11px;background:var(--bg-color,#12131C);
+  border:1px solid color-mix(in srgb,var(--accent-gold,#E5A93C) 35%,transparent)}
+.jr-lwhy b{font-size:1rem;color:var(--accent-gold,#E5A93C)}
+.jr-lwhy span{font-size:.72rem;color:var(--text-muted,#8E94A5);line-height:1.5}
+.jr-sheet.jr-lootsheet .jr-lgo{
+  background:var(--accent-gold,#E5A93C);border:none;color:#12131C;
+  font-weight:700;text-align:center;margin-bottom:6px;
+}
+.jr-lsec{display:flex;align-items:baseline;gap:8px;font-size:.68rem;letter-spacing:.06em;
+  color:var(--text-muted,#8E94A5);padding:11px 4px 6px;
+  border-top:1px solid var(--border-color,#2F3346);margin-top:6px}
+.jr-lsec .v{margin-left:auto;color:var(--accent-gold,#E5A93C);font-weight:700}
+.jr-llist{max-height:34vh;overflow-y:auto}
+.jr-lrow{display:flex;align-items:center;gap:9px;padding:9px 11px;margin-bottom:5px;
+  border-radius:10px;background:var(--card-bg,#1E202D)}
+.jr-lrow.hd{background:transparent;padding:6px 4px 2px}
+.jr-lrow.hd .tx b{font-size:.76rem;color:var(--accent-gold,#E5A93C)}
+.jr-lrow .tx{flex:1;min-width:0;display:flex;flex-direction:column;gap:1px}
+.jr-lrow .tx b{font-size:.86rem;font-weight:600;line-height:1.45}
+.jr-lrow .tx i{font-style:normal;font-size:.63rem;color:#5A6073}
+.jr-sheet.jr-lootsheet .jr-lrow .tk{
+  flex:0 0 auto;width:auto;padding:5px 12px;border-radius:14px;font-size:.72rem;font-weight:700;
+  background:transparent;border:1px solid var(--accent-gold,#E5A93C);
+  color:var(--accent-gold,#E5A93C);
+}
+.jr-sheet.jr-lootsheet .jr-lrow .tk.done{
+  border-color:var(--border-color,#2F3346);color:#5A6073;font-weight:400;
+}
+
 /* ══ [7] ACTION SHEET ═════════════════════════════════════════════ */
 /* ⚠️ แผ่นทั้งหมด append ที่ body จึงอยู่นอก #jr-root/#jr-bar
    ต้องประกาศ box-sizing เองซ้ำ ไม่งั้น width:100% + padding = ล้นขอบขวา */
@@ -7051,7 +7236,7 @@ function init() {
   bindUI();
   fitNav(); measureBar(); render(true);
   hookLog(); hookToast(); hookOracle(); hookTabs();
-  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff(); hookDelveCtx();
+  bootWorld(); hookZeroBug(); entLoad(world.current); fixWords(); hookNpcModal(); hookClock(); loadRules(); hookRules(); hookTravelDiff(); hookDelveCtx(); hookScavenge();
   closePanel();
   setTimeout(() => { armed = true; }, CFG.armDelay);
 
@@ -9771,111 +9956,114 @@ function scavengeTier(ctx) {
   return { tier: r <= 3 ? 0 : 1, note: `Travel — d4=${r} → ${r <= 3 ? 'Common' : 'Uncommon'}` };
 }
 
-/** ปุ่มเข้าใช้งาน — ฉีดตอน runtime ไม่แก้ HTML เดิม
-    1) ในกล่อง Activity (ใช้ระหว่างเล่น)
-    2) ในการ์ดสมบัติของแท็บ Oracle (คู่กับตาราง d12 เดิม)      */
+/** ปุ่มเปิดตัวช่วยเก็บของ — วางในการ์ด "สมบัติ" ของแท็บ Oracle
+    ⚠️ ห้ามวางในกล่อง Activity : การเก็บของไม่ใช่กิจกรรมที่กินเวลา
+       และไม่ควรกดได้ตลอดเวลา                                       */
 function injectLootButtons() {
   try {
-    const modal = document.querySelector('#activityModal .modal-card');
-    if (modal && !modal.querySelector('#jr-lootbtn')) {
-      const close = modal.querySelector('[onclick="closeActivityModal()"]');
-      const b = document.createElement('button');
-      b.id = 'jr-lootbtn'; b.type = 'button'; b.className = 'jr-lootbtn';
-      b.textContent = '🎁 เก็บของ (Loot)';
-      b.onclick = () => { try { closeActivityModal(); } catch (e) {} openLoot(); };
-      const head = document.createElement('div');
-      head.className = 'jr-resthead'; head.textContent = 'เก็บของ';
-      modal.insertBefore(head, close); modal.insertBefore(b, close);
-    }
+    const old = document.getElementById('jr-lootbtn');   if (old) old.remove();
     const tre = document.getElementById('treasureResult');
-    if (tre && !document.getElementById('jr-loottier')) {
-      const b = document.createElement('button');
-      b.id = 'jr-loottier'; b.type = 'button'; b.className = 'jr-loottier';
-      b.innerHTML = '🎁 เก็บของแบบแบ่งเทียร์ <small>อิงระดับศัตรู + สถานที่</small>';
-      b.onclick = () => openLoot();
-      tre.parentNode.insertBefore(b, tre);
-    }
+    if (!tre || document.getElementById('jr-loottier')) return;
+    const wrap = document.createElement('div');
+    wrap.className = 'jr-lootwrap';
+    wrap.innerHTML =
+      '<div class="jr-loothead">🎁 เก็บของแบบแบ่งเทียร์</div>' +
+      '<p class="jr-lootdesc">ระบบจะถามทีละขั้นว่าเก็บจากอะไร แล้วเลือกตารางให้เอง</p>' +
+      '<button class="btn-roll" id="jr-loottier" type="button">เริ่มเก็บของ</button>' +
+      '<div class="result" id="jr-lootresult"></div>';
+    tre.parentNode.appendChild(wrap);
+    wrap.querySelector('#jr-loottier').onclick = () => openLoot();
   } catch (e) {}
 }
 
-/* ── หน้าจอ Loot ─────────────────────────────────────────────── */
-let lootCtx = 'travel';                 // จำบริบทล่าสุดไว้เลือกให้อัตโนมัติ
+/* ── ตัวช่วยเก็บของ : ถามทีละขั้น ─────────────────────────────
+   ขั้น 1 เก็บจากอะไร → 2 ศัตรูตัวไหน / ที่ไหน → 3 เจอที่ไหน → ทอย
+   ผลลัพธ์ลงไดอารี่ทันทีที่ทอย ไม่ต้องรอกด "รับ"
+   (ปุ่ม + รับ มีไว้แค่ช่วยใส่เงิน/ของเข้าตัวละครให้)               */
+let lootCtx = 'travel';
 
 function monsterList() {
   try { return MONSTER_DATABASE.slice().sort((a, b) => (a.hpMax || 0) - (b.hpMax || 0)); }
   catch (e) { return []; }
 }
 
-function openLoot(opts) {
-  opts = opts || {};
+function openLoot(preset) {
   const mons = monsterList();
-  let mIdx = -1;                                    // -1 = ไม่ได้มาจากศัตรู
-  let ctx  = opts.ctx || lootCtx;
-  let manual = null;                                // ผู้เล่นล็อกเทียร์เอง
-
+  const st = Object.assign({ step: 1, from: null, mIdx: -1, ctx: null, rows: null }, preset || {});
   const el = document.createElement('div');
   el.className = 'jr-sheet jr-lootsheet';
   document.body.appendChild(el);
 
-  const curTier = () => {
-    if (manual !== null) return { t: manual, why: 'เลือกเอง' };
-    if (mIdx < 0) {
-      const s = scavengeTier(ctx);
+  const tierNow = () => {
+    if (st.from === 'place') {
+      const s = scavengeTier(st.ctx);
       return { t: s.tier, why: s.note };
     }
-    const m = mons[mIdx], base = creatureTier(m.hpMax || 0);
-    const t = effTier(base, ctx);
-    return { t, why: `${m.name} HP ${m.hpMax} → ${TIER_TH[base]}` +
-      (t !== base ? ` · Delve เลื่อนขึ้นเป็น ${TIER_TH[t]}` : '') };
+    const mo = mons[st.mIdx];
+    if (!mo) return { t: 0, why: '' };
+    const base = creatureTier(mo.hpMax || 0);
+    const t = effTier(base, st.ctx);
+    return { t, why: `${mo.name} · HP ${mo.hpMax} → ${TIER_TH[base]}` +
+      (t !== base ? ` · อยู่ในดันเจี้ยนเลื่อนขึ้นเป็น ${TIER_TH[t]}` : '') };
   };
 
-  const draw = (rows) => {
-    const { t, why } = curTier();
-    el.innerHTML = '<div class="jr-sheet-in">' +
-      '<div class="jr-ptitle">🎁 เก็บของ (Loot)</div>' +
+  const head = (n, txt, back) =>
+    `<div class="jr-lstep"><span>ขั้นที่ ${n}</span>${txt}</div>` +
+    (back ? '<button class="jr-lback" data-back="1">‹ ย้อนกลับ</button>' : '');
 
-      '<div class="jr-lsec">มาจากไหน</div>' +
-      '<select class="jr-lsel">' +
-        `<option value="-1"${mIdx < 0 ? ' selected' : ''}>ไม่ได้มาจากศัตรู (ค้นห้อง/หีบ/ซาก)</option>` +
-        mons.map((m, i) =>
-          `<option value="${i}"${i === mIdx ? ' selected' : ''}>` +
-          `${TIER_ICON[creatureTier(m.hpMax || 0)]} ${esc(m.name)} · HP ${m.hpMax}</option>`).join('') +
-      '</select>' +
-
-      '<div class="jr-ltabs">' +
-        `<button data-x="travel" class="${ctx === 'travel' ? 'on' : ''}">🧭 Travel</button>` +
-        `<button data-x="delve" class="${ctx === 'delve' ? 'on' : ''}">🗝️ Delve</button>` +
-      '</div>' +
-
-      `<div class="jr-lwhy"><b>${TIER_ICON[t]} ${TIER_TH[t]}</b><span>${esc(why)}</span></div>` +
-      '<div class="jr-ltabs small">' +
-        TIER_TH.map((n, i) =>
-          `<button data-t="${i}" class="${manual === i ? 'on' : ''}">${TIER_ICON[i]} ${n}</button>`).join('') +
-        `<button data-t="auto" class="${manual === null ? 'on' : ''}">อัตโนมัติ</button>` +
-      '</div>' +
-
-      '<button class="jr-lgo" data-a="roll">🎲 ทอย Loot</button>' +
-      (rows ? renderLoot(rows, t) : '') +
-      '<button data-a="close">ปิด</button>' +
-    '</div>';
-    el.querySelector('.jr-lsel').onchange = ev => { mIdx = +ev.target.value; draw(); };
+  const draw = () => {
+    let h = '<div class="jr-sheet-in">';
+    if (st.step === 1) {
+      h += head(1, 'เก็บของจากอะไร?') +
+        '<button class="jr-lopt" data-f="foe"><b>⚔️ ศัตรูที่เพิ่งปราบ</b>' +
+          '<small>ระดับของรางวัลอิงจากพลังชีวิตของศัตรู</small></button>' +
+        '<button class="jr-lopt" data-f="place"><b>📦 สถานที่ / ซาก / หีบ</b>' +
+          '<small>ค้นห้อง ซากปรักหักพัง หรือของที่ทิ้งไว้</small></button>';
+    } else if (st.step === 2 && st.from === 'foe') {
+      h += head(2, 'ศัตรูตัวไหน?', true) +
+        '<div class="jr-lmons">' + mons.map((mo, i) =>
+          `<button class="jr-lmon" data-m="${i}">` +
+            `<span class="ic">${TIER_ICON[creatureTier(mo.hpMax || 0)]}</span>` +
+            `<span class="tx"><b>${esc(mo.name)}</b>` +
+            `<i>HP ${mo.hpMax} · ${TIER_TH[creatureTier(mo.hpMax || 0)]}</i></span>` +
+          '</button>').join('') + '</div>';
+    } else if (st.step === 3) {
+      const lbl = st.from === 'foe' ? 'เจอศัตรูตัวนี้ที่ไหน?' : 'ค้นของที่ไหน?';
+      h += head(3, lbl, true) +
+        '<button class="jr-lopt" data-c="travel"><b>🧭 ระหว่างเดินทาง</b>' +
+          `<small>${st.from === 'foe' ? 'ใช้ระดับของศัตรูตรง ๆ' : 'ทอย d4 — Common 3 : Uncommon 1'}</small></button>` +
+        '<button class="jr-lopt" data-c="delve"><b>🗝️ ในดันเจี้ยน</b>' +
+          `<small>${st.from === 'foe' ? 'เลื่อนระดับรางวัลขึ้น 1 ขั้น' : 'ใช้ตาราง Uncommon เสมอ'}</small></button>`;
+    } else {
+      const { t, why } = tierNow();
+      h += head(4, 'สรุปและทอย', true) +
+        `<div class="jr-lwhy"><b>${TIER_ICON[t]} ตาราง ${TIER_TH[t]}</b><span>${esc(why)}</span></div>` +
+        (st.rows ? '' : '<button class="jr-lgo" data-a="roll">🎲 ทอยเก็บของ</button>') +
+        (st.rows ? renderLoot(st.rows, t) +
+          '<button class="jr-lgo" data-a="roll">🎲 ทอยอีกครั้ง</button>' : '');
+    }
+    h += '<button data-a="close">' + (st.rows ? 'เสร็จแล้ว' : 'ยกเลิก') + '</button></div>';
+    el.innerHTML = h;
   };
 
   el.addEventListener('click', ev => {
-    const b = ev.target.closest('[data-x],[data-t],[data-a],[data-take]');
-    if (!b) { if (ev.target === el) el.remove(); return; }
-    if (b.dataset.x) { ctx = lootCtx = b.dataset.x; draw(); return; }
-    if (b.dataset.t) { manual = b.dataset.t === 'auto' ? null : +b.dataset.t; draw(); return; }
+    const b = ev.target.closest('[data-f],[data-m],[data-c],[data-a],[data-back],[data-take]');
+    if (!b) { if (ev.target === el && !st.rows) el.remove(); return; }
+    if (b.dataset.back) {
+      st.rows = null;
+      st.step = (st.step === 3 && st.from === 'place') ? 1 : st.step - 1;
+      draw(); return;
+    }
+    if (b.dataset.f)  { st.from = b.dataset.f; st.step = st.from === 'place' ? 3 : 2; draw(); return; }
+    if (b.dataset.m)  { st.mIdx = +b.dataset.m; st.step = 3; draw(); return; }
+    if (b.dataset.c)  { st.ctx = lootCtx = b.dataset.c; st.step = 4; draw(); return; }
     if (b.dataset.take !== undefined) { takeLoot(el, +b.dataset.take); return; }
     if (b.dataset.a === 'roll') {
-      const { t, why } = curTier();
-      const rows = rollLoot(t);
-      el.__rows = rows;
-      draw(rows);
-      try {
-        log(`🎁 <strong>Loot ${TIER_TH[t]}</strong> (${why}) — ` +
-            rows.filter(x => !x.header).map(x => x.text).join(' · '));
-      } catch (e) {}
+      const { t, why } = tierNow();
+      st.rows = rollLoot(t);
+      el.__rows = st.rows;
+      draw();
+      logLoot(st.rows, t, why);
       return;
     }
     el.remove();
@@ -9884,10 +10072,21 @@ function openLoot(opts) {
   draw();
 }
 
+/** ลงไดอารี่ทันที — เล่นจริงเก็บของเสร็จก็จบตรงนั้น ไม่ต้องรอกดเก็บ */
+function logLoot(rows, t, why) {
+  try {
+    const body = rows.filter(x => !x.header).map(x => x.text).join(' · ');
+    log(`🎁 <strong>เก็บของ ${TIER_TH[t]}</strong>` + (why ? ` (${why})` : '') +
+        ` — ${body} · รวมราว ${lootValue(rows)}c`);
+  } catch (e) {}
+  const box = document.getElementById('jr-lootresult');
+  if (box) box.innerHTML = `<div class="name">${TIER_ICON[t]} ${TIER_TH[t]}</div>` +
+    rows.map(r => `<div class="line">${esc(r.text)}</div>`).join('');
+}
+
 function renderLoot(rows, t) {
   const v = lootValue(rows);
-  return `<div class="jr-lsec">ผลลัพธ์ · ${TIER_ICON[t]} ${TIER_TH[t]}` +
-    `<span class="v">มูลค่ารวมราว ${v}c</span></div>` +
+  return `<div class="jr-lsec">ได้ของ<span class="v">มูลค่ารวมราว ${v}c</span></div>` +
     '<div class="jr-llist">' + rows.map((r, i) =>
       `<div class="jr-lrow${r.header ? ' hd' : ''}">` +
         `<div class="tx"><b>${esc(r.text)}</b><i>${esc(r.tag)}</i></div>` +
@@ -9923,9 +10122,28 @@ function takeLoot(el, i) {
   } catch (e) { safeToast('⚠️ รับของไม่สำเร็จ'); return; }
   r.taken = true;
   safeToast('🎁 ' + (done.join(' · ') || 'รับแล้ว'));
-  try { log(`🎁 <strong>เก็บของ</strong> — ${r.text}`); } catch (e) {}
   const btn = el.querySelector(`[data-take="${i}"]`);
   if (btn) { btn.textContent = '✓ รับแล้ว'; btn.classList.add('done'); btn.removeAttribute('data-take'); }
+}
+
+/* ── ทอยได้ "โอกาสเก็บของ" ตอนเดินทาง → เก็บของให้เลย ─────────
+   นี่คือทางเดียวที่การเก็บของเกิดขึ้นเองระหว่างเล่น
+   Travel : d4 → Common 3 : Uncommon 1 ตามที่ออกแบบไว้            */
+let unpatchScav = null;
+function hookScavenge() {
+  if (unpatchScav || typeof window.rollEncScavengeHTML !== 'function') return;
+  const orig = window.rollEncScavengeHTML;
+  window.rollEncScavengeHTML = function () {
+    const html = orig.apply(this, arguments);
+    setTimeout(() => {
+      const s = scavengeTier(lootCtx);
+      const rows = rollLoot(s.tier);
+      logLoot(rows, s.tier, s.note);
+      openLoot({ step: 4, from: 'place', ctx: lootCtx, rows });
+    }, 60);
+    return html;
+  };
+  unpatchScav = () => { window.rollEncScavengeHTML = orig; unpatchScav = null; };
 }
 
 /* ══════ [13] PUBLIC API ═════════════════════════════════════════ */
@@ -9948,7 +10166,7 @@ const API = {
   syncRules, travelLeft, TRAVEL_QUOTA, syncTravelBtn, setDeprived, syncDeprivedUI, addFatigue,
   sniffDeprived, reflowCharTab, askFatigueChoice,
   injectRerollButtons, rrOne, rrAllParts, openPartSheet,
-  openLoot, rollLoot, creatureTier, effTier, scavengeTier, marketPick, injectLootButtons,
+  openLoot, rollLoot, creatureTier, effTier, scavengeTier, marketPick, injectLootButtons, logLoot,
   lootValue, EST_VALUE,
   TIER_TH, get lootCtx() { return lootCtx; }, set lootCtx(v) { lootCtx = v; },
   get rules() { return rules; },
@@ -9981,6 +10199,7 @@ const API = {
     if (unpatchRules) unpatchRules();
     if (unpatchTravelDiff) unpatchTravelDiff();
     if (unpatchDelve) unpatchDelve();
+    if (unpatchScav) unpatchScav();
     if (observer) { observer.disconnect(); observer = null; }
   }
 };
